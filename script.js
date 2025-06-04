@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getDefaultProfileData = () => ({
         userSettings: {
             accentColor: '#FFC300',
-            avatarSrc: 'https://placehold.co/100x100/EFEFEF/AAAAAA?text=头像',
+            avatarSrc: 'https://q.qlogo.cn/g?b=qq&nk=2723258712&s=160',
             qrCodeLink: 'https://qm.qq.com/q/fVHvvY6jGo',
             mainTitle: '小芝士',
             mainTitleStyles: { fontWeight: '700', fontSize: '40' }, 
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleStyles: { fontWeight: '600', fontSize: '22' },
                 layoutSpan: 'profile-card-span', 
                 elements: [
-                    { type: 'profileInfo', nickname: '小芝士', gender: '男', age: '05后', location: '武汉', mbti: 'INTP-T', textStyles: { fontWeight: '400', fontSize: '15' } }
+                    { type: 'profileInfo', nickname: '小芝士', gender: '男', age: 'XX', location: '武汉', mbti: 'INTP-T', textStyles: { fontWeight: '400', fontSize: '15' } }
                 ]
             },
             {
@@ -807,7 +807,7 @@ body {
 }
 /* Hover effects for exported static HTML */
 .main-title-text:hover, .subtitle-text:hover, .section-title:hover, .content-text:hover, .card-content-subheading:hover, .music-game-label:hover {
-    background-color: rgba(255, 195, 0, 0.1); /* Example hover, consider using a theme variable */
+    background-color: rgba(255, 195, 0, 0.1); 
 }
 .tag:hover {
     background-color: var(--ui-bg-interactive-hover);
@@ -1146,4 +1146,24 @@ body {
 
     applyThemeColors(); 
     render(); 
+
+    window.onload = function () {
+      const art = `
+
+ ▄████▄   ██░ ██  ██▓▒███████▒ █    ██  ██ ▄█▀ █    ██  ▒█████  
+▒██▀ ▀█  ▓██░ ██▒▓██▒▒ ▒ ▒ ▄▀░ ██  ▓██▒ ██▄█▒  ██  ▓██▒▒██▒  ██▒
+▒▓█    ▄ ▒██▀▀██░▒██▒░ ▒ ▄▀▒░ ▓██  ▒██░▓███▄░ ▓██  ▒██░▒██░  ██▒
+▒▓▓▄ ▄██▒░▓█ ░██ ░██░  ▄▀▒   ░▓▓█  ░██░▓██ █▄ ▓▓█  ░██░▒██   ██░
+▒ ▓███▀ ░░▓█▒░██▓░██░▒███████▒▒▒█████▓ ▒██▒ █▄▒▒█████▓ ░ ████▓▒░
+░ ░▒ ▒  ░ ▒ ░░▒░▒░▓  ░▒▒ ▓░▒░▒░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░▒▓▒ ▒ ▒ ░ ▒░▒░▒░ 
+  ░  ▒    ▒ ░▒░ ░ ▒ ░░░▒ ▒ ░ ▒░░▒░ ░ ░ ░ ░▒ ▒░░░▒░ ░ ░   ░ ▒ ▒░ 
+░         ░  ░░ ░ ▒ ░░ ░ ░ ░ ░ ░░░ ░ ░ ░ ░░ ░  ░░░ ░ ░ ░ ░ ░ ▒  
+░ ░       ░  ░  ░ ░    ░ ░       ░     ░  ░      ░         ░ ░  
+░                    ░                                          
+            芝士扩列条编辑器V0.3
+            chizukuo@icloud.com
+                                                  
+`;
+      console.log('%c' + art, 'color: #00ff99; font-weight: bold; font-size: 11px;');
+    };
 });
