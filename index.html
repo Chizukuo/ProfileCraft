@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的扩列条编辑器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- html2canvas for image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- qrcode.js for QR code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="editor-toolbar top-toolbar">
+        <div class="toolbar-group">
+            <label for="accentColorPicker">主题强调色:</label>
+            <input type="color" id="accentColorPicker" value="#FFC300">
+        </div>
+        <div class="toolbar-group">
+            <button id="exportHtmlButton"><span class="material-icons-outlined">file_download</span>导出 HTML</button>
+            <button id="exportImageButton"><span class="material-icons-outlined">image</span>导出图片</button>
+        </div>
+        <div class="toolbar-group">
+            <button id="addCardButton"><span class="material-icons-outlined">add_box</span>添加新卡片</button>
+        </div>
+         <div class="toolbar-group">
+            <button id="resetButton"><span class="material-icons-outlined">restart_alt</span>恢复默认模板</button>
+        </div>
+    </div>
+
+    <div id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8 min-h-screen flex flex-col items-center">
+        <!-- Profile content will be rendered here by JavaScript -->
+    </div>
+
+    <div id="editControlsPopup" class="edit-popup" style="display: none;">
+        <label>字重: <input type="number" id="fontWeightInput" min="100" max="900" step="100"></label>
+        <label>大小(px): <input type="number" id="fontSizeInput" min="8" max="72"></label>
+        <button id="applyTextChanges" class="popup-button">
+            <span class="material-icons-outlined">done</span>应用样式
+        </button>
+        <button id="deleteElementButton" class="popup-button delete-action">
+             <span class="material-icons-outlined">delete_sweep</span>清除内容
+        </button>
+    </div>
+
+    <!-- Modal for selections -->
+    <div id="selectionModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 id="modalTitle">请选择</h3>
+            <div id="modalOptionsContainer">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+            <button id="modalCancelButton" class="modal-button">取消</button>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
