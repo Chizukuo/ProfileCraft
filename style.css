@@ -322,7 +322,7 @@ body {
     gap: 1.75rem; 
 }
 
-@media (min-width: 640px) {
+@media (min-width: 480px) {
     .profile-section-layout {
         display: flex;
         align-items: center;
@@ -596,3 +596,40 @@ body {
 .mt-1 { margin-top: 0.25rem; }
 .py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; } 
 .px-4 { padding-left: 1rem; padding-right: 1rem; }
+
+/* 请将这段修改后的 CSS 更新到您的 style.css 文件中 */
+
+/* --- 工具栏在小屏幕上仅显示图标并放大图标 (基于HTML修改后) --- */
+
+/* 媒体查询：当屏幕宽度小于等于 480px 时 (您可以按需调整此断点) */
+@media (max-width: 876px) {
+    .toolbar-button-text {
+        display: none; /* 直接隐藏带有此类的文本span */
+    }
+
+    /* 调整按钮的内边距和图标与（隐藏的）文本之间的间隙 */
+    .editor-toolbar button,
+    .editor-toolbar .toolbar-button-link {
+        padding: 6px 8px; /* 根据视觉效果调整内边距，确保放大后的图标有足够空间 */
+        gap: 0;           /* 移除图标和文本之间的间隙，因为文本已隐藏 */
+        /* 如果需要，可以调整按钮的行高来适应放大的图标 */
+        /* line-height: 24px; */ /* 示例值 */
+    }
+
+    /* 放大图标 */
+    .editor-toolbar button .material-icons,
+    .editor-toolbar button .material-icons-outlined,
+    .editor-toolbar .toolbar-button-link .material-icons,
+    .editor-toolbar .toolbar-button-link .material-icons-outlined {
+        font-size: 1.5em; /* 将图标大小增加到原来的1.5倍。您可以调整这个值，例如 1.3em, 1.8em 等 */
+                          /* Material Icons 默认的 font-size 在您的 style.css 中是 1.1em */
+                          /* 所以 1.5em 实际上会比默认的 1.1em 大不少，相对于按钮的 0.9rem 字体也更突出 */
+        /* 如果图标垂直对齐有问题，可以尝试调整 vertical-align */
+        /* vertical-align: middle; */ /* 通常Material Icons的基线样式已处理好对齐 */
+    }
+
+    /* 针对“主题强调色”标签，在小屏幕隐藏它 */
+    .editor-toolbar label[for="accentColorPicker"] {
+        display: none;
+    }
+}
