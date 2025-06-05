@@ -1007,25 +1007,6 @@ body {
     transition: background-color 0.3s ease-in-out;
 }
 
-.material-icons, .material-icons-outlined {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 1.1em; 
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  vertical-align: middle;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'liga';
-}
-
 #profileCardContainer { 
     width: 100%;
     max-width: 1024px; 
@@ -1319,9 +1300,6 @@ body {
         themeStyleBlock += `--hover-bg-color: transparent;`; // Ensure this is transparent for export
         themeStyleBlock += `--theme-tag-hover-bg: ${getCssVar('--theme-tag-hover-bg')};`;
         themeStyleBlock += `}\n </style>`;
-
-        const googleFontsLink = `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">`;
-        const materialIconsLink = `<link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">`;
 
         const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>导出的扩列条</title>${googleFontsLink}${materialIconsLink}<style>${INLINED_CSS_STYLES}</style>${themeStyleBlock}</head><body><div id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8">${tempContainer.innerHTML}</div></body></html>`;
 
