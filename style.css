@@ -6,17 +6,20 @@
     --theme-bg-page: #FFFDF5;
     --theme-text-strong: #8B4513; /* Usually a dark color for text on light backgrounds */
     --theme-divider: #D4A017;
+    --theme-tag-hover-bg: #FFE082; /* New variable for general tag hover, will be updated by JS */
+
 
     --ui-text-primary: #1d1d1f;
     --ui-text-secondary: #333333;
     --ui-text-tertiary: #86868b;
     --ui-bg-card: #ffffff;
     --ui-border-default: #d2d2d7; /* Default border color for cards */
-    --ui-bg-interactive-hover: #FFE082; 
+    /* --ui-bg-interactive-hover: #FFE082;  Replaced by --theme-tag-hover-bg for general tags */
     --ui-bg-placeholder: #f0f0f5;
     --delete-red: #ef4444; 
     --delete-red-hover: #dc2626;
     --button-text-on-accent: #FFFFFF; /* Text color for buttons with accent background, ensure contrast */
+    --hover-bg-color: rgba(255, 195, 0, 0.1); /* Defined hover background color for text elements */
 }
 
 body {
@@ -26,7 +29,7 @@ body {
     background-color: var(--theme-bg-page);
     margin: 0;
     padding-top: 70px; 
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease-in-out; /* Added timing function */
 }
 
 /* Material Icons base style */
@@ -72,7 +75,10 @@ body {
     gap: 8px;
     align-items: center;
 }
-.editor-toolbar button, .editor-toolbar input[type="color"], .editor-toolbar label {
+.toolbar-group-right {
+    margin-left: auto; 
+}
+.editor-toolbar button, .editor-toolbar input[type="color"], .editor-toolbar label, .toolbar-button-link {
     padding: 8px 12px;
     border-radius: 6px;
     border: 1px solid var(--ui-border-default);
@@ -80,13 +86,14 @@ body {
     color: var(--theme-text-strong);
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease-in-out; /* Added timing function */
     display: inline-flex; 
     align-items: center;
     gap: 5px;
+    text-decoration: none;
 }
-.editor-toolbar button:hover {
-    background-color: var(--ui-bg-interactive-hover);
+.editor-toolbar button:hover, .toolbar-button-link:hover {
+    background-color: var(--theme-tag-hover-bg); /* Use theme-derived hover for consistency */
 }
 .editor-toolbar input[type="color"] {
     min-width: 40px;
@@ -115,11 +122,11 @@ body {
 
 .main-title-text, .subtitle-text, .section-title, .content-text, .card-content-subheading, .tag, .oshi-tag, .oshi-meta-tag, .music-game-label {
     cursor: pointer; 
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease-in-out; /* Added timing function */
     -webkit-user-modify: read-write-plaintext-only; 
 }
 .main-title-text:hover, .subtitle-text:hover, .section-title:hover, .content-text:hover, .card-content-subheading:hover, .music-game-label:hover {
-    background-color: rgba(255, 195, 0, 0.1); 
+    background-color: var(--hover-bg-color); 
 }
 [contenteditable="true"]:focus {
     outline: 2px solid var(--theme-accent) !important;
@@ -132,7 +139,7 @@ body {
     border-radius: 20px;
     border: 1px solid var(--ui-border-default); 
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.07), 0px 1px 1px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease-in-out;
+    transition: box-shadow 0.3s ease-in-out; /* Added timing function */
     overflow: visible; 
     position: relative; 
 }
@@ -172,7 +179,7 @@ body {
     font-size: 0.8125rem; 
     font-weight: 500;
     margin: 0.25rem;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added timing function */
     position: relative;
 }
 .tag:hover, .oshi-tag:hover, .oshi-meta-tag:hover {
@@ -183,8 +190,8 @@ body {
     background-color: var(--theme-tag-bg);
     color: var(--theme-text-strong);
 }
-.tag:hover {
-    background-color: var(--ui-bg-interactive-hover);
+.tag:hover { 
+    background-color: var(--theme-tag-hover-bg); /* Use new theme variable */
 }
 
 .oshi-tag {
@@ -194,9 +201,9 @@ body {
     font-size: 0.9rem; 
     font-weight: 400;
 }
-.oshi-tag:hover {
+.oshi-tag:hover { 
     background-color: var(--theme-accent);
-    color: var(--ui-bg-card);
+    color: var(--ui-bg-card); 
 }
 
 .oshi-meta-tag {
@@ -208,8 +215,8 @@ body {
     font-weight: 400;
     border: 1px dashed var(--theme-accent);
 }
-.oshi-meta-tag:hover {
-    border-color: var(--ui-bg-interactive-hover);
+.oshi-meta-tag:hover { 
+    border-color: var(--theme-tag-hover-bg); /* Use theme-derived hover for consistency */
 }
 
 .card-content-subheading {
@@ -250,7 +257,7 @@ body {
     font-size: 0.7rem;
     padding: 2px 0;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease-in-out; /* Added timing function */
 }
 .avatar-container:hover::after {
     opacity: 1;
@@ -381,7 +388,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 5px;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
+    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out; /* Added timing function */
 }
 .edit-popup .popup-button:hover {
     opacity: 0.85;
@@ -407,7 +414,7 @@ body {
     display: inline-flex; 
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, opacity 0.3s ease-in-out; /* Added timing function */
     color: var(--ui-text-secondary); 
 }
 .action-button:hover {
@@ -434,7 +441,7 @@ body {
     color: var(--theme-text-strong);
 }
 .text-with-icon:hover {
-    background-color: var(--ui-bg-interactive-hover);
+    background-color: var(--theme-tag-hover-bg);
 }
 
 
@@ -444,7 +451,7 @@ body {
     right: 8px;
     display: flex;
     opacity: 0; 
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease-in-out; /* Added timing function */
 }
 .ui-card:hover .card-actions-container {
     opacity: 1; 
@@ -452,9 +459,9 @@ body {
 
 .element-container .action-button.delete-element-btn { 
     opacity: 0; 
-    transition: opacity 0.2s ease, background-color 0.2s ease;
+    transition: opacity 0.3s ease-in-out, background-color 0.2s ease-in-out; /* Added timing function */
     position: absolute;
-    bottom: 8px; /* Positioned at the bottom-right of the element-container */
+    bottom: 8px; 
     right: 8px; 
     padding: 2px; 
     z-index: 10; 
@@ -469,7 +476,7 @@ body {
     top: -8px; 
     right: -8px;
     opacity: 0; 
-    transition: opacity 0.2s ease;
+    transition: opacity 0.3s ease-in-out; /* Added timing function */
 }
 .tag:hover .tag-actions-container,
 .oshi-tag:hover .tag-actions-container,
@@ -536,10 +543,10 @@ body {
     border-radius: 6px;
     cursor: pointer;
     text-align: left;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease-in-out; /* Added timing function */
 }
 #modalOptionsContainer button:hover {
-    background-color: var(--ui-bg-interactive-hover);
+    background-color: var(--theme-tag-hover-bg);
 }
 #modalOptionsContainer button:last-child {
     margin-bottom: 0;
