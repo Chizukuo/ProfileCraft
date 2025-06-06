@@ -1446,14 +1446,34 @@ body {
 ░ ░▒ ▒  ░ ▒ ░░▒░▒░▓  ░▒▒ ▓░▒░▒░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░▒▓▒ ▒ ▒ ░ ▒░▒░▒░ 
   ░  ▒    ▒ ░▒░ ░ ▒ ░░░▒ ▒ ░ ▒░░▒░ ░ ░ ░ ░▒ ▒░░░▒░ ░ ░   ░ ▒ ▒░ 
 ░         ░  ░░ ░ ▒ ░░ ░ ░ ░ ░ ░░░ ░ ░ ░ ░░ ░  ░░░ ░ ░ ░ ░ ░ ▒  
-░ ░       ░  ░  ░ ░    ░ ░         ░      ░  ░       ░         ░ ░  
-░                                                               
+░ ░       ░  ░  ░ ░    ░ ░       ░     ░  ░      ░         ░ ░  
+░                    ░                                          
+    
+    
+    `;
 
-`;
         const versionInfo = `
-            芝士扩列条编辑器V1.2.2
-            chizukuo@icloud.com
-`;
-        console.log('%c' + art + versionInfo, 'color: #00ff99; font-weight: bold; font-size: 11px;');
+        芝士扩列条编辑器 V1.2.2
+         chizukuo@icloud.com
+    `;
+
+        const styleArt = `
+    color: #FFC107;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: "Courier New", "Lucida Console", monospace;
+    white-space: pre;
+    `;
+
+        const styleVersion = `
+    color: #B5651D; 
+    font-weight: bold;
+    font-size: 12px;
+    font-family: "Courier New", "Lucida Console", monospace;
+    white-space: pre;
+    `;
+
+        console.log('%c' + art, styleArt.trim());
+        console.log('%c' + versionInfo, styleVersion.trim());
     };
 });
