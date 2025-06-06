@@ -1,27 +1,50 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <!-- 基本元数据 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 搜索引擎验证 -->
     <meta name="google-site-verification" content="-w4KKv2Eb3DwO9UdyKwE_fTIFMooa4psh4SjnugYZMY" />
-    <title>芝士扩列条编辑器</title>
+    <meta name="sogou_site_verification" content="bZfpNekXuN" />
+    <meta name="shenma-site-verification" content="fcb89a6d79a7ce7f7e3f609ca62a5557_1749204507"/>
 
+    <!-- SEO 优化: 核心元数据 -->
+    <title>芝士扩列条编辑器 - 在线制作与分享 | ProfileCraft</title>
+    <meta name="description" content="ProfileCraft是一款简洁、免费的在线扩列条制作工具。通过简单的自定义选项，快速创建和分享你的个人社交名片。">
+    <meta name="keywords" content="扩列条, 扩列条编辑器, 扩列条模板, 扩列条设计, 在线制作, 个人名片, 社交名片, Profile Card Maker, 自己紹介カード">
+
+    <!-- SEO 优化: 多语言声明 (Hreflang) -->
+    <link rel="alternate" hreflang="zh-CN" href="https://chizukuo.github.io/ProfileCraft/" />
+    <link rel="alternate" hreflang="en" href="https://chizukuo.github.io/ProfileCraft/" />
+    <link rel="alternate" hreflang="ja" href="https://chizukuo.github.io/ProfileCraft/" />
+    <link rel="alternate" hreflang="x-default" href="https://chizukuo.github.io/ProfileCraft/" />
+
+    <!-- 网站图标与字体 -->
     <link rel="icon" href="/ProfileCraft/favicon.ico" type="image/x-icon">
+    <!-- 国内优化建议: 以下字体库和JS库在国内访问可能较慢。若追求极致速度，可考虑替换为国内CDN服务商（如 cdn.baomitu.com / staticfile.org）的资源。 -->
     <link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preload" href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined"></noscript>
+    
+    <!-- 样式表 -->
     <link rel="stylesheet" href="style.css">
 
+    <!-- 外部 JavaScript 库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+
+    <!-- JavaScript未启用警告 -->
     <noscript>
         <div class="noscript-warning">
             本网站的核心功能需要启用 JavaScript 才能工作。请在您的浏览器设置中启用它以获得完整体验。
         </div>
     </noscript>
 
+    <!-- 顶部工具栏 -->
     <header class="editor-toolbar top-toolbar">
         <div class="toolbar-group">
             <label for="accentColorPicker">主题强调色:</label>
@@ -44,8 +67,37 @@
         </div>
     </header>
 
+    <!-- SEO 优化: 这段介绍性文本对用户不可见，但搜索引擎可以读取 -->
+    <div class="intro-section" style="position: absolute; width: 1px; height: 1px; overflow: hidden; left: -9999px; top: -9999px;">
+        <h1>芝士扩列条在线制作工具 (ProfileCraft)</h1>
+        <p>
+            使用 ProfileCraft，您可以方便地在线制作和分享您的个人扩列条。这是一个简洁的工具，帮助您快速生成社交名片。
+        </p>
+        <div>
+            <h2>提供基础模板</h2>
+            <p>提供一个默认模板作为起点，方便您快速开始编辑和设计。</p>
+        </div>
+        <div>
+            <h2>简单的自定义功能</h2>
+            <p>支持修改文字、颜色等基础元素，轻松完成您的扩列条设计。</p>
+        </div>
+        <div>
+            <h2>一键导出与分享</h2>
+            <p>轻松导出为图片或HTML，方便分享至各大平台。</p>
+        </div>
+        
+        <!-- 多语言关键词 -->
+        <div>
+             <h2>Multilingual Keywords</h2>
+             <p>English: Online profile card maker, social card generator, profile editor, card template.</p>
+             <p>日本語: プロフィールカードメーカー, 自己紹介カードジェネレーター, オンラインプロフィールエディター, カードテンプレート。</p>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
     <main id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8 min-h-screen flex flex-col items-center"></main>
 
+    <!-- 文本编辑弹窗 -->
     <aside id="editControlsPopup" class="edit-popup" style="display: none;">
         <label>字重: <input type="number" id="fontWeightInput" min="100" max="900" step="100"></label>
         <label>大小(px): <input type="number" id="fontSizeInput" min="8" max="72"></label>
@@ -57,6 +109,7 @@
         </button>
     </aside>
 
+    <!-- 通用选择模态框 -->
     <div id="selectionModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h3 id="modalTitle">请选择</h3>
@@ -65,6 +118,7 @@
         </div>
     </div>
 
+    <!-- 主要脚本与统计 -->
     <script src="script.js" defer></script>
     <script data-goatcounter="https://chizukuo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>

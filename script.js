@@ -1451,7 +1451,7 @@ body {
 
 `;
         const versionInfo = `
-            芝士扩列条编辑器V1.2.1
+            芝士扩列条编辑器V1.2.2
             chizukuo@icloud.com
 `;
         console.log('%c' + art + versionInfo, 'color: #00ff99; font-weight: bold; font-size: 11px;');
