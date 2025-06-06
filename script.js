@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const googleFontsLink = '<link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">';
+    const materialIconsLink = '<link href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">';
     // --- DOM ELEMENT CACHING ---
     const profileCardContainer = document.getElementById('profileCardContainer');
     const accentColorPicker = document.getElementById('accentColorPicker');
@@ -1432,7 +1434,7 @@ body {
 ░ ░       ░  ░  ░ ░    ░ ░       ░     ░  ░      ░         ░ ░  
 ░                    ░                                        
 
-            芝士扩列条编辑器V1.0
+            芝士扩列条编辑器V1.1.0
             chizukuo@icloud.com
 
                                                 
