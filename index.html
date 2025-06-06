@@ -5,18 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="-w4KKv2Eb3DwO9UdyKwE_fTIFMooa4psh4SjnugYZMY" />
     <title>芝士扩列条编辑器</title>
+
     <link rel="icon" href="/ProfileCraft/favicon.ico" type="image/x-icon">
     <link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Google Material Icons -->
-    <link href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+    <link rel="preload" href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined"></noscript>
     <link rel="stylesheet" href="style.css">
-    <!-- html2canvas for image export -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- qrcode.js for QR code generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-    <div class="editor-toolbar top-toolbar">
+    <noscript>
+        <div class="noscript-warning">
+            本网站的核心功能需要启用 JavaScript 才能工作。请在您的浏览器设置中启用它以获得完整体验。
+        </div>
+    </noscript>
+
+    <header class="editor-toolbar top-toolbar">
         <div class="toolbar-group">
             <label for="accentColorPicker">主题强调色:</label>
             <input type="color" id="accentColorPicker" value="#FFC300">
@@ -36,13 +42,11 @@
                 <span class="material-icons-outlined">star_outline</span><span class="toolbar-button-text">Star on GitHub</span>
             </a>
         </div>
-    </div>
+    </header>
 
-    <div id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8 min-h-screen flex flex-col items-center">
-        <!-- Profile content will be rendered here by JavaScript -->
-    </div>
+    <main id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8 min-h-screen flex flex-col items-center"></main>
 
-    <div id="editControlsPopup" class="edit-popup" style="display: none;">
+    <aside id="editControlsPopup" class="edit-popup" style="display: none;">
         <label>字重: <input type="number" id="fontWeightInput" min="100" max="900" step="100"></label>
         <label>大小(px): <input type="number" id="fontSizeInput" min="8" max="72"></label>
         <button id="applyTextChanges" class="popup-button">
@@ -51,22 +55,17 @@
         <button id="deleteElementButton" class="popup-button delete-action">
              <span class="material-icons-outlined">delete_sweep</span>清除内容
         </button>
-    </div>
+    </aside>
 
-    <!-- Modal for selections -->
     <div id="selectionModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h3 id="modalTitle">请选择</h3>
-            <div id="modalOptionsContainer">
-                <!-- Options will be dynamically inserted here -->
-            </div>
+            <div id="modalOptionsContainer"></div>
             <button id="modalCancelButton" class="modal-button">取消</button>
         </div>
     </div>
 
-
-    <script src="script.js"></script>
-    <script data-goatcounter="https://chizukuo.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+    <script src="script.js" defer></script>
+    <script data-goatcounter="https://chizukuo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- LINK TAGS FOR EXPORT (FIX) ---
+    // 为导出的HTML文件定义必要的字体和图标链接
     const googleFontsLink = '<link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">';
     const materialIconsLink = '<link href="https://fonts.loli.net/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">';
+
     // --- DOM ELEMENT CACHING ---
     const profileCardContainer = document.getElementById('profileCardContainer');
     const accentColorPicker = document.getElementById('accentColorPicker');
@@ -28,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UTILITY FUNCTIONS ---
 
     /**
-     * Strips HTML tags from a string.
-     * @param {string} html - The HTML string to strip.
-     * @returns {string} The plain text content.
+     * 从字符串中剥离HTML标签。
+     * @param {string} html - 要处理的HTML字符串。
+     * @returns {string} 纯文本内容。
      */
     function stripHtml(html) {
         const tmp = document.createElement("DIV");
@@ -39,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Generates default profile data.
-     * @returns {object} The default profile data structure.
+     * 生成默认的个人资料数据。
+     * @returns {object} 默认的个人资料数据结构。
      */
     const getDefaultProfileData = () => ({
         userSettings: {
@@ -74,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { type: 'tagSection', subheading: '爱好:', subheadingStyles: { fontWeight: '600', fontSize: '18' }, tags: [{ text: '音游', styles: {} }, { text: '光棒', styles: {} }], tagStyles: { fontWeight: '500', fontSize: '13' } },
                     { type: 'tagSection', subheading: '主要涉猎:', subheadingStyles: { fontWeight: '600', fontSize: '18' }, tags: [{ text: 'Love Live!', styles: {} }, { text: '少女☆歌剧 Revue Starlight', styles: {} }, { text: 'Project Sekai', styles: {} }, { text: 'BanG Dream!', styles: {} }], tagStyles: { fontWeight: '500', fontSize: '13' } },
                     {
-                        type: 'groupedTagSection', // <-- 更新为 分组标签区块
+                        type: 'groupedTagSection',
                         subheading: '音游偏好:', subheadingStyles: { fontWeight: '600', fontSize: '18' },
                         arcadeLabel: '街机:', arcadeLabelStyles: { fontWeight: 'bold', fontSize: '15' },
                         arcade: [{ text: '中二节奏', styles: {} }, { text: '舞萌DX (偶尔打)', styles: {} }],
@@ -91,13 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 layoutSpan: 'oshi-card-span',
                 elements: [
                     {
-                        type: 'tagSectionTwo', // <-- 更新为 标签区块（样式二）
+                        type: 'tagSectionTwo',
                         subheading: '🎤 女声优', subheadingStyles: { fontWeight: '600', fontSize: '18' },
                         oshis: [{ text: '中岛由贵', type: 'oshi-tag', styles: { fontWeight: '400', fontSize: '14.4' } }],
                         meta: [{ text: 'and all......', type: 'oshi-meta-tag', styles: { fontWeight: '400', fontSize: '14' } }]
                     },
                     {
-                        type: 'tagSectionTwo', // <-- 更新为 标签区块（样式二）
+                        type: 'tagSectionTwo',
                         subheading: '💖 二次元', subheadingStyles: { fontWeight: '600', fontSize: '18' },
                         oshis: ['高坂穗乃果', '矢泽妮可', '渡边曜', '黑泽露比', '优木雪菜', '平安名堇', '户山香澄', '今井莉莎', '白金燐子', 'CHU²', 'PAREO', '朝日六花', '八幡海铃', '大场奈奈', '花里实乃理', '桃井爱莉', '小豆泽心羽', '宵崎奏', '星井美希', '如月千早', '浊心斯卡蒂'].map(name => ({ text: name, type: 'oshi-tag', styles: { fontWeight: '400', fontSize: '14.4' } })),
                         meta: [{ text: 'and more...', type: 'oshi-meta-tag', styles: { fontWeight: '400', fontSize: '14' } }]
@@ -110,22 +113,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let profileData = loadData();
 
     /**
-     * Saves profile data to local storage.
+     * 将个人资料数据保存到本地存储。
      */
     function saveData() {
         localStorage.setItem('kuolieProfileData', JSON.stringify(profileData));
     }
 
     /**
-     * Loads profile data from local storage or returns default if invalid.
-     * @returns {object} The loaded or default profile data.
+     * 从本地存储加载个人资料数据，如果无效则返回默认值。
+     * @returns {object} 加载的或默认的个人资料数据。
      */
     function loadData() {
         const savedData = localStorage.getItem('kuolieProfileData');
         if (savedData) {
             try {
                 const parsedData = JSON.parse(savedData);
-                // Basic validation for saved data structure
+                // 对保存的数据结构进行基本验证
                 if (parsedData && parsedData.userSettings && parsedData.cards) {
                     return parsedData;
                 } else {
@@ -141,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Resets profile data to default and re-renders.
+     * 将个人资料数据重置为默认值并重新渲染。
      */
     function resetToDefault() {
         if (confirm("确定要重置所有内容到默认模板吗？所有未保存的更改将丢失。")) {
@@ -153,9 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Calculates the brightness of a hex color.
-     * @param {string} hexColor - The hex color string (e.g., "#RRGGBB" or "#RGB").
-     * @returns {number} The brightness value (0-255).
+     * 计算十六进制颜色的亮度。
+     * @param {string} hexColor - 十六进制颜色字符串 (例如, "#RRGGBB" or "#RGB")。
+     * @returns {number} 亮度值 (0-255)。
      */
     function getBrightness(hexColor) {
         hexColor = hexColor.replace(/^#/, '');
@@ -169,10 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Lightens a hex color by a given percentage.
-     * @param {string} hex - The hex color string.
-     * @param {number} percent - The percentage to lighten (0-1).
-     * @returns {string} The new hex color string.
+     * 按给定百分比提亮十六进制颜色。
+     * @param {string} hex - 十六进制颜色字符串。
+     * @param {number} percent - 提亮的百分比 (0-1)。
+     * @returns {string} 新的十六进制颜色字符串。
      */
     function lightenHexColor(hex, percent) {
         hex = hex.replace(/^#/, '');
@@ -189,10 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Darkens a hex color by a given percentage.
-     * @param {string} hex - The hex color string.
-     * @param {number} percent - The percentage to darken (0-1).
-     * @returns {string} The new hex color string.
+     * 按给定百分比加深十六进制颜色。
+     * @param {string} hex - 十六进制颜色字符串。
+     * @param {number} percent - 加深的百分比 (0-1)。
+     * @returns {string} 新的十六进制颜色字符串。
      */
     function darkenHexColor(hex, percent) {
         hex = hex.replace(/^#/, '');
@@ -209,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Applies theme colors to the document's CSS variables and updates QR codes.
+     * 将主题颜色应用于文档的CSS变量并更新二维码。
      */
     function applyThemeColors() {
         const accent = profileData.userSettings.accentColor;
@@ -235,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.body.style.backgroundColor = newPageBg;
 
-        // Debounce QR code generation to avoid multiple calls on rapid color changes
+        // 为避免颜色快速变化时多次调用，对二维码生成进行防抖处理
         if (this.qrCodeTimeout) clearTimeout(this.qrCodeTimeout);
         this.qrCodeTimeout = setTimeout(() => {
             document.querySelectorAll('.qr-code-container').forEach(qrEl => {
@@ -247,14 +250,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Generates a QR code using the QRCode.js library.
-     * @param {string} link - The URL to encode in the QR code.
-     * @param {string} elementId - The ID of the container element for the QR code.
+     * 使用QRCode.js库生成二维码。
+     * @param {string} link - 要在二维码中编码的URL。
+     * @param {string} elementId - 二维码容器元素的ID。
      */
     function generateQRCode(link, elementId) {
         const qrElement = document.getElementById(elementId);
         if (!qrElement) {
-            console.warn(`QR code element with ID ${elementId} not found.`);
+            console.warn(`未找到ID为 ${elementId} 的二维码元素。`);
             return;
         }
         qrElement.innerHTML = '';
@@ -274,8 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Handles avatar file uploads.
-     * @param {Event} event - The file input change event.
+     * 处理头像文件上传。
+     * @param {Event} event - 文件输入框的change事件。
      */
     function handleAvatarUpload(event) {
         const file = event.target.files[0];
@@ -288,16 +291,16 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             reader.readAsDataURL(file);
         }
-        event.target.value = null; // Clear input to allow re-uploading same file
+        event.target.value = null; // 清空输入框，以便重新上传相同文件
     }
 
     /**
-     * Creates a DOM element with optional classes, text content, and attributes.
-     * @param {string} tag - The HTML tag name.
-     * @param {string[]} [classNames=[]] - An array of class names.
-     * @param {string} [textContent=null] - The text content of the element.
-     * @param {object} [attributes={}] - An object of attributes to set.
-     * @returns {HTMLElement} The created DOM element.
+     * 创建一个DOM元素，可附带class、文本内容和属性。
+     * @param {string} tag - HTML标签名。
+     * @param {string[]} [classNames=[]] - class名称数组。
+     * @param {string} [textContent=null] - 元素的文本内容。
+     * @param {object} [attributes={}] - 要设置的属性对象。
+     * @returns {HTMLElement} 创建的DOM元素。
      */
     function createElement(tag, classNames = [], textContent = null, attributes = {}) {
         const el = document.createElement(tag);
@@ -316,9 +319,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Applies CSS styles from an object to a DOM element.
-     * @param {HTMLElement} element - The element to apply styles to.
-     * @param {object} styles - The style object (e.g., { fontWeight: '700', fontSize: '20' }).
+     * 将样式对象中的CSS样式应用于DOM元素。
+     * @param {HTMLElement} element - 要应用样式的元素。
+     * @param {object} styles - 样式对象 (例如, { fontWeight: '700', fontSize: '20' })。
      */
     function applyStylesToElement(element, styles) {
         if (styles) {
@@ -328,16 +331,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Creates an action button with a Material Icons icon and optional text.
-     * @param {string} iconName - The name of the Material Icons icon.
-     * @param {string} title - The title/tooltip for the button.
-     * @param {Function} onClick - The click event handler.
-     * @param {boolean} [hasText=false] - Whether the button should display text alongside the icon.
-     * @returns {HTMLButtonElement} The created button element.
+     * 创建一个带有Material Icons图标和可选文本的操作按钮。
+     * @param {string} iconName - Material Icons图标的名称。
+     * @param {string} title - 按钮的标题/提示。
+     * @param {Function} onClick - 点击事件处理函数。
+     * @param {boolean} [hasText=false] - 按钮是否应在图标旁边显示文本。
+     * @returns {HTMLButtonElement} 创建的按钮元素。
      */
     function createActionButton(iconName, title, onClick, hasText = false) {
         const btn = createElement('button', ['action-button']);
-        const cleanedTitle = stripHtml(title); // Clean title for tooltip
+        const cleanedTitle = stripHtml(title); // 清理标题用于提示
         let buttonHTML = `<span class="material-icons-outlined">${iconName}</span>`;
 
         if (hasText && cleanedTitle) {
@@ -355,12 +358,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- RENDERING FUNCTIONS ---
 
     /**
-     * Renders the entire profile card UI based on `profileData`.
+     * 根据 `profileData` 渲染整个个人资料卡UI。
      */
     function render() {
-        profileCardContainer.innerHTML = ''; // Clear existing content
+        profileCardContainer.innerHTML = ''; // 清空现有内容
 
-        // Render Header
+        // 渲染页眉
         const headerContainer = createElement('header', ['main-header-container', 'mb-12']);
         const mainTitleEl = createElement('h1', ['main-title', 'main-title-text'], null, { innerHTML: profileData.userSettings.mainTitle });
         applyStylesToElement(mainTitleEl, profileData.userSettings.mainTitleStyles);
@@ -372,29 +375,29 @@ document.addEventListener('DOMContentLoaded', () => {
         headerContainer.append(mainTitleEl, subtitleEl);
         profileCardContainer.appendChild(headerContainer);
 
-        // Render Cards Grid
+        // 渲染卡片网格
         const gridContainer = createElement('div', ['grid-container']);
         profileData.cards.forEach((cardData, cardIndex) => {
             gridContainer.appendChild(renderCard(cardData, cardIndex));
         });
         profileCardContainer.appendChild(gridContainer);
 
-        // Render Footer
+        // 渲染页脚
         const footer = createElement('footer', ['page-footer']);
         const footerTextEl = createElement('p', [], null, { innerHTML: profileData.userSettings.footerText });
         makeEditable(footerTextEl, ['userSettings', 'footerText'], null);
         footer.appendChild(footerTextEl);
         profileCardContainer.appendChild(footer);
 
-        applyThemeColors(); // Apply colors after all elements are rendered
-        saveData(); // Save data after rendering
+        applyThemeColors(); // 在所有元素渲染后应用颜色
+        saveData(); // 渲染后保存数据
     }
 
     /**
-     * Renders a single profile card.
-     * @param {object} cardData - The data for the card.
-     * @param {number} cardIndex - The index of the card in the profileData.cards array.
-     * @returns {HTMLElement} The rendered card element.
+     * 渲染单个个人资料卡。
+     * @param {object} cardData - 卡片的数据。
+     * @param {number} cardIndex - 卡片在 profileData.cards 数组中的索引。
+     * @returns {HTMLElement} 渲染的卡片元素。
      */
     function renderCard(cardData, cardIndex) {
         const cardDiv = createElement('div', ['ui-card', 'p-6', 'md:p-7', cardData.layoutSpan]);
@@ -427,11 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Renders a single element within a profile card.
-     * @param {object} elementData - The data for the element.
-     * @param {number} cardIndex - The index of the parent card.
-     * @param {number} elementIndex - The index of the element within its card.
-     * @returns {HTMLElement} The rendered element.
+     * 渲染个人资料卡内的单个元素。
+     * @param {object} elementData - 元素的数据。
+     * @param {number} cardIndex - 父卡片的索引。
+     * @param {number} elementIndex - 元素在其卡片内的索引。
+     * @returns {HTMLElement} 渲染的元素。
      */
     function renderCardElement(elementData, cardIndex, elementIndex) {
         const basePath = ['cards', cardIndex, 'elements', elementIndex];
@@ -486,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 qrCodeWrapper.append(qrCodeDisplay, qrLinkInput, qrHint);
                 elementContainer.append(avatarWrapper, infoDiv, qrCodeWrapper);
 
-                // Delay QR code generation slightly to ensure element is in DOM
+                // 稍微延迟二维码生成以确保元素已在DOM中
                 setTimeout(() => generateQRCode(profileData.userSettings.qrCodeLink, qrCodeDisplayId), 0);
                 break;
 
@@ -595,8 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     oshiTagsContainer.appendChild(renderTag(tag, [...basePath, 'meta', tagIndex], tag.styles, cardIndex, elementIndex, 'meta', tag.type));
                 });
                 const addOshiTagContainer = createElement('div', ['add-tag-button-container']);
-                const addOshiTagInput = createElement('input', ['add-tag-input'], null, { type: 'text', placeholder: '新标签名' }); // Changed placeholder
-                const addOshiTagBtn = createActionButton('add', '添加标签', () => { // Changed button text
+                const addOshiTagInput = createElement('input', ['add-tag-input'], null, { type: 'text', placeholder: '新标签名' });
+                const addOshiTagBtn = createActionButton('add', '添加标签', () => {
                     if (addOshiTagInput.value.trim()) {
                         profileData.cards[cardIndex].elements[elementIndex].oshis.push({ text: addOshiTagInput.value.trim(), type: 'oshi-tag', styles: { fontWeight: '400', fontSize: '14.4' } });
                         addOshiTagInput.value = '';
@@ -609,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
 
-        // Add delete element button for all types except 'profileInfo'
+        // 为除'profileInfo'外的所有类型添加删除元素按钮
         if (elementData.type !== 'profileInfo') {
             const deleteElementBtnIcon = createActionButton('close', '删除此区块', () => {
                 if (confirm(`确定要删除此区块吗？`)) {
@@ -624,15 +627,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Renders a single tag element within a tag section.
-     * @param {object} tagData - The data for the tag.
-     * @param {string[]} dataPath - The data path to the tag's text and styles.
-     * @param {object} defaultStyles - Default styles for the tag.
-     * @param {number} cardIndex - The index of the parent card.
-     * @param {number} elementIndex - The index of the parent element.
-     * @param {string} tagArrayName - The name of the array containing the tag (e.g., 'tags', 'arcade', 'mobile', 'oshis', 'meta').
-     * @param {string} [tagClassOverride='tag'] - Override for the CSS class of the tag.
-     * @returns {HTMLElement} The rendered tag element.
+     * 在标签区段内渲染单个标签元素。
+     * @param {object} tagData - 标签的数据。
+     * @param {string[]} dataPath - 到达标签文本和样式的数据路径。
+     * @param {object} defaultStyles - 标签的默认样式。
+     * @param {number} cardIndex - 父卡片的索引。
+     * @param {number} elementIndex - 父元素的索引。
+     * @param {string} tagArrayName - 包含此标签的数组名称 (例如, 'tags', 'arcade', 'mobile', 'oshis', 'meta')。
+     * @param {string} [tagClassOverride='tag'] - 标签CSS class的覆盖值。
+     * @returns {HTMLElement} 渲染的标签元素。
      */
     function renderTag(tagData, dataPath, defaultStyles, cardIndex, elementIndex, tagArrayName, tagClassOverride = 'tag') {
         const tagEl = createElement('span', [tagClassOverride], null, { innerHTML: tagData.text });
@@ -644,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteTagBtn = createActionButton('close', '删除标签', (e) => {
             e.stopPropagation();
             const elementsArray = profileData.cards[cardIndex].elements[elementIndex][tagArrayName];
-            const tagIndex = elementsArray.indexOf(tagData); // Find by reference
+            const tagIndex = elementsArray.indexOf(tagData); // 通过引用查找
             if (tagIndex > -1) {
                 elementsArray.splice(tagIndex, 1);
             }
@@ -659,10 +662,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- EDITING & INTERACTIVITY ---
 
     /**
-     * Makes an element contenteditable and attaches editing controls.
-     * @param {HTMLElement} element - The element to make editable.
-     * @param {string[]} textDataPath - The path in `profileData` to the element's text content.
-     * @param {string[]|null} styleDataPath - The path in `profileData` to the element's styles, or null if no styles.
+     * 使元素内容可编辑并附加编辑控件。
+     * @param {HTMLElement} element - 要设为可编辑的元素。
+     * @param {string[]} textDataPath - `profileData` 中元素文本内容的路径。
+     * @param {string[]|null} styleDataPath - `profileData` 中元素样式的路径，如果无样式则为null。
      */
     function makeEditable(element, textDataPath, styleDataPath) {
         element.setAttribute('contenteditable', 'false');
@@ -674,11 +677,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentEditTarget && currentEditTarget !== element) {
                 currentEditTarget.style.outline = 'none';
                 currentEditTarget.setAttribute('contenteditable', 'false');
-                saveContentEditableChanges(currentEditTarget); // Save changes from previously edited element
+                saveContentEditableChanges(currentEditTarget); // 保存之前编辑元素的变化
             }
 
             currentEditTarget = element;
-            currentDataPath = { text: textDataPath, style: styleDataPath, type: 'html' };
+            currentDataPath = { text: textDataPath, style: styleDataPath };
 
             element.setAttribute('contenteditable', 'true');
             element.focus();
@@ -688,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fontWeightInput.value = currentStyles.fontWeight || '400';
             fontSizeInput.value = currentStyles.fontSize || '16';
 
-            // Position and show the edit controls popup
+            // 定位并显示编辑控件弹窗
             if (window.innerWidth >= 768) {
                 const rect = element.getBoundingClientRect();
                 const popupWidth = editControlsPopup.offsetWidth || 250;
@@ -696,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let popupTop = rect.top + window.scrollY;
                 let popupLeft = rect.right + window.scrollX + 10;
 
-                // Adjust position to keep popup within viewport
+                // 调整位置以使弹窗保持在视口内
                 if (popupLeft + popupWidth > document.documentElement.scrollWidth) {
                     popupLeft = rect.left + window.scrollX - popupWidth - 10;
                 }
@@ -718,14 +721,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 editControlsPopup.style.display = 'none';
             }
 
-            // Determine if "Clear Content" button should be visible
+            // 判断“清除内容”按钮是否应可见
             const isTextClearable = styleDataPath && !(textDataPath.includes('userSettings') && (textDataPath.includes('mainTitle') || textDataPath.includes('subtitle')));
             deleteElementButton.style.display = isTextClearable ? 'block' : 'none';
         });
 
-        // Event listener for blur to save changes and hide popup
+        // blur事件监听器，用于保存更改并隐藏弹窗
         element.addEventListener('blur', () => {
-            // Use setTimeout to allow click events on popup controls to register first
+            // 使用setTimeout以允许弹窗控件上的点击事件先注册
             setTimeout(() => {
                 if (currentEditTarget === element && !editControlsPopup.contains(document.activeElement)) {
                     saveContentEditableChanges(element);
@@ -735,10 +738,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentEditTarget = null;
                     currentDataPath = null;
                 }
-            }, 150); // Small delay
+            }, 150); // 短暂延迟
         });
 
-        // Event listener for input to save changes instantly (for continuous updates)
+        // input事件监听器，用于即时保存更改（用于连续更新）
         element.addEventListener('input', () => {
             if (currentEditTarget === element) {
                 saveContentEditableChanges(element);
@@ -747,8 +750,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Saves changes from a contenteditable element back to `profileData`.
-     * @param {HTMLElement} element - The contenteditable element.
+     * 将contenteditable元素的更改保存回 `profileData`。
+     * @param {HTMLElement} element - contenteditable元素。
      */
     function saveContentEditableChanges(element) {
         if (!element || !currentDataPath || !currentDataPath.text) return;
@@ -766,10 +769,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MODAL FUNCTIONS ---
 
     /**
-     * Opens a generic selection modal.
-     * @param {string} title - The title of the modal.
-     * @param {Array<object>} options - An array of objects with { text: string, value: any }.
-     * @returns {Promise<any|null>} A promise that resolves with the selected value or null if canceled.
+     * 打开一个通用的选择模态框。
+     * @param {string} title - 模态框的标题。
+     * @param {Array<object>} options - 包含 { text: string, value: any } 对象的数组。
+     * @returns {Promise<any|null>} 一个Promise，解析为所选值，如果取消则为null。
      */
     function openSelectionModal(title, options) {
         return new Promise((resolve) => {
@@ -842,7 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         target[currentDataPath.text[currentDataPath.text.length - 1]] = '';
         currentEditTarget.innerHTML = '';
-        saveData(); // Save the cleared content
+        saveData(); // 保存已清除的内容
 
         editControlsPopup.style.display = 'none';
         if (currentEditTarget) {
@@ -853,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDataPath = null;
     });
 
-    // Close edit popup when clicking outside
+    // 点击外部时关闭编辑弹窗
     document.addEventListener('click', (e) => {
         if (editControlsPopup.style.display === 'flex' &&
             !editControlsPopup.contains(e.target) &&
@@ -898,8 +901,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /**
-     * Deletes a card from the profile data and re-renders.
-     * @param {number} cardIndex - The index of the card to delete.
+     * 从个人资料数据中删除一张卡片并重新渲染。
+     * @param {number} cardIndex - 要删除的卡片的索引。
      */
     function deleteCard(cardIndex) {
         if (confirm(`确定要删除卡片 "${stripHtml(profileData.cards[cardIndex].title)}" 吗？`)) {
@@ -909,15 +912,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Shows options for adding a new element to a card and adds it.
-     * @param {number} cardIndex - The index of the card to add the element to.
+     * 显示向卡片添加新元素的选项并添加它。
+     * @param {number} cardIndex - 要添加元素的卡片的索引。
      */
     async function showAddElementOptions(cardIndex) {
         const elementTypes = [
             { text: "段落文字", value: "paragraph" },
             { text: "标签区块", value: "tagSection" },
-            { text: "标签区块（样式二）", value: "tagSectionTwo" }, 
-            { text: "分组标签区块", value: "groupedTagSection" }, 
+            { text: "标签区块（样式二）", value: "tagSectionTwo" },
+            { text: "分组标签区块", value: "groupedTagSection" },
             { text: "基本信息区块", value: "profileInfo" }
         ];
         const type = await openSelectionModal("选择要添加的区块类型", elementTypes);
@@ -927,7 +930,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const defaultTextStyles = { fontWeight: '400', fontSize: '15' };
         const defaultSubheadingStyles = { fontWeight: '600', fontSize: '18' };
         const defaultTagStyles = { fontWeight: '500', fontSize: '13' };
-        const defaultOshiStyles = { fontWeight: '400', fontSize: '14.4' }; // Specific for oshi tags
+        const defaultOshiStyles = { fontWeight: '400', fontSize: '14.4' }; // 特定于oshi标签
 
         switch (type) {
             case 'paragraph':
@@ -955,7 +958,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 break;
             case 'profileInfo':
-                // Check if a profileInfo card already exists
+                // 检查是否已存在profileInfo卡片
                 const hasProfileInfo = profileData.cards.some(card =>
                     card.elements.some(el => el.type === 'profileInfo')
                 );
@@ -978,26 +981,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const INLINED_CSS_STYLES = `
 /* 基本变量和页面背景 */
 :root {
-    /* Default theme values, will be overridden by JS-generated themeStyleBlock if user changes colors */
+    /* 默认主题值, 如果用户更改颜色，将被JS生成的themeStyleBlock覆盖 */
     --theme-accent: #FFC300; 
     --theme-tag-bg: #FFF5CC; 
     --theme-tag-bg-alt: #FFE082; 
     --theme-bg-page: #FFFDF5; 
     --theme-text-strong: #8B4513; 
     --theme-divider: #D4A017; 
-    --theme-tag-hover-bg: #FFE082; /* Added for .tag:hover */
+    --theme-tag-hover-bg: #FFE082;
 
     --ui-text-primary: #1d1d1f;
     --ui-text-secondary: #333333;
     --ui-text-tertiary: #86868b;
     --ui-bg-card: #ffffff;
     --ui-border-default: #d2d2d7;
-    /* --ui-bg-interactive-hover: #FFE082;  Replaced by --theme-tag-hover-bg */
     --ui-bg-placeholder: #f0f0f5;
     --delete-red: #ef4444;
     --delete-red-hover: #dc2626;
     --button-text-on-accent: #FFFFFF; 
-    --hover-bg-color: transparent; /* Set to transparent for exported view */
+    --hover-bg-color: transparent; /* 为导出视图设为透明 */
 }
 
 body {
@@ -1024,19 +1026,19 @@ body {
     position: relative;
 }
 
-/* Text elements: cursor and user-modify for exported (non-editable) view */
+/* 导出（非编辑）视图的文本元素光标和用户修改样式 */
 .main-title-text, .subtitle-text, .section-title, .content-text, .card-content-subheading, .tag, .oshi-tag, .oshi-meta-tag, .music-game-label {
     cursor: default !important; 
     -webkit-user-modify: read-only !important; 
     user-select: text !important;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
-/* Hover effects for exported static HTML - Text elements will NOT change background on hover */
+/* 导出的静态HTML悬停效果 - 文本元素悬停时背景不会改变 */
 .main-title-text:hover, .subtitle-text:hover, .section-title:hover, .content-text:hover, .card-content-subheading:hover, .music-game-label:hover {
-    background-color: transparent !important; /* No background change for text on hover in export */
+    background-color: transparent !important;
 }
 .tag:hover {
-    background-color: var(--theme-tag-hover-bg) !important; /* Specific hover for tags */
+    background-color: var(--theme-tag-hover-bg) !important;
     transform: translateY(-1px);
 }
 .oshi-tag:hover {
@@ -1045,7 +1047,7 @@ body {
     transform: translateY(-1px);
 }
 .oshi-meta-tag:hover {
-    border-color: var(--theme-tag-hover-bg) !important; /* Use consistent hover derived color */
+    border-color: var(--theme-tag-hover-bg) !important;
     transform: translateY(-1px);
 }
 
@@ -1262,156 +1264,169 @@ body {
 .lg\\:px-8 { }
 `;
 
-    exportHtmlButton.addEventListener('click', async () => {
-        const tempContainer = document.createElement('div');
-        const originalProfileContainer = document.getElementById('profileCardContainer');
-        tempContainer.innerHTML = originalProfileContainer.innerHTML;
+    // ✨ 优化: 为导出按钮添加加载状态处理
+    exportHtmlButton.addEventListener('click', () => {
+        exportHtmlButton.disabled = true;
+        exportHtmlButton.classList.add('loading');
 
-        const editorElementsSelectors = '.editor-toolbar, .edit-popup, .card-actions-container, .element-container > .action-button.delete-element-btn, .tag-actions-container, .action-button.text-with-icon[title*="区块"], .action-button.text-with-icon[title*="标签"], .add-tag-button-container, input[type="file"], [id^="avatarUploadInputHidden_"], .qr-code-link-input, .qr-code-wrapper p:last-child';
-        tempContainer.querySelectorAll(editorElementsSelectors).forEach(el => el.remove());
+        // 使用 setTimeout 确保浏览器有时间更新UI以显示加载状态
+        setTimeout(() => {
+            try {
+                const tempContainer = document.createElement('div');
+                const originalProfileContainer = document.getElementById('profileCardContainer');
+                tempContainer.innerHTML = originalProfileContainer.innerHTML;
 
-        const potentiallyEditableSelectors = '.main-title-text, .subtitle-text, .section-title, .content-text, .card-content-subheading, .tag, .oshi-tag, .oshi-meta-tag, .music-game-label, .profile-section-layout span, .page-footer p';
-        tempContainer.querySelectorAll(potentiallyEditableSelectors).forEach(el => {
-            el.removeAttribute('contenteditable');
-            el.style.removeProperty('-webkit-user-modify');
-            el.style.removeProperty('outline');
-        });
+                const editorElementsSelectors = '.editor-toolbar, .edit-popup, .card-actions-container, .element-container > .action-button.delete-element-btn, .tag-actions-container, .action-button.text-with-icon[title*="区块"], .action-button.text-with-icon[title*="标签"], .add-tag-button-container, input[type="file"], [id^="avatarUploadInputHidden_"], .qr-code-link-input, .qr-code-wrapper p:last-child';
+                tempContainer.querySelectorAll(editorElementsSelectors).forEach(el => el.remove());
 
-        const footerP = tempContainer.querySelector('.page-footer p');
-        if (footerP) {
-            const originalFooterHTML = profileData.userSettings.footerText;
-            const poweredByLink = " | Powered by <a href='https://chizukuo.github.io/ProfileCraft/' target='_blank' rel='noopener noreferrer' style='color: var(--theme-accent); text-decoration: underline;'>ProfileCraft</a>";
-            footerP.innerHTML = originalFooterHTML + poweredByLink;
-        }
+                const potentiallyEditableSelectors = '.main-title-text, .subtitle-text, .section-title, .content-text, .card-content-subheading, .tag, .oshi-tag, .oshi-meta-tag, .music-game-label, .profile-section-layout span, .page-footer p';
+                tempContainer.querySelectorAll(potentiallyEditableSelectors).forEach(el => {
+                    el.removeAttribute('contenteditable');
+                    el.style.removeProperty('-webkit-user-modify');
+                    el.style.removeProperty('outline');
+                });
 
-        // Dynamically get current computed styles for theme variables
-        const computedStyle = getComputedStyle(document.documentElement);
-        const getCssVar = (name) => computedStyle.getPropertyValue(name).trim();
-
-        let themeStyleBlock = '<style>:root {';
-        themeStyleBlock += `--theme-accent: ${profileData.userSettings.accentColor};`;
-        themeStyleBlock += `--theme-bg-page: ${getCssVar('--theme-bg-page')};`;
-        themeStyleBlock += `--theme-tag-bg: ${getCssVar('--theme-tag-bg')};`;
-        themeStyleBlock += `--theme-tag-bg-alt: ${getCssVar('--theme-tag-bg-alt')};`;
-        themeStyleBlock += `--theme-text-strong: ${getCssVar('--theme-text-strong')};`;
-        themeStyleBlock += `--theme-divider: ${getCssVar('--theme-divider')};`;
-        themeStyleBlock += `--ui-text-primary: #1d1d1f; --ui-text-secondary: #333333; --ui-text-tertiary: #86868b; --ui-bg-card: #ffffff;`;
-        themeStyleBlock += `--ui-border-default: #d2d2d7;`;
-        themeStyleBlock += `--delete-red: #ef4444; --delete-red-hover: #dc2626;`;
-        themeStyleBlock += `--button-text-on-accent: ${getCssVar('--button-text-on-accent')};`;
-        themeStyleBlock += `--hover-bg-color: transparent;`; // Ensure this is transparent for export
-        themeStyleBlock += `--theme-tag-hover-bg: ${getCssVar('--theme-tag-hover-bg')};`;
-        themeStyleBlock += `}\n </style>`;
-
-        const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>导出的扩列条</title>${googleFontsLink}${materialIconsLink}<style>${INLINED_CSS_STYLES}</style>${themeStyleBlock}</head><body><div id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8">${tempContainer.innerHTML}</div></body></html>`;
-
-        const blob = new Blob([fullHtml], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = '扩列条.html';
-        link.click();
-        URL.revokeObjectURL(link.href);
-    });
-
-    exportImageButton.addEventListener('click', () => {
-        const elementsToHideSelectors = '.editor-toolbar, .edit-popup, .card-actions-container, .element-container > .action-button.delete-element-btn, .tag-actions-container, .action-button.text-with-icon[title*="区块"], .action-button.text-with-icon[title*="标签"], .add-tag-button-container, .qr-code-link-input, .qr-code-wrapper p:last-child, [id^="avatarUploadInputHidden_"]';
-        const elementsToHideTemporarily = document.querySelectorAll(elementsToHideSelectors);
-
-        // Store original styles to restore later
-        const originalDisplayStyles = [];
-        elementsToHideTemporarily.forEach(el => {
-            originalDisplayStyles.push({ element: el, display: el.style.display });
-            el.style.setProperty('display', 'none', 'important');
-        });
-
-        // Store and remove outline/contenteditable
-        const outlinedElements = profileCardContainer.querySelectorAll('[style*="outline"]');
-        const originalOutlines = [];
-        outlinedElements.forEach(el => {
-            originalOutlines.push({ element: el, outline: el.style.outline });
-            el.style.outline = 'none';
-        });
-
-        const editableElements = profileCardContainer.querySelectorAll('[contenteditable="true"]');
-        const originalContenteditables = [];
-        editableElements.forEach(el => {
-            originalContenteditables.push({ element: el, contenteditable: el.getAttribute('contenteditable'), userModify: el.style.webkitUserModify });
-            el.setAttribute('contenteditable', 'false');
-            el.style.removeProperty('-webkit-user-modify');
-        });
-
-        const originalPageStyles = {
-            paddingTop: document.body.style.paddingTop,
-            backgroundColor: document.body.style.backgroundColor,
-            profileContainerMarginTop: profileCardContainer.style.marginTop
-        };
-
-        // Apply temporary styles for screenshot
-        document.body.style.paddingTop = '0px';
-        profileCardContainer.style.marginTop = '0px';
-        document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim();
-
-        html2canvas(profileCardContainer, {
-            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim(),
-            scale: 1.5,
-            useCORS: true,
-            logging: true,
-            onclone: (clonedDoc) => {
-                const clonedRoot = clonedDoc.documentElement;
-                const computedStyleCloned = getComputedStyle(document.documentElement); // Get from original doc to ensure consistency
-                const getCssVarCloned = (name) => computedStyleCloned.getPropertyValue(name).trim();
-
-                // Apply computed CSS variables to the cloned document's root
-                clonedRoot.style.setProperty('--theme-accent', profileData.userSettings.accentColor);
-                clonedRoot.style.setProperty('--theme-bg-page', getCssVarCloned('--theme-bg-page'));
-                clonedRoot.style.setProperty('--theme-tag-bg', getCssVarCloned('--theme-tag-bg'));
-                clonedRoot.style.setProperty('--theme-tag-bg-alt', getCssVarCloned('--theme-tag-bg-alt'));
-                clonedRoot.style.setProperty('--theme-text-strong', getCssVarCloned('--theme-text-strong'));
-                clonedRoot.style.setProperty('--theme-divider', getCssVarCloned('--theme-divider'));
-                clonedRoot.style.setProperty('--button-text-on-accent', getCssVarCloned('--button-text-on-accent'));
-                clonedRoot.style.setProperty('--ui-border-default', getCssVarCloned('--ui-border-default'));
-                clonedRoot.style.setProperty('--hover-bg-color', 'transparent'); // Force transparent for image export
-                clonedRoot.style.setProperty('--theme-tag-hover-bg', getCssVarCloned('--theme-tag-hover-bg'));
-
-                clonedDoc.body.style.backgroundColor = getCssVarCloned('--theme-bg-page');
-                clonedDoc.body.style.paddingTop = '0px';
-
-                const clonedProfileContainer = clonedDoc.getElementById('profileCardContainer');
-                if (clonedProfileContainer) {
-                    clonedProfileContainer.style.paddingTop = getComputedStyle(profileCardContainer).paddingTop;
-                    clonedProfileContainer.style.paddingBottom = getComputedStyle(profileCardContainer).paddingBottom;
-                    clonedProfileContainer.style.paddingLeft = getComputedStyle(profileCardContainer).paddingLeft;
-                    clonedProfileContainer.style.paddingRight = getComputedStyle(profileCardContainer).paddingRight;
-                    clonedProfileContainer.style.marginTop = '0px';
+                const footerP = tempContainer.querySelector('.page-footer p');
+                if (footerP) {
+                    const originalFooterHTML = profileData.userSettings.footerText;
+                    const poweredByLink = " | Powered by <a href='https://chizukuo.github.io/ProfileCraft/' target='_blank' rel='noopener noreferrer' style='color: var(--theme-accent); text-decoration: underline;'>ProfileCraft</a>";
+                    footerP.innerHTML = originalFooterHTML + poweredByLink;
                 }
 
-                clonedDoc.querySelectorAll(elementsToHideSelectors).forEach(el => el.remove());
-                clonedDoc.querySelectorAll('[contenteditable="true"]').forEach(el => el.setAttribute('contenteditable', 'false'));
-                clonedDoc.querySelectorAll('[style*="-webkit-user-modify"]').forEach(el => el.style.removeProperty('-webkit-user-modify'));
+                const computedStyle = getComputedStyle(document.documentElement);
+                const getCssVar = (name) => computedStyle.getPropertyValue(name).trim();
+
+                let themeStyleBlock = '<style>:root {';
+                themeStyleBlock += `--theme-accent: ${profileData.userSettings.accentColor};`;
+                themeStyleBlock += `--theme-bg-page: ${getCssVar('--theme-bg-page')};`;
+                themeStyleBlock += `--theme-tag-bg: ${getCssVar('--theme-tag-bg')};`;
+                themeStyleBlock += `--theme-tag-bg-alt: ${getCssVar('--theme-tag-bg-alt')};`;
+                themeStyleBlock += `--theme-text-strong: ${getCssVar('--theme-text-strong')};`;
+                themeStyleBlock += `--theme-divider: ${getCssVar('--theme-divider')};`;
+                themeStyleBlock += `--ui-text-primary: #1d1d1f; --ui-text-secondary: #333333; --ui-text-tertiary: #86868b; --ui-bg-card: #ffffff;`;
+                themeStyleBlock += `--ui-border-default: #d2d2d7;`;
+                themeStyleBlock += `--delete-red: #ef4444; --delete-red-hover: #dc2626;`;
+                themeStyleBlock += `--button-text-on-accent: ${getCssVar('--button-text-on-accent')};`;
+                themeStyleBlock += `--hover-bg-color: transparent;`;
+                themeStyleBlock += `--theme-tag-hover-bg: ${getCssVar('--theme-tag-hover-bg')};`;
+                themeStyleBlock += `}\n </style>`;
+
+                const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>导出的扩列条</title>${googleFontsLink}${materialIconsLink}<style>${INLINED_CSS_STYLES}</style>${themeStyleBlock}</head><body><div id="profileCardContainer" class="py-10 px-4 md:px-6 lg:px-8">${tempContainer.innerHTML}</div></body></html>`;
+
+                const blob = new Blob([fullHtml], { type: 'text/html' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = '扩列条.html';
+                link.click();
+                URL.revokeObjectURL(link.href);
+            } finally {
+                exportHtmlButton.disabled = false;
+                exportHtmlButton.classList.remove('loading');
             }
-        }).then(canvas => {
-            const image = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = '扩列条.png';
-            link.click();
-        }).catch(err => {
-            console.error("导出图片失败:", err);
-            alert("导出图片失败，请查看控制台获取更多信息。");
-        }).finally(() => {
-            // Restore original styles
-            originalDisplayStyles.forEach(({ element, display }) => element.style.display = display);
-            originalOutlines.forEach(({ element, outline }) => element.style.outline = outline);
-            originalContenteditables.forEach(({ element, contenteditable, userModify }) => {
-                element.setAttribute('contenteditable', contenteditable);
-                if (userModify) element.style.webkitUserModify = userModify;
+        }, 50); // 50ms延迟
+    });
+
+    // ✨ 优化: 为导出图片按钮添加加载状态处理
+    exportImageButton.addEventListener('click', () => {
+        exportImageButton.disabled = true;
+        exportImageButton.classList.add('loading');
+
+        setTimeout(() => {
+            const elementsToHideSelectors = '.editor-toolbar, .edit-popup, .card-actions-container, .element-container > .action-button.delete-element-btn, .tag-actions-container, .action-button.text-with-icon[title*="区块"], .action-button.text-with-icon[title*="标签"], .add-tag-button-container, .qr-code-link-input, .qr-code-wrapper p:last-child, [id^="avatarUploadInputHidden_"]';
+            const elementsToHideTemporarily = document.querySelectorAll(elementsToHideSelectors);
+            const originalDisplayStyles = [];
+            elementsToHideTemporarily.forEach(el => {
+                originalDisplayStyles.push({ element: el, display: el.style.display });
+                el.style.setProperty('display', 'none', 'important');
             });
 
-            document.body.style.paddingTop = originalPageStyles.paddingTop;
-            document.body.style.backgroundColor = originalPageStyles.backgroundColor;
-            profileCardContainer.style.marginTop = originalPageStyles.profileContainerMarginTop;
-        });
+            const outlinedElements = profileCardContainer.querySelectorAll('[style*="outline"]');
+            const originalOutlines = [];
+            outlinedElements.forEach(el => {
+                originalOutlines.push({ element: el, outline: el.style.outline });
+                el.style.outline = 'none';
+            });
+
+            const editableElements = profileCardContainer.querySelectorAll('[contenteditable="true"]');
+            const originalContenteditables = [];
+            editableElements.forEach(el => {
+                originalContenteditables.push({ element: el, contenteditable: el.getAttribute('contenteditable'), userModify: el.style.webkitUserModify });
+                el.setAttribute('contenteditable', 'false');
+                el.style.removeProperty('-webkit-user-modify');
+            });
+
+            const originalPageStyles = {
+                paddingTop: document.body.style.paddingTop,
+                backgroundColor: document.body.style.backgroundColor,
+                profileContainerMarginTop: profileCardContainer.style.marginTop
+            };
+
+            document.body.style.paddingTop = '0px';
+            profileCardContainer.style.marginTop = '0px';
+            document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim();
+
+            html2canvas(profileCardContainer, {
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim(),
+                scale: 1.5,
+                useCORS: true,
+                logging: true,
+                onclone: (clonedDoc) => {
+                    const clonedRoot = clonedDoc.documentElement;
+                    const computedStyleCloned = getComputedStyle(document.documentElement);
+                    const getCssVarCloned = (name) => computedStyleCloned.getPropertyValue(name).trim();
+
+                    clonedRoot.style.setProperty('--theme-accent', profileData.userSettings.accentColor);
+                    clonedRoot.style.setProperty('--theme-bg-page', getCssVarCloned('--theme-bg-page'));
+                    clonedRoot.style.setProperty('--theme-tag-bg', getCssVarCloned('--theme-tag-bg'));
+                    clonedRoot.style.setProperty('--theme-tag-bg-alt', getCssVarCloned('--theme-tag-bg-alt'));
+                    clonedRoot.style.setProperty('--theme-text-strong', getCssVarCloned('--theme-text-strong'));
+                    clonedRoot.style.setProperty('--theme-divider', getCssVarCloned('--theme-divider'));
+                    clonedRoot.style.setProperty('--button-text-on-accent', getCssVarCloned('--button-text-on-accent'));
+                    clonedRoot.style.setProperty('--ui-border-default', getCssVarCloned('--ui-border-default'));
+                    clonedRoot.style.setProperty('--hover-bg-color', 'transparent');
+                    clonedRoot.style.setProperty('--theme-tag-hover-bg', getCssVarCloned('--theme-tag-hover-bg'));
+                    clonedDoc.body.style.backgroundColor = getCssVarCloned('--theme-bg-page');
+                    clonedDoc.body.style.paddingTop = '0px';
+
+                    const clonedProfileContainer = clonedDoc.getElementById('profileCardContainer');
+                    if (clonedProfileContainer) {
+                        clonedProfileContainer.style.paddingTop = getComputedStyle(profileCardContainer).paddingTop;
+                        clonedProfileContainer.style.paddingBottom = getComputedStyle(profileCardContainer).paddingBottom;
+                        clonedProfileContainer.style.paddingLeft = getComputedStyle(profileCardContainer).paddingLeft;
+                        clonedProfileContainer.style.paddingRight = getComputedStyle(profileCardContainer).paddingRight;
+                        clonedProfileContainer.style.marginTop = '0px';
+                    }
+
+                    clonedDoc.querySelectorAll(elementsToHideSelectors).forEach(el => el.remove());
+                    clonedDoc.querySelectorAll('[contenteditable="true"]').forEach(el => el.setAttribute('contenteditable', 'false'));
+                    clonedDoc.querySelectorAll('[style*="-webkit-user-modify"]').forEach(el => el.style.removeProperty('-webkit-user-modify'));
+                }
+            }).then(canvas => {
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = '扩列条.png';
+                link.click();
+            }).catch(err => {
+                console.error("导出图片失败:", err);
+                alert("导出图片失败，请查看控制台获取更多信息。");
+            }).finally(() => {
+                originalDisplayStyles.forEach(({ element, display }) => element.style.display = display);
+                originalOutlines.forEach(({ element, outline }) => element.style.outline = outline);
+                originalContenteditables.forEach(({ element, contenteditable, userModify }) => {
+                    element.setAttribute('contenteditable', contenteditable);
+                    if (userModify) element.style.webkitUserModify = userModify;
+                });
+                document.body.style.paddingTop = originalPageStyles.paddingTop;
+                document.body.style.backgroundColor = originalPageStyles.backgroundColor;
+                profileCardContainer.style.marginTop = originalPageStyles.profileContainerMarginTop;
+
+                exportImageButton.disabled = false;
+                exportImageButton.classList.remove('loading');
+            });
+        }, 50); // 50ms延迟
     });
+
 
     resetButton.addEventListener('click', resetToDefault);
 
@@ -1431,14 +1446,14 @@ body {
 ░ ░▒ ▒  ░ ▒ ░░▒░▒░▓  ░▒▒ ▓░▒░▒░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░▒▓▒ ▒ ▒ ░ ▒░▒░▒░ 
   ░  ▒    ▒ ░▒░ ░ ▒ ░░░▒ ▒ ░ ▒░░▒░ ░ ░ ░ ░▒ ▒░░░▒░ ░ ░   ░ ▒ ▒░ 
 ░         ░  ░░ ░ ▒ ░░ ░ ░ ░ ░ ░░░ ░ ░ ░ ░░ ░  ░░░ ░ ░ ░ ░ ░ ▒  
-░ ░       ░  ░  ░ ░    ░ ░       ░     ░  ░      ░         ░ ░  
-░                    ░                                        
+░ ░       ░  ░  ░ ░    ░ ░         ░      ░  ░       ░         ░ ░  
+░                                                               
 
-            芝士扩列条编辑器V1.1.0
-            chizukuo@icloud.com
-
-                                                
 `;
-        console.log('%c' + art, 'color: #00ff99; font-weight: bold; font-size: 11px;');
+        const versionInfo = `
+            芝士扩列条编辑器V1.2.1
+            chizukuo@icloud.com
+`;
+        console.log('%c' + art + versionInfo, 'color: #00ff99; font-weight: bold; font-size: 11px;');
     };
 });

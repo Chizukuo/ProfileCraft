@@ -14,7 +14,6 @@
     --ui-text-tertiary: #86868b;
     --ui-bg-card: #ffffff;
     --ui-border-default: #d2d2d7; /* Default border color for cards */
-    /* --ui-bg-interactive-hover: #FFE082;  Replaced by --theme-tag-hover-bg for general tags */
     --ui-bg-placeholder: #f0f0f5;
     --delete-red: #ef4444; 
     --delete-red-hover: #dc2626;
@@ -86,14 +85,18 @@ body {
     color: var(--theme-text-strong);
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background-color 0.2s ease-in-out; /* Added timing function */
+    transition: background-color 0.2s ease-in-out;
     display: inline-flex; 
     align-items: center;
     gap: 5px;
     text-decoration: none;
 }
 .editor-toolbar button:hover, .toolbar-button-link:hover {
-    background-color: var(--theme-tag-hover-bg); /* Use theme-derived hover for consistency */
+    background-color: var(--theme-tag-hover-bg);
+}
+.editor-toolbar button:disabled {
+    cursor: wait;
+    background-color: #f0f0f0;
 }
 .editor-toolbar input[type="color"] {
     min-width: 40px;
@@ -107,7 +110,29 @@ body {
     color: var(--ui-text-secondary);
 }
 
-#profileCardContainer {
+/* 优化: 导出按钮加载状态 */
+.editor-toolbar button.loading .toolbar-button-text {
+    display: none;
+}
+.editor-toolbar button.loading .material-icons-outlined {
+    display: none;
+}
+.editor-toolbar button.loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--theme-accent);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+main#profileCardContainer {
     width: 100%;
     max-width: 1024px; 
     margin: 0 auto; 
@@ -122,7 +147,7 @@ body {
 
 .main-title-text, .subtitle-text, .section-title, .content-text, .card-content-subheading, .tag, .oshi-tag, .oshi-meta-tag, .music-game-label {
     cursor: pointer; 
-    transition: background-color 0.2s ease-in-out; /* Added timing function */
+    transition: background-color 0.2s ease-in-out;
     -webkit-user-modify: read-write-plaintext-only; 
 }
 .main-title-text:hover, .subtitle-text:hover, .section-title:hover, .content-text:hover, .card-content-subheading:hover, .music-game-label:hover {
@@ -139,7 +164,7 @@ body {
     border-radius: 20px;
     border: 1px solid var(--ui-border-default); 
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.07), 0px 1px 1px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.3s ease-in-out; /* Added timing function */
+    transition: box-shadow 0.3s ease-in-out;
     overflow: visible; 
     position: relative; 
 }
@@ -179,7 +204,7 @@ body {
     font-size: 0.8125rem; 
     font-weight: 500;
     margin: 0.25rem;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added timing function */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out;
     position: relative;
 }
 .tag:hover, .oshi-tag:hover, .oshi-meta-tag:hover {
@@ -191,7 +216,7 @@ body {
     color: var(--theme-text-strong);
 }
 .tag:hover { 
-    background-color: var(--theme-tag-hover-bg); /* Use new theme variable */
+    background-color: var(--theme-tag-hover-bg);
 }
 
 .oshi-tag {
@@ -216,7 +241,7 @@ body {
     border: 1px dashed var(--theme-accent);
 }
 .oshi-meta-tag:hover { 
-    border-color: var(--theme-tag-hover-bg); /* Use theme-derived hover for consistency */
+    border-color: var(--theme-tag-hover-bg);
 }
 
 .card-content-subheading {
@@ -257,7 +282,7 @@ body {
     font-size: 0.7rem;
     padding: 2px 0;
     opacity: 0;
-    transition: opacity 0.3s ease-in-out; /* Added timing function */
+    transition: opacity 0.3s ease-in-out;
 }
 .avatar-container:hover::after {
     opacity: 1;
@@ -354,7 +379,7 @@ body {
     padding-bottom: 2rem;
 }
 
-.edit-popup {
+aside#editControlsPopup {
     position: absolute; 
     background-color: white;
     border: 1px solid #ccc;
@@ -388,7 +413,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 5px;
-    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out; /* Added timing function */
+    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 .edit-popup .popup-button:hover {
     opacity: 0.85;
@@ -414,7 +439,7 @@ body {
     display: inline-flex; 
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, opacity 0.3s ease-in-out; /* Added timing function */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, opacity 0.3s ease-in-out;
     color: var(--ui-text-secondary); 
 }
 .action-button:hover {
@@ -451,7 +476,7 @@ body {
     right: 8px;
     display: flex;
     opacity: 0; 
-    transition: opacity 0.3s ease-in-out; /* Added timing function */
+    transition: opacity 0.3s ease-in-out;
 }
 .ui-card:hover .card-actions-container {
     opacity: 1; 
@@ -459,7 +484,7 @@ body {
 
 .element-container .action-button.delete-element-btn { 
     opacity: 0; 
-    transition: opacity 0.3s ease-in-out, background-color 0.2s ease-in-out; /* Added timing function */
+    transition: opacity 0.3s ease-in-out, background-color 0.2s ease-in-out;
     position: absolute;
     bottom: 8px; 
     right: 8px; 
@@ -476,7 +501,7 @@ body {
     top: -8px; 
     right: -8px;
     opacity: 0; 
-    transition: opacity 0.3s ease-in-out; /* Added timing function */
+    transition: opacity 0.3s ease-in-out;
 }
 .tag:hover .tag-actions-container,
 .oshi-tag:hover .tag-actions-container,
@@ -524,6 +549,7 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     min-width: 300px;
     max-width: 90%;
+    text-align: center;
 }
 .modal-content h3 {
     margin-top: 0;
@@ -543,7 +569,7 @@ body {
     border-radius: 6px;
     cursor: pointer;
     text-align: left;
-    transition: background-color 0.2s ease-in-out; /* Added timing function */
+    transition: background-color 0.2s ease-in-out;
 }
 #modalOptionsContainer button:hover {
     background-color: var(--theme-tag-hover-bg);
@@ -552,9 +578,9 @@ body {
     margin-bottom: 0;
 }
 .modal-button { 
-    display: block;
-    width: 100%;
-    padding: 10px;
+    display: inline-block;
+    width: auto;
+    padding: 10px 20px;
     margin-top: 20px;
     background-color: var(--ui-text-tertiary);
     color: var(--ui-bg-card);
@@ -566,8 +592,33 @@ body {
     opacity: 0.8;
 }
 
+/* 优化: 自定义 Alert/Confirm 弹窗样式 */
+.modal-content-text {
+    margin: 15px 0;
+    color: var(--ui-text-secondary);
+    line-height: 1.5;
+}
 
-/* TailwindCSS class overrides - these are kept for the static structure from original HTML */
+.modal-button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+.modal-button-group .modal-button {
+    margin-top: 0;
+}
+.modal-button-group .modal-button.confirm {
+    background-color: var(--theme-accent);
+    color: var(--button-text-on-accent);
+}
+.modal-button-group .modal-button.cancel {
+    background-color: var(--ui-border-default);
+    color: var(--ui-text-secondary);
+}
+
+
+/* TailwindCSS class overrides */
 .p-6 { padding: 1.5rem; }
 .md\\:p-7 { padding: 1.75rem; } 
 .mb-12 { margin-bottom: 3rem; }
@@ -597,38 +648,25 @@ body {
 .py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; } 
 .px-4 { padding-left: 1rem; padding-right: 1rem; }
 
-/* 请将这段修改后的 CSS 更新到您的 style.css 文件中 */
-
-/* --- 工具栏在小屏幕上仅显示图标并放大图标 (基于HTML修改后) --- */
-
-/* 媒体查询：当屏幕宽度小于等于 480px 时 (您可以按需调整此断点) */
+/* 工具栏在小屏幕上仅显示图标并放大图标 */
 @media (max-width: 876px) {
     .toolbar-button-text {
-        display: none; /* 直接隐藏带有此类的文本span */
+        display: none;
     }
 
-    /* 调整按钮的内边距和图标与（隐藏的）文本之间的间隙 */
     .editor-toolbar button,
     .editor-toolbar .toolbar-button-link {
-        padding: 6px 8px; /* 根据视觉效果调整内边距，确保放大后的图标有足够空间 */
-        gap: 0;           /* 移除图标和文本之间的间隙，因为文本已隐藏 */
-        /* 如果需要，可以调整按钮的行高来适应放大的图标 */
-        /* line-height: 24px; */ /* 示例值 */
+        padding: 6px 8px;
+        gap: 0;
     }
 
-    /* 放大图标 */
     .editor-toolbar button .material-icons,
     .editor-toolbar button .material-icons-outlined,
     .editor-toolbar .toolbar-button-link .material-icons,
     .editor-toolbar .toolbar-button-link .material-icons-outlined {
-        font-size: 1.5em; /* 将图标大小增加到原来的1.5倍。您可以调整这个值，例如 1.3em, 1.8em 等 */
-                          /* Material Icons 默认的 font-size 在您的 style.css 中是 1.1em */
-                          /* 所以 1.5em 实际上会比默认的 1.1em 大不少，相对于按钮的 0.9rem 字体也更突出 */
-        /* 如果图标垂直对齐有问题，可以尝试调整 vertical-align */
-        /* vertical-align: middle; */ /* 通常Material Icons的基线样式已处理好对齐 */
+        font-size: 1.5em;
     }
 
-    /* 针对“主题强调色”标签，在小屏幕隐藏它 */
     .editor-toolbar label[for="accentColorPicker"] {
         display: none;
     }
