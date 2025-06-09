@@ -13,14 +13,6 @@ It lets you freely edit text, customize theme colors, upload avatars and QR code
 ## 👉 Try it Live! ([GitHub Pages Deployment](https://chizukuo.github.io/ProfileCraft/))
 
 
-## 📋 Table of Contents
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Exporting](#exporting)
-- [Tech Stack](#tech-stack)
-- [Heads-Up](#heads-up)
-
----
 
 ## 📌 Features
 - 🖋️ **Live Rich Text Editing**  
