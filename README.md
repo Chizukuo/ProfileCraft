@@ -25,7 +25,7 @@ It lets you freely edit text, customize theme colors, upload avatars and QR code
 ## 📌 Features
 - 🖋️ **Live Rich Text Editing**  
   What you see is what you get. Click and type.  
-  Supports **bold**, *italic*, ~~strikethrough~~, underline.
+  Supports **bold**, *italic*, ~~strikethrough~~, <u>underline</u>.
 
 - 🎨 **Custom Themes**  
   Pick a primary color and the theme auto-adjusts for stylish consistency.
