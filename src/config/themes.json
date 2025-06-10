@@ -5,7 +5,7 @@
   },
   "cyberpunk": {
     "name": "赛博朋克 (Cyberpunk)",
-    "path": "/themes/cyberpunk.css",
+    "path": "themes/cyberpunk.css",
     "isAccentColorEnabled": false
   }
 }
