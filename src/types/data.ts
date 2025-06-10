@@ -14,6 +14,7 @@ export interface UserSettings {
   subtitle: string;
   subtitleStyles: Styles;
   footerText: string;
+  theme: string; // 新增：支持主题选择
 }
 
 export interface TagData {

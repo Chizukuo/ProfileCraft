@@ -1,5 +1,5 @@
 # 🌈 Cheese Profile Craft
-### [中文](./README.zh-CN.md) / [日本語](./README.ja-JP.md) / [한국어](./README.ko-KR.md)
+### [中文](./document/README.zh-CN.md) / [日本語](./document/README.ja-JP.md) / [한국어](./document/README.ko-KR.md)
 
 >A note from the developer, "chizukuo" (小芝士)!  
 >The name "chizu" (cheese,芝士, zhī shì) is a fun pun on the Chinese phrase "This is" (这是, zhè shì).  

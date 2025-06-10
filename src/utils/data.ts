@@ -11,7 +11,8 @@ export const getDefaultProfileData = (): ProfileData => ({
         mainTitleStyles: { fontWeight: '700', fontSize: '40', fontFamily: '' },
         subtitle: 'ID: chizukuo',
         subtitleStyles: { fontWeight: '500', fontSize: '20', fontFamily: '' },
-        footerText: `&copy; ${new Date().getFullYear()} 小芝士.`
+        footerText: `&copy; ${new Date().getFullYear()} 小芝士.`,
+        theme: 'default' // 默认主题，可根据需要更改
     },
     cards: [
         {

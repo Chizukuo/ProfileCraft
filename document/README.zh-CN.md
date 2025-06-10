@@ -1,5 +1,5 @@
 # 🌈 芝士扩列条编辑器 (Profile Craft)
-### [English](./README.md) / [日本語](./README.ja-JP.md) / [한국어](./README.ko-KR.md)
+### [English](./README.md) / [日本語](./document/README.ja-JP.md) / [한국어](./document/README.ko-KR.md)
 
 >开发者“小芝士”说：嘿！“芝士”的发音和“这是”一样，所以这个工具的名字，意思就是“这是一个扩列条编辑器！” 希望你喜欢这个由我带来的小工具。
 
