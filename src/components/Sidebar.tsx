@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FileCode2, Image, PlusSquare, RotateCcw, Star, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import themes from '../config/themes.json'; // 引入主题配置文件
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,20 +15,8 @@ interface SidebarProps {
   isAccentColorEnabled: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  isOpen,
-  onClose,
-  onAddCardClick,
-  onResetClick,
-  onExportHtmlClick,
-  onExportImageClick,
-  displayColor,
-  onColorChange,
-  isAccentColorEnabled
-}) => {
-  // This is the line that was removed. We want the component to always be in the DOM
-  // so that the CSS exit animations can play.
-  // if (!isOpen) return null; 
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onResetClick, onExportHtmlClick, onExportImageClick, displayColor, onColorChange, isAccentColorEnabled }) => {
+  const { theme, setTheme } = useTheme();
 
   const handleButtonClick = (action: () => void) => {
     action();
@@ -53,26 +43,39 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
           )}
-          <button onClick={() => handleButtonClick(onAddCardClick)} className="sidebar-item-button">
+          <button onClick={() => handleButtonClick(onAddCardClick)} className="button-style sidebar-item-button">
             <PlusSquare size={20} />
             <span>添加卡片</span>
           </button>
-          <button onClick={() => handleButtonClick(onResetClick)} className="sidebar-item-button">
+          <button onClick={() => handleButtonClick(onResetClick)} className="button-style sidebar-item-button">
             <RotateCcw size={20} />
             <span>重置样式</span>
           </button>
-          <button onClick={() => handleButtonClick(onExportHtmlClick)} className="sidebar-item-button">
+          <button onClick={() => handleButtonClick(onExportHtmlClick)} className="button-style sidebar-item-button">
             <FileCode2 size={20} />
             <span>导出 HTML</span>
           </button>
-          <button onClick={() => handleButtonClick(onExportImageClick)} className="sidebar-item-button">
+          <button onClick={() => handleButtonClick(onExportImageClick)} className="button-style sidebar-item-button">
             <Image size={20} />
             <span>导出图片</span>
           </button>
-          <a href="https://github.com/Chizukuo/ProfileCraft" target="_blank" rel="noopener noreferrer" className="sidebar-item-button">
+          <a href="https://github.com/Chizukuo/ProfileCraft" target="_blank" rel="noopener noreferrer" className="button-style sidebar-item-button">
             <Star size={20} />
             <span>Star on GitHub</span>
           </a>
+          <div className="sidebar-item">
+            <label htmlFor="sidebarThemeSwitcher">主题风格</label>
+            <select
+              id="sidebarThemeSwitcher"
+              value={theme}
+              onChange={e => setTheme(e.target.value as any)}
+              style={{ marginLeft: 4 }}
+            >
+              {Object.entries(themes).map(([key, value]) => (
+                <option key={key} value={key}>{value.name}</option>
+              ))}
+            </select>
+          </div>
         </nav>
       </aside>
     </div>

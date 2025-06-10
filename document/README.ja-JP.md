@@ -1,5 +1,5 @@
 # 🌈 チーズプロフィールカードエディター (Profile Craft)
-### [English](./README.md) / [中文](./README.zh-CN.md) / [한국어](./README.ko-KR.md)
+### [English](./README.md) / [中文](./document/README.zh-CN.md) / [한국어](./document/README.ko-KR.md)
 >開発者「小芝士（チーズちゃん）」より一言：  
 >「芝士（チーズ）」は中国語の「これは（这是 / zhè shì）」と発音が似ています。  
 >つまりこのツールの名前は「これはプロフィールカードエディターです！」という遊び心のある意味が込められています。ぜひ楽しんで使ってみてください。

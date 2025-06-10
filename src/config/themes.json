@@ -1,0 +1,11 @@
+{
+  "default": {
+    "name": "默认 (Default)",
+    "path": ""
+  },
+  "cyberpunk": {
+    "name": "赛博朋克 (Cyberpunk)",
+    "path": "/themes/cyberpunk.css",
+    "isAccentColorEnabled": false
+  }
+}

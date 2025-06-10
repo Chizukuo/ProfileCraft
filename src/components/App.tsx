@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useProfile } from '../context/ProfileContext';
+import { useTheme } from '../context/ThemeContext';
 import Toolbar from './Toolbar';
 import ProfileHeader from './ProfileHeader';
 import Card from './Card';
@@ -19,6 +20,7 @@ const SeoContent: React.FC = () => (
 
 function App() {
   const { profileData, isLoaded, updateProfileData } = useProfile();
+  const { theme, setTheme } = useTheme();
   const [isAddCardModalOpen, setAddCardModalOpen] = useState(false);
 
   // The update logic is now throttled at the source (Toolbar),
@@ -34,7 +36,7 @@ function App() {
 ▒ ▓███▀ ░░▓█▒░██▓░██░▒███████▒▒▒█████▓ ▒██▒ █▄▒▒█████▓ ░ ████▓▒░
 ░ ░▒ ▒  ░ ▒ ░░▒░▒░▓  ░▒▒ ▓░▒░▒░▒▓▒ ▒ ▒ ▒ ▒▒ ▓▒░▒▓▒ ▒ ▒ ░ ▒░▒░▒░ 
   ░  ▒    ▒ ░▒░ ░ ▒ ░░░▒ ▒ ░ ▒░░▒░ ░ ░ ░ ░▒ ▒░░░▒░ ░ ░   ░ ▒ ▒░ 
-░         ░  ░░ ░ ▒ ░░ ░ ░ ░ ░ ░░░ ░ ░ ░ ░░ ░  ░░░ ░ ░ ░ ░ ░ ▒  
+░         ░  ░░ ░ ▒ ░░ ░ ░ ░ ░░░ ░ ░ ░ ░░ ░  ░░░ ░ ░ ░ ░ ░ ▒  
 ░ ░       ░  ░  ░ ░    ░ ░       ░     ░  ░      ░         ░ ░  
 ░                    ░                                          
     
@@ -101,7 +103,6 @@ function App() {
               as="p"
               html={profileData.userSettings.footerText}
               onUpdate={handleFooterUpdate}
-              isClearable={false}
             />
         </footer>
       </main>

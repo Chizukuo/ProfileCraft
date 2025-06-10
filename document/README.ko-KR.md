@@ -1,5 +1,5 @@
 # 🌈 치즈 프로필 카드 에디터 (Profile Craft)
-### [English](./README.md) / [中文](./README.zh-CN.md) / [日本語](./README.ja-JP.md)
+### [English](./README.md) / [中文](./document/README.zh-CN.md) / [日本語](./document/README.ja-JP.md)
 >개발자 "작은 치즈(小芝士, chizukuo)"가 전하는 인사말:  
 "치즈(芝士)"는 중국어로 "이것은(这是, zhè shì)"와 발음이 비슷해요.  
 그래서 이 툴의 이름은 "이것은 프로필 카드 에디터입니다!"라는 재치 있는 뜻을 담고 있어요. 재미있게 사용해 주세요!

@@ -1,7 +1,4 @@
-/*
- @theme-property accent-color-enabled: true;
-*/
-
+/* 1. 全局变量和基础样式 */
 :root {
     /* Theme Colors */
     --theme-accent: #FFC300;
@@ -12,6 +9,9 @@
     --theme-divider: #D4A017;
     --theme-tag-hover-bg: #FFE082;
     --hover-bg-color: rgba(255, 195, 0, 0.1);
+    
+    /* NEW: Default QR Code Color Variable */
+    --qr-code-fg-color: var(--theme-text-strong);
 
     /* UI Colors */
     --ui-text-primary: #1d1d1f;
@@ -186,6 +186,52 @@ main#profileCardContainer {
     padding: 0;
     color: var(--ui-text-secondary);
     font-size: 0.9rem;
+}
+
+/* ===== 主题选择下拉框样式 ===== */
+.editor-toolbar select,
+.sidebar-item select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff;
+  color: var(--ui-text-primary);
+  border: 1px solid var(--ui-border-default);
+  border-radius: var(--radius-s);
+  padding: 6px 32px 6px 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  cursor: pointer;
+  min-width: 110px;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%2386868b" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 8.293a1 1 0 011.414 0L10 9.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px 18px;
+}
+
+.editor-toolbar select {
+  margin-left: var(--space-xs); /* Specific to toolbar select, using spacing token */
+}
+
+.editor-toolbar select:focus,
+.sidebar-item select:focus {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 2px var(--theme-accent);
+}
+.editor-toolbar select:hover,
+.sidebar-item select:hover {
+  border-color: var(--theme-accent);
+}
+
+/* 兼容深色主题可自定义调整 */
+body[data-theme='dark'] .editor-toolbar select,
+body[data-theme='dark'] .sidebar-item select {
+  background-color: #232323;
+  color: #fff;
+  border-color: #444;
 }
 
 /* Responsive Logic for Toolbar and Sidebar */

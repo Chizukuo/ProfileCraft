@@ -5,12 +5,14 @@ import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu } from 'lucide-reac
 import Modal from '../components/ui/Modal.tsx';
 import { getThemeSettings, ThemeSettings } from '../utils/themeUtils.ts';
 import Sidebar from './Sidebar.tsx';
+import { useTheme } from '../context/ThemeContext.tsx';
+import themesManifest from '../config/themes.json';
 
 /**
- * A custom hook to throttle a function call.
- * @param callback The function to throttle.
- * @param delay The throttle delay in milliseconds.
- * @returns A throttled version of the callback.
+ * 一个用于限制函数调用频率的自定义 Hook。
+ * @param callback 需要限制频率的函数。
+ * @param delay 限制的延迟时间（毫秒）。
+ * @returns 经过限制的函数。
  */
 const useThrottle = (callback: (...args: any[]) => void, delay: number) => {
     const isThrottled = useRef(false);
@@ -40,6 +42,7 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
   const { profileData, updateProfileData, resetProfileData } = useProfile();
+  const { theme, setTheme } = useTheme(); // 从 useTheme 解构 theme
   const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>({ isAccentColorEnabled: true });
@@ -47,8 +50,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
   const [displayColor, setDisplayColor] = useState(profileData?.userSettings.accentColor || '#FFC300');
 
   useEffect(() => {
-    setThemeSettings(getThemeSettings());
-  }, []);
+      (async () => {
+        const settings = await getThemeSettings(theme);
+        setThemeSettings(settings);
+      })();
+    }, [theme]);
 
   useEffect(() => {
     if (profileData) {
@@ -82,8 +88,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
     setResetModalOpen(false);
   }
 
+  // 将当前主题传递给 exportToHtml
   const handleExportHtml = () => {
-      exportToHtml(profileData);
+      exportToHtml(profileData, theme); 
   }
 
   const handleExportImage = () => {
@@ -92,6 +99,12 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
         exportToImage(container, profileData);
       }
   }
+
+  // 动态生成主题选项
+  const themeOptions = Object.entries(themesManifest).map(([value, info]) => ({
+    value,
+    label: info.name
+  }));
 
   return (
     <>
@@ -122,11 +135,24 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
             </div>
             <div className="toolbar-group">
               <button onClick={handleExportHtml} title="导出 HTML"><FileCode2 size={16} /><span className="toolbar-button-text">导出 HTML</span></button>
-              <button onClick={handleExportImage} title="导出图片"><Image size={16} /><span className="toolbar-button-text">导出图片</span></button>
+              <button onClick={handleExportImage} title="导出图片(beta)"><Image size={16} /><span className="toolbar-button-text">导出图片</span></button>
+            </div>
+            <div className="toolbar-group">
+              <label htmlFor="themeSwitcher">主题风格:</label>
+              <select
+                id="themeSwitcher"
+                value={theme}
+                onChange={e => setTheme(e.target.value as any)}
+                style={{ marginLeft: 4 }}
+              >
+                {themeOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
             <div className="toolbar-group toolbar-group-right">
               <a href="https://github.com/Chizukuo/ProfileCraft" target="_blank" rel="noopener noreferrer" className="toolbar-button-link" title="在 GitHub 上点个 Star">
-                <Star size={16} /><span className="toolbar-button-text">Star on GitHub</span>
+                <Star size={16} /><span className="toolbar-button-text">Github</span>
               </a>
             </div>
         </div>

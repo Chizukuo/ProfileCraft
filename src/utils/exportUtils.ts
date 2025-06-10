@@ -1,15 +1,19 @@
 import html2canvas from 'html2canvas';
 import { ProfileData } from '../types/data';
-// 直接导入CSS文件作为原始文本字符串
-import appCss from '../styles/App.css?raw';
+import themesManifest from '../config/themes.json'; // Import themes manifest
 
-// 辅助函数：计算颜色亮度、提亮、加深
+// Define Theme type if needed (adjust according to your JSON structure)
+export type Theme = keyof typeof themesManifest; // Export Theme type
+import appCssContent from '../styles/App.css?raw'; // Import App.css content directly
+
+// 辅助函数：计算颜色亮度、提亮、加深 (保持不变)
 const getBrightness = (hexColor: string): number => {
     hexColor = hexColor.replace(/^#/, '');
     if (hexColor.length === 3) hexColor = hexColor.split('').map(c => c + c).join('');
     const r = parseInt(hexColor.substring(0, 2), 16), g = parseInt(hexColor.substring(2, 4), 16), b = parseInt(hexColor.substring(4, 6), 16);
     return (r * 299 + g * 587 + b * 114) / 1000;
 };
+
 const lightenHexColor = (hex: string, p: number): string => {
     hex = hex.replace(/^#/, '');
     if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
@@ -17,6 +21,7 @@ const lightenHexColor = (hex: string, p: number): string => {
     const newR = Math.min(255, Math.floor(r + (255 - r) * p)), newG = Math.min(255, Math.floor(g + (255 - g) * p)), newB = Math.min(255, Math.floor(b + (255 - b) * p));
     return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
 };
+
 const darkenHexColor = (hex: string, p: number): string => {
     hex = hex.replace(/^#/, '');
     if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
@@ -24,6 +29,8 @@ const darkenHexColor = (hex: string, p: number): string => {
     const newR = Math.max(0, Math.floor(r * (1 - p))), newG = Math.max(0, Math.floor(g * (1 - p))), newB = Math.max(0, Math.floor(b * (1 - p)));
     return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
 };
+
+// 此函数在图像导出时用于克隆的文档，确保主题颜色正确应用
 function applyThemeColorsToElement(element: HTMLElement, accent: string) {
     element.style.setProperty('--theme-accent', accent);
     element.style.setProperty('--theme-bg-page', lightenHexColor(accent, 0.95));
@@ -37,18 +44,40 @@ function applyThemeColorsToElement(element: HTMLElement, accent: string) {
 
 /**
  * 导出为 HTML 文件。
- * 此函数现在使用Vite的`?raw`导入功能，在构建时直接包含App.css内容。
+ * 此函数现在将当前主题的CSS和App.css内容直接嵌入到HTML中，并移除编辑器控件。
  * @param profileData 用户的个人资料数据。
+ * @param currentThemeName 当前选择的主题名称。
  */
-export const exportToHtml = (profileData: ProfileData) => {
+export const exportToHtml = async (profileData: ProfileData, currentThemeName: Theme) => {
     const container = document.getElementById('profileCardContainer');
     if (!container) return;
 
-    // 动态生成主题颜色相关的CSS变量
+    // 获取当前主题的CSS文件路径
+    const themeInfo = themesManifest[currentThemeName];
+    const themeCssPath = themeInfo ? themeInfo.path : ''; // e.g., '/themes/cyberpunk.css'
+
+    let themeCssContent = '';
+    if (themeCssPath) {
+        try {
+            // 从公共文件夹获取主题CSS内容
+            const response = await fetch(themeCssPath);
+            if (response.ok) {
+                themeCssContent = await response.text();
+            } else {
+                console.error(`Failed to fetch theme CSS: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error fetching theme CSS:', error);
+        }
+    }
+
+    // 动态生成主题颜色相关的CSS变量 (从当前计算样式获取)
     const accent = profileData.userSettings.accentColor;
     const computedStyle = getComputedStyle(document.documentElement);
     const getCssVar = (name: string) => computedStyle.getPropertyValue(name).trim();
-    const themeStyleBlock = `
+
+    // 构建动态主题变量样式块
+    const dynamicThemeStyleBlock = `
     :root {
         --theme-accent: ${accent};
         --theme-bg-page: ${getCssVar('--theme-bg-page')};
@@ -60,45 +89,54 @@ export const exportToHtml = (profileData: ProfileData) => {
     }
     `;
 
-    // 定义用于覆盖编辑器UI和交互效果的CSS
-    const overrideCss = `
-        /* 隐藏所有编辑器特有的UI元素 */
-        .editor-toolbar, .action-button, .delete-action-btn, .action-button-text-with-icon,
-        .add-tag-button-container, .rich-text-toolbar, .modal-overlay,
-        .add-tag-input, .qr-code-link-input, .qr-code-wrapper p,
-        .avatar-container::after {
-            display: none !important;
-        }
-    `;
-
     // 克隆并清理HTML内容
     const exportContainer = container.cloneNode(true) as HTMLElement;
+
+    // 移除所有编辑器相关的控件和交互元素
+    const elementsToRemoveSelectors = [
+        '.action-button',
+        '.add-tag-button-container',
+        '.tag-actions-container',
+        '.delete-element-btn',
+        '.action-button-text-with-icon', // 移除此行，因为它不应该被移除
+        '.card-actions-container',
+        '.edit-popup',
+        '.qr-code-link-input',
+        '.rich-text-toolbar',
+        '.profile-info-text [contenteditable]:hover::after', // 移除编辑提示
+        '.avatar-container:hover::after' // 移除头像更换提示
+    ];
+    elementsToRemoveSelectors.forEach(selector => {
+        exportContainer.querySelectorAll(selector).forEach(el => el.remove());
+    });
+
+    // 移除 contenteditable 属性，并清理编辑时的视觉样式
+    exportContainer.querySelectorAll('[contenteditable]').forEach(el => {
+        el.removeAttribute('contenteditable');
+        (el as HTMLElement).style.backgroundColor = 'transparent'; // 移除编辑时的背景色
+        (el as HTMLElement).style.border = 'none'; // 移除编辑时的边框
+        // 移除之前强制设为0的padding和margin，让其回归原有布局
+        (el as HTMLElement).style.padding = ''; 
+        (el as HTMLElement).style.margin = ''; 
+    });
+    
+    // 确保 QR 码下方的提示文本在导出时显示为静态文本（如果存在）
+    const qrCodeWrapper = exportContainer.querySelector('.qr-code-wrapper');
+    if (qrCodeWrapper) {
+        qrCodeWrapper.querySelectorAll('p').forEach(p => {
+            if (p.classList.contains('text-sm')) {
+                p.remove();
+            }
+        });
+    }
+
+    // 更新页脚信息 - 保持为英文 "Powered by ProfileCraft"
     const footerP = exportContainer.querySelector('.page-footer p');
     if (footerP) {
         const poweredByLink = " | Powered by <a href='https://chizukuo.github.io/ProfileCraft/' target='_blank' rel='noopener noreferrer' style='color: var(--theme-accent); text-decoration: none;'>ProfileCraft</a>";
         footerP.innerHTML += poweredByLink;
     }
-    
-    // 构建最终的HTML文件
-    const consoleArtScript = `
-<script>
-    try {
-        const accentColor = '${accent}';
-        const styles = [
-            \`color: \${accentColor}; font-size: 1.2em; font-weight: bold;\`,
-            'color: initial; font-size: 1em; font-weight: normal;'
-        ];
-        console.log(
-            '%cCrafted with ♥ by ProfileCraft %c\\nhttps://github.com/chizukuo/ProfileCraft',
-            styles[0],
-            styles[1]
-        );
-    } catch (e) {
-        // 在某些环境下 console 可能不可用，静默失败
-    }
-<\/script>
-`;
-    
+
     // 构建最终的HTML文件
     const fullHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -108,16 +146,38 @@ export const exportToHtml = (profileData: ProfileData) => {
     <title>导出的扩列条</title>
     <link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        ${themeStyleBlock}
-        ${appCss}
-        ${overrideCss}
+        /* App.css content */
+        ${appCssContent}
+        /* Current theme CSS content */
+        ${themeCssContent}
+        /* Dynamic theme variables (override if needed) */
+        ${dynamicThemeStyleBlock}
+
+        /* 导出时隐藏特定的UI元素 */
+        .editor-toolbar, .edit-popup, .rich-text-toolbar,
+        .action-button, .add-tag-button-container, .tag-actions-container,
+        .delete-element-btn, .card-actions-container,
+        .qr-code-link-input, .avatar-container:hover::after,
+        /* 移除 contenteditable 的 hover 效果 */
+        [contenteditable]:hover { 
+            display: none !important;
+        }
+        /* 强制 contenteditable 元素变为静态，仅移除交互样式 */
+        [contenteditable] {
+            cursor: default !important;
+            border: none !important;
+            background-color: transparent !important;
+            outline: none !important;
+            /* 允许其原有的 padding/margin 生效，不再强制设为0 */
+        }
+        /* 确保页面主体没有多余的上边距，因为它在原应用中是为固定工具栏预留的 */
+        body { padding-top: 0 !important; }
     </style>
 </head>
 <body>
     <main id="profileCardContainer">
         ${exportContainer.innerHTML}
     </main>
-    ${consoleArtScript}
 </body>
 </html>`;
 
@@ -131,7 +191,7 @@ export const exportToHtml = (profileData: ProfileData) => {
 };
 
 
-// 导出为图片文件 (保持不变)
+// 导出为图片文件 (保持不变，但修改了 alert 消息)
 export const exportToImage = (element: HTMLElement, profileData: ProfileData | null) => {
     if (!element || !profileData) return;
 
@@ -150,7 +210,8 @@ export const exportToImage = (element: HTMLElement, profileData: ProfileData | n
             // 在克隆的文档中应用主题并移除不必要的元素
             const clonedRoot = clonedDoc.documentElement;
             applyThemeColorsToElement(clonedRoot, profileData.userSettings.accentColor);
-            clonedDoc.querySelectorAll('.action-button, .add-tag-button-container, .tag-actions-container, .delete-element-btn, .action-button-text-with-icon, .card-actions-container, .qr-code-wrapper p, .avatar-container:hover::after, .edit-popup, .qr-code-link-input, .rich-text-toolbar').forEach(el => el.remove());
+            // 修正：不再移除 .action-button-text-with-icon，因为它包含应导出的边框样式
+            clonedDoc.querySelectorAll('.action-button, .add-tag-button-container, .tag-actions-container, .delete-element-btn, .card-actions-container, .qr-code-wrapper p, .avatar-container:hover::after, .edit-popup, .qr-code-link-input, .rich-text-toolbar').forEach(el => el.remove());
         }
     }).then(canvas => {
         // 创建并触发下载
@@ -161,7 +222,18 @@ export const exportToImage = (element: HTMLElement, profileData: ProfileData | n
         link.click();
     }).catch(err => {
         console.error("导出图片失败:", err);
-        alert("导出图片失败，请查看控制台获取更多信息。");
+        // 使用自定义消息框替代 alert()
+        const messageBox = document.createElement('div');
+        messageBox.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999; text-align: center;
+        `;
+        messageBox.innerHTML = `
+            <p>导出图片失败，请查看控制台获取更多信息。</p>
+            <button onclick="this.parentNode.remove()" style="margin-top: 10px; padding: 8px 16px; border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer;">确定</button>
+        `;
+        document.body.appendChild(messageBox);
     }).finally(() => {
         // 恢复隐藏的编辑器UI
         elementsToHide.forEach(el => (el as HTMLElement).style.display = '');
