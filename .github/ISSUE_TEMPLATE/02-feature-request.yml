@@ -1,0 +1,41 @@
+# .github/ISSUE_TEMPLATE/02-feature-request.yml
+
+name: "✨ 功能请求 (Feature Request)"
+description: "分享您的绝妙点子，让这个项目变得更好！Share your brilliant idea to make this project better."
+title: "✨ [FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **非常感谢您愿意花时间分享您的想法！正是因为有您的创意，社区才会变得更棒。**
+        Thank you for taking the time to share your idea! It's creative minds like yours that make the community great.
+
+  - type: textarea
+    id: inspiration
+    attributes:
+      label: "您的灵感来源 (The Spark for Your Idea)"
+      description: "是什么让您有了这个绝妙的想法？是日常使用中遇到了什么不便，还是觉得某个地方可以做得更好？(What inspired this great idea? Was it an inconvenience you faced, or a potential for improvement you noticed?)"
+      placeholder: "例如：我希望有一个快捷键可以快速添加标签，因为现在每次都要用鼠标点击，感觉有点慢。(e.g. I wish there was a hotkey to add tags quickly, because using the mouse every time feels a bit slow.)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "您的绝妙构想 (Your Brilliant Concept)"
+      description: "请尽情描述您脑海中的新功能吧！它看起来是什么样子？它会如何工作？(Feel free to describe the new feature you're imagining. What would it look like? How would it work?)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "其他可能性 (Other Possibilities) (选填/Optional)"
+      description: "在构思时，您是否也想过其他实现方式？分享出来可能会碰撞出更多火花！(While brainstorming, did you also think of other ways to implement this? Sharing them might spark even more ideas!)"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "补充信息 (Additional Context)"
+      description: "还有其他任何关于这个功能请求的补充信息或截图吗？(Add any other context or screenshots about the feature request here.)"
