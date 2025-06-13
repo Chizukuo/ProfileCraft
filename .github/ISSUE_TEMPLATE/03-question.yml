@@ -1,0 +1,43 @@
+# .github/ISSUE_TEMPLATE/03-question.yml
+
+name: "❓ 问题咨询 (Question)"
+description: "提出关于项目的疑问或寻求帮助。Ask a question or get help."
+title: "❓ [Q] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **在提问前，请先确认您已经查看了相关文档。**
+        Before asking, please make sure you have checked the relevant documentation.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: "您的问题 (Your Question)"
+      description: "请详细、清晰地描述您的问题。(Please describe your question in detail.)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: "您的操作系统是？ (What is your operating system?) (选填/Optional)"
+      description: "如果您的问题可能与特定平台相关，请告诉我们您使用的系统。(If your question might be platform-specific, please let us know.)"
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - iOS
+        - Android
+        - "其他 (Other)"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "检查清单 (Checklist)"
+      options:
+        - label: "我已阅读过项目的 README 文档。(I have read the project's README.)"
+          required: true
+        - label: "我已搜索过现有的 Issues，确认没有类似的问题。(I have searched the existing issues and my question is not a duplicate.)"
+          required: true

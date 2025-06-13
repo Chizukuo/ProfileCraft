@@ -1,0 +1,88 @@
+name: "🐞 Bug 报告 (Bug Report)"
+description: "报告一个可复现的 Bug，帮助我们改进项目。File a reproducible bug to help us improve."
+title: "🐞 [BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **感谢您抽出宝贵时间来报告 Bug！一份清晰的报告能帮助我们更快地定位和修复问题。**
+        Thanks for taking the time to file a bug report! A clear report helps us locate and fix the issue faster.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: "问题描述 (The Bug)"
+      description: "请清晰、简洁地描述您遇到的 Bug。您期望的结果是什么？(A clear and concise description of what the bug is. What did you expect to happen?)"
+      placeholder: "例如：当我点击“导出 PNG”按钮时，下载的图片是空白的。我期望能得到一张包含我个人信息的完整图片。(e.g. When I click 'Export PNG', the downloaded image is blank. I expected to get a complete image with my profile info.)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: "复现步骤 (Steps to Reproduce)"
+      description: "请详细描述如何一步步触发这个 Bug。(Please describe how to trigger this bug step by step.)"
+      placeholder: |
+        1. 打开应用页面 (Open the app page)
+        2. 在 XX 卡片中输入内容“...” (Enter '...' in the XX card)
+        3. 点击顶部工具栏的“导出 PNG”按钮 (Click the 'Export PNG' button in the top toolbar)
+        4. 查看下载的图片 (Check the downloaded image)
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "### 您的运行环境 (Your Environment)"
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: "操作系统 (Operating System)"
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - iOS
+        - Android
+        - "其他 (Other)"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: "浏览器 (Browser)"
+      description: "您在哪种或哪些浏览器上遇到了问题？(On which browser(s) did you encounter the problem?)"
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Microsoft Edge
+        - "其他 (Other)"
+
+  - type: input
+    id: version
+    attributes:
+      label: "项目版本 (Project Version)"
+      description: "请在应用页面的浏览器开发者工具“控制台(Console)”中找到版本信息并粘贴于此。(Please find the version in your browser's developer console and paste it here.)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "补充信息 (Additional Context)"
+      description: "还有其他任何关于这个问题的补充信息或截图吗？(Any other context or screenshots about the problem?)"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "提交前检查清单 (Pre-submission Checklist)"
+      description: "在提交之前，请确保您已完成以下操作。(Before submitting, please ensure you have completed the following.)"
+      options:
+        - label: "我已经搜索过现有的 Issues，确认这不是一个重复的 Bug。(I have searched the existing issues and confirmed this is not a duplicate.)"
+          required: true
+        - label: "我已在最新版本的应用中测试过，问题依然存在。(I have tested this on the latest version of the app and the issue still persists.)"
+          required: true
