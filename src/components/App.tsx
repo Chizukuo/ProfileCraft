@@ -44,7 +44,7 @@ function App() {
     `;
 
         const versionInfo = `
-        芝士扩列条编辑器 V2.0.0
+        芝士扩列条编辑器 V2.2.0
          chizukuo@icloud.com
     `;
 
