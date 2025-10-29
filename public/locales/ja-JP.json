@@ -1,156 +1,79 @@
-{{
-
-  "toolbar": {  "toolbar": {
-
-    "openMenu": "メニューを開く",    "openMenu": "メニューを開く",
-
-    "themeColor": "テーマカラー",    "themeColor": "テーマカラー",
-
-    "selectThemeColor": "テーマカラーを選択",    "selectThemeColor": "テーマカラーを選択",
-
-    "addCard": "カード追加",    "addCard": "カード追加",
-
-    "addNewCard": "新しいカードを追加",    "addNewCard": "新しいカードを追加",
-
-    "resetStyle": "スタイルをリセット",    "resetStyle": "スタイルリセット",
-
-    "restoreDefault": "デフォルトテンプレートに復元",    "restoreDefault": "デフォルトテンプレートに戻す",
-
-    "exportHtml": "HTMLエクスポート",    "exportHtml": "HTMLエクスポート",
-
-    "exportImage": "画像エクスポート",    "exportImage": "画像エクスポート",
-
-    "themeStyle": "テーマスタイル",    "themeStyle": "テーマスタイル",
-
-    "selectTheme": "テーマスタイルを選択",    "selectTheme": "テーマスタイルを選択",
-
-    "language": "言語",    "language": "言語",
-
-    "selectLanguage": "言語を選択",    "selectLanguage": "言語を選択",
-
-    "github": "Github",    "github": "Github",
-
-    "starOnGithub": "GitHubでスター"    "starOnGithub": "GitHubでスター"
-
-  },  },
-
-  "sidebar": {  "sidebar": {
-
-    "menu": "メニュー",    "menu": "メニュー",
-
-    "close": "閉じる"    "close": "閉じる"
-
-  },  },
-
-  "card": {  "card": {
-
-    "deleteCard": "このカードを削除",    "deleteCard": "このカードを削除",
-
-    "addNewBlock": "このカードに新しいブロックを追加"    "addNewBlock": "このカードに新しいブロックを追加"
-
-  },  },
-
-  "modal": {  "modal": {
-
-    "confirmReset": "リセットを確認",    "confirmReset": "リセット確認",
-
-    "confirmResetMessage": "すべてのコンテンツをデフォルトテンプレートにリセットしてもよろしいですか？この操作は元に戻せません。",    "confirmResetMessage": "すべてのコンテンツをデフォルトテンプレートにリセットしてもよろしいですか？この操作は元に戻せません。",
-
-    "confirmResetButton": "リセットを確認",    "confirmResetButton": "リセット確認",
-
-    "cancel": "キャンセル",    "cancel": "キャンセル",
-
-    "confirmDeleteCard": "カードの削除を確認",    "confirmDeleteCard": "カード削除確認",
-
-    "confirmDeleteCardMessage": "カード「{title}」を削除してもよろしいですか？この操作は元に戻せません。",    "confirmDeleteCardMessage": "カード「{title}」を削除してもよろしいですか？この操作は元に戻せません。",
-
-    "delete": "削除",    "delete": "削除",
-
-    "confirmDeleteBlock": "ブロックの削除を確認",    "confirmDeleteBlock": "ブロック削除確認",
-
-    "confirmDeleteBlockMessage": "このブロックを削除してもよろしいですか？この操作は元に戻せません。",    "confirmDeleteBlockMessage": "このブロックを削除してもよろしいですか？この操作は元に戻せません。",
-
-    "addCard": "カードを追加",    "addCard": "カード追加",
-
-    "selectCardType": "追加するカードのタイプを選択",    "selectCardType": "追加するカードのタイプを選択",
-
-    "addElement": "ブロックを追加",    "addElement": "ブロック追加",
-
-    "selectElementType": "追加するブロックのタイプを選択"    "selectElementType": "追加するブロックのタイプを選択"
-
-  },  },
-
-  "notification": {  "notification": {
-
-    "exportHtmlSuccess": "HTMLファイルのエクスポートに成功しました！",    "exportHtmlSuccess": "HTMLファイルのエクスポートに成功しました！",
-
-    "exportHtmlError": "HTMLのエクスポートに失敗しました。もう一度お試しください",    "exportHtmlError": "HTMLのエクスポートに失敗しました。もう一度お試しください",
-
-    "exportImageSuccess": "画像のエクスポートに成功しました！",    "exportImageSuccess": "画像のエクスポートに成功しました！",
-
-    "exportImageError": "画像のエクスポートに失敗しました。詳細はコンソールをご確認ください。",    "exportImageError": "画像のエクスポートに失敗しました。詳細はコンソールをご確認ください。",
-
-    "containerNotFound": "エクスポートコンテナが見つかりません"    "containerNotFound": "エクスポートするコンテンツコンテナが見つかりません"
-
-  },  },
-
-  "cardTypes": {  "cardTypes": {
-
-    "profileCard": "プロフィールカード",    "profileCard": "プロフィールカード",
-
-    "profileCardDesc": "アバター、基本情報、QRコードを表示",    "profileCardDesc": "アバター、基本情報、QRコードを表示",
-
-    "aboutMeCard": "自己紹介",    "aboutMeCard": "自己紹介",
-
-    "aboutMeCardDesc": "段落で自己紹介",    "aboutMeCardDesc": "段落で自己紹介",
-
-    "oshiCard": "おすすめカード",    "oshiCard": "おすすめカード",
-
-    "oshiCardDesc": "おすすめコンテンツを表示",    "oshiCardDesc": "おすすめを表示",
-
-    "fullWidthCard": "全幅カード",    "fullWidthCard": "全幅カード",
-
-    "fullWidthCardDesc": "行全体に広がるカード"    "fullWidthCardDesc": "全幅に広がるカード"
-
-  },  },
-
-  "blockTypes": {  "blockTypes": {
-
-    "profileInfo": "プロフィール情報",    "profileInfo": "プロフィール情報",
-
-    "profileInfoDesc": "アバター、情報、QRコード",    "profileInfoDesc": "アバター、情報、QRコード",
-
-    "paragraph": "段落",    "paragraph": "段落",
-
-    "paragraphDesc": "自由テキストコンテンツ",    "paragraphDesc": "自由テキストコンテンツ",
-
-    "tagSection": "タグセクション",    "tagSection": "タグセクション",
-
-    "tagSectionDesc": "タグリストを表示",    "tagSectionDesc": "タグリストを表示",
-
-    "oshiSection": "おすすめセクション",    "oshiSection": "おすすめセクション",
-
-    "oshiSectionDesc": "おすすめを表示",    "oshiSectionDesc": "おすすめを表示",
-
-    "groupedTagSection": "グループ化されたタグ",    "groupedTagSection": "グループ化タグ",
-
-    "groupedTagSectionDesc": "カテゴリ別にグループ化されたタグ"    "groupedTagSectionDesc": "カテゴリ別にグループ化されたタグ"
-
-  },  },
-
-  "common": {  "common": {
-
-    "confirm": "確認",    "confirm": "確認",
-
-    "clickToChange": "クリックして変更"    "clickToChange": "クリックして変更"
-
-  },  },
-
-  "footer": {  "footer": {
-
-    "poweredBy": "Powered by"    "poweredBy": "Powered by"
-
-  }  }
-
-}}
+{
+  "toolbar": {
+    "openMenu": "メニューを開く",
+    "themeColor": "テーマカラー",
+    "selectThemeColor": "テーマカラーを選択",
+    "addCard": "カード追加",
+    "addNewCard": "新しいカードを追加",
+    "resetStyle": "スタイルリセット",
+    "restoreDefault": "デフォルトテンプレートに戻す",
+    "exportHtml": "HTMLエクスポート",
+    "exportImage": "画像エクスポート",
+    "themeStyle": "テーマスタイル",
+    "selectTheme": "テーマスタイルを選択",
+    "language": "言語",
+    "selectLanguage": "言語を選択",
+    "github": "Github",
+    "starOnGithub": "GitHubでスター"
+  },
+  "sidebar": {
+    "menu": "メニュー",
+    "close": "閉じる"
+  },
+  "card": {
+    "deleteCard": "このカードを削除",
+    "addNewBlock": "このカードに新しいブロックを追加"
+  },
+  "modal": {
+    "confirmReset": "リセット確認",
+    "confirmResetMessage": "すべてのコンテンツをデフォルトテンプレートにリセットしてもよろしいですか？この操作は元に戻せません。",
+    "confirmResetButton": "リセット確認",
+    "cancel": "キャンセル",
+    "confirmDeleteCard": "カード削除確認",
+    "confirmDeleteCardMessage": "カード「{title}」を削除してもよろしいですか？この操作は元に戻せません。",
+    "delete": "削除",
+    "confirmDeleteBlock": "ブロック削除確認",
+    "confirmDeleteBlockMessage": "このブロックを削除してもよろしいですか？この操作は元に戻せません。",
+    "addCard": "カード追加",
+    "selectCardType": "追加するカードのタイプを選択",
+    "addElement": "ブロック追加",
+    "selectElementType": "追加するブロックのタイプを選択"
+  },
+  "notification": {
+    "exportHtmlSuccess": "HTMLファイルのエクスポートに成功しました！",
+    "exportHtmlError": "HTMLのエクスポートに失敗しました。もう一度お試しください",
+    "exportImageSuccess": "画像のエクスポートに成功しました！",
+    "exportImageError": "画像のエクスポートに失敗しました。詳細はコンソールをご確認ください。",
+    "containerNotFound": "エクスポートするコンテンツコンテナが見つかりません"
+  },
+  "cardTypes": {
+    "profileCard": "プロフィールカード",
+    "profileCardDesc": "アバター、基本情報、QRコードを表示",
+    "aboutMeCard": "自己紹介",
+    "aboutMeCardDesc": "段落で自己紹介",
+    "oshiCard": "おすすめカード",
+    "oshiCardDesc": "おすすめを表示",
+    "fullWidthCard": "全幅カード",
+    "fullWidthCardDesc": "全幅に広がるカード"
+  },
+  "blockTypes": {
+    "profileInfo": "プロフィール情報",
+    "profileInfoDesc": "アバター、情報、QRコード",
+    "paragraph": "段落",
+    "paragraphDesc": "自由テキストコンテンツ",
+    "tagSection": "タグセクション",
+    "tagSectionDesc": "タグリストを表示",
+    "oshiSection": "おすすめセクション",
+    "oshiSectionDesc": "おすすめを表示",
+    "groupedTagSection": "グループ化タグ",
+    "groupedTagSectionDesc": "カテゴリ別にグループ化されたタグ"
+  },
+  "common": {
+    "confirm": "確認",
+    "clickToChange": "クリックして変更"
+  },
+  "footer": {
+    "poweredBy": "Powered by"
+  }
+}
 

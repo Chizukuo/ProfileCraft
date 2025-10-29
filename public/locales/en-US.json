@@ -1,156 +1,79 @@
-{{
-
-  "toolbar": {  "toolbar": {
-
-    "openMenu": "Open Menu",    "openMenu": "Open Menu",
-
-    "themeColor": "Theme Color",    "themeColor": "Theme Color",
-
-    "selectThemeColor": "Select Theme Color",    "selectThemeColor": "Select Theme Color",
-
-    "addCard": "Add Card",    "addCard": "Add Card",
-
-    "addNewCard": "Add New Card",    "addNewCard": "Add New Card",
-
-    "resetStyle": "Reset Style",    "resetStyle": "Reset Style",
-
-    "restoreDefault": "Restore Default Template",    "restoreDefault": "Restore Default Template",
-
-    "exportHtml": "Export HTML",    "exportHtml": "Export HTML",
-
-    "exportImage": "Export Image",    "exportImage": "Export Image",
-
-    "themeStyle": "Theme Style",    "themeStyle": "Theme Style",
-
-    "selectTheme": "Select Theme Style",    "selectTheme": "Select Theme Style",
-
-    "language": "Language",    "language": "Language",
-
-    "selectLanguage": "Select Language",    "selectLanguage": "Select Language",
-
-    "github": "Github",    "github": "Github",
-
-    "starOnGithub": "Star on GitHub"    "starOnGithub": "Star on GitHub"
-
-  },  },
-
-  "sidebar": {  "sidebar": {
-
-    "menu": "Menu",    "menu": "Menu",
-
-    "close": "Close"    "close": "Close"
-
-  },  },
-
-  "card": {  "card": {
-
-    "deleteCard": "Delete This Card",    "deleteCard": "Delete This Card",
-
-    "addNewBlock": "Add New Block to This Card"    "addNewBlock": "Add New Block to This Card"
-
-  },  },
-
-  "modal": {  "modal": {
-
-    "confirmReset": "Confirm Reset",    "confirmReset": "Confirm Reset",
-
-    "confirmResetMessage": "Are you sure you want to reset all content to the default template? This action cannot be undone.",    "confirmResetMessage": "Are you sure you want to reset all content to the default template? This action cannot be undone.",
-
-    "confirmResetButton": "Confirm Reset",    "confirmResetButton": "Confirm Reset",
-
-    "cancel": "Cancel",    "cancel": "Cancel",
-
-    "confirmDeleteCard": "Confirm Delete Card",    "confirmDeleteCard": "Confirm Delete Card",
-
-    "confirmDeleteCardMessage": "Are you sure you want to delete card \"{title}\"? This action cannot be undone.",    "confirmDeleteCardMessage": "Are you sure you want to delete the card \"{title}\"? This action cannot be undone.",
-
-    "delete": "Delete",    "delete": "Delete",
-
-    "confirmDeleteBlock": "Confirm Delete Block",    "confirmDeleteBlock": "Confirm Delete Block",
-
-    "confirmDeleteBlockMessage": "Are you sure you want to delete this block? This action cannot be undone.",    "confirmDeleteBlockMessage": "Are you sure you want to delete this block? This action cannot be undone.",
-
-    "addCard": "Add Card",    "addCard": "Add Card",
-
-    "selectCardType": "Select the type of card to add",    "selectCardType": "Select the type of card to add",
-
-    "addElement": "Add Block",    "addElement": "Add Block",
-
-    "selectElementType": "Select the type of block to add"    "selectElementType": "Select the type of block to add"
-
-  },  },
-
-  "notification": {  "notification": {
-
-    "exportHtmlSuccess": "HTML file exported successfully!",    "exportHtmlSuccess": "HTML file exported successfully!",
-
-    "exportHtmlError": "Failed to export HTML, please try again",    "exportHtmlError": "Failed to export HTML, please try again",
-
-    "exportImageSuccess": "Image exported successfully!",    "exportImageSuccess": "Image exported successfully!",
-
-    "exportImageError": "Failed to export image, please check console for more information.",    "exportImageError": "Failed to export image, please check the console for more information.",
-
-    "containerNotFound": "Export container not found"    "containerNotFound": "Content container to export not found"
-
-  },  },
-
-  "cardTypes": {  "cardTypes": {
-
-    "profileCard": "Profile Card",    "profileCard": "Profile Card",
-
-    "profileCardDesc": "Display avatar, basic info, and QR code",    "profileCardDesc": "Display avatar, basic info and QR code",
-
-    "aboutMeCard": "About Me",    "aboutMeCard": "About Me",
-
-    "aboutMeCardDesc": "Introduce yourself with paragraphs",    "aboutMeCardDesc": "Introduce yourself with paragraphs",
-
-    "oshiCard": "Recommendation Card",    "oshiCard": "Recommendation Card",
-
-    "oshiCardDesc": "Show your recommendations",    "oshiCardDesc": "Show your recommendations",
-
-    "fullWidthCard": "Full Width Card",    "fullWidthCard": "Full Width Card",
-
-    "fullWidthCardDesc": "Card that spans the full row"    "fullWidthCardDesc": "Card spanning the full width"
-
-  },  },
-
-  "blockTypes": {  "blockTypes": {
-
-    "profileInfo": "Profile Info",    "profileInfo": "Profile Info",
-
-    "profileInfoDesc": "Avatar, info, and QR code",    "profileInfoDesc": "Avatar, info and QR code",
-
-    "paragraph": "Paragraph",    "paragraph": "Paragraph",
-
-    "paragraphDesc": "Free text content",    "paragraphDesc": "Free-form text content",
-
-    "tagSection": "Tag Section",    "tagSection": "Tag Section",
-
-    "tagSectionDesc": "Display tag list",    "tagSectionDesc": "Display a list of tags",
-
-    "oshiSection": "Recommendation Section",    "oshiSection": "Recommendation Section",
-
-    "oshiSectionDesc": "Show recommendations",    "oshiSectionDesc": "Show recommendations",
-
-    "groupedTagSection": "Grouped Tags",    "groupedTagSection": "Grouped Tags",
-
-    "groupedTagSectionDesc": "Tags grouped by category"    "groupedTagSectionDesc": "Tags grouped by category"
-
-  },  },
-
-  "common": {  "common": {
-
-    "confirm": "Confirm",    "confirm": "Confirm",
-
-    "clickToChange": "Click to Change"    "clickToChange": "Click to change"
-
-  },  },
-
-  "footer": {  "footer": {
-
-    "poweredBy": "Powered by"    "poweredBy": "Powered by"
-
-  }  }
-
-}}
+{
+  "toolbar": {
+    "openMenu": "Open Menu",
+    "themeColor": "Theme Color",
+    "selectThemeColor": "Select Theme Color",
+    "addCard": "Add Card",
+    "addNewCard": "Add New Card",
+    "resetStyle": "Reset Style",
+    "restoreDefault": "Restore Default Template",
+    "exportHtml": "Export HTML",
+    "exportImage": "Export Image",
+    "themeStyle": "Theme Style",
+    "selectTheme": "Select Theme Style",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "github": "Github",
+    "starOnGithub": "Star on GitHub"
+  },
+  "sidebar": {
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "card": {
+    "deleteCard": "Delete This Card",
+    "addNewBlock": "Add New Block to This Card"
+  },
+  "modal": {
+    "confirmReset": "Confirm Reset",
+    "confirmResetMessage": "Are you sure you want to reset all content to the default template? This action cannot be undone.",
+    "confirmResetButton": "Confirm Reset",
+    "cancel": "Cancel",
+    "confirmDeleteCard": "Confirm Delete Card",
+    "confirmDeleteCardMessage": "Are you sure you want to delete the card \"{title}\"? This action cannot be undone.",
+    "delete": "Delete",
+    "confirmDeleteBlock": "Confirm Delete Block",
+    "confirmDeleteBlockMessage": "Are you sure you want to delete this block? This action cannot be undone.",
+    "addCard": "Add Card",
+    "selectCardType": "Select the type of card to add",
+    "addElement": "Add Block",
+    "selectElementType": "Select the type of block to add"
+  },
+  "notification": {
+    "exportHtmlSuccess": "HTML file exported successfully!",
+    "exportHtmlError": "Failed to export HTML, please try again",
+    "exportImageSuccess": "Image exported successfully!",
+    "exportImageError": "Failed to export image, please check the console for more information.",
+    "containerNotFound": "Content container to export not found"
+  },
+  "cardTypes": {
+    "profileCard": "Profile Card",
+    "profileCardDesc": "Display avatar, basic info and QR code",
+    "aboutMeCard": "About Me",
+    "aboutMeCardDesc": "Introduce yourself with paragraphs",
+    "oshiCard": "Recommendation Card",
+    "oshiCardDesc": "Show your recommendations",
+    "fullWidthCard": "Full Width Card",
+    "fullWidthCardDesc": "Card spanning the full width"
+  },
+  "blockTypes": {
+    "profileInfo": "Profile Info",
+    "profileInfoDesc": "Avatar, info and QR code",
+    "paragraph": "Paragraph",
+    "paragraphDesc": "Free-form text content",
+    "tagSection": "Tag Section",
+    "tagSectionDesc": "Display a list of tags",
+    "oshiSection": "Recommendation Section",
+    "oshiSectionDesc": "Show recommendations",
+    "groupedTagSection": "Grouped Tags",
+    "groupedTagSectionDesc": "Tags grouped by category"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "clickToChange": "Click to change"
+  },
+  "footer": {
+    "poweredBy": "Powered by"
+  }
+}
 

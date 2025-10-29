@@ -14,7 +14,9 @@ export const useTranslation = () => {
   useEffect(() => {
     const loadLanguage = async () => {
       setIsLoading(true);
+      console.log('[useTranslation] 正在加载语言:', locale);
       const data = await loadTranslations(locale);
+      console.log('[useTranslation] 加载的翻译数据:', data);
       setTranslations(data);
       setIsLoading(false);
     };

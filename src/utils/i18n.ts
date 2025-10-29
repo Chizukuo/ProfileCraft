@@ -14,20 +14,24 @@ const translationCache: Map<Locale, TranslationObject> = new Map();
  * @returns 翻译对象
  */
 export const loadTranslations = async (locale: Locale): Promise<TranslationObject> => {
-  // 如果已缓存，直接返回
+  // 如果已缓存,直接返回
   if (translationCache.has(locale)) {
+    console.log('[i18n] 从缓存加载翻译:', locale);
     return translationCache.get(locale)!;
   }
 
   try {
+    console.log('[i18n] 尝试加载翻译文件:', `/locales/${locale}.json`);
     // 动态导入翻译文件（从 public 目录）
     const translations = await import(`/locales/${locale}.json`);
+    console.log('[i18n] 成功加载翻译:', locale, translations.default);
     translationCache.set(locale, translations.default);
     return translations.default;
   } catch (error) {
-    console.error(`Failed to load translations for locale: ${locale}`, error);
+    console.error(`[i18n] 加载翻译失败: ${locale}`, error);
     // 如果加载失败，尝试加载默认语言（简体中文）
     if (locale !== 'zh-CN') {
+      console.log('[i18n] 回退到默认语言: zh-CN');
       return loadTranslations('zh-CN');
     }
     return {};
@@ -85,6 +89,12 @@ export const t = (
  * @returns 绑定后的 t 函数
  */
 export const createT = (translations: TranslationObject) => {
-  return (key: string, params?: Record<string, string | number>) => 
-    t(translations, key, params);
+  return (key: string, params?: Record<string, string | number>) => {
+    const result = t(translations, key, params);
+    // 只在翻译键没有找到时打印调试信息
+    if (result === key) {
+      console.warn('[i18n] 翻译键未找到:', key);
+    }
+    return result;
+  };
 };
