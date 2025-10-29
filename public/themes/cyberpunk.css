@@ -310,14 +310,96 @@ h2.section-title {
 
 /* ... 其余所有原始样式均已适配新的赛博朋克变量和风格 ... */
 /* responsive, rich-text-toolbar, delete-btn etc. styles are inherited or slightly adapted by the new variables */
-@media (max-width: 876px) { 
-  .toolbar-button-text, .desktop-toolbar-content { display: none !important; } 
-  .hamburger-menu { display: block !important; } 
-  .editor-toolbar.top-toolbar { justify-content: flex-end !important; } 
+
+/* 响应式工具栏优化 - 防止换行 */
+.desktop-toolbar-content {
+    display: flex !important;
+    gap: var(--space-l) !important;
+    align-items: center !important;
+    width: 100% !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE and Edge */
 }
-@media (min-width: 877px) { 
-  .hamburger-menu { display: none !important; } 
-  .desktop-toolbar-content { display: flex !important; } 
+
+.desktop-toolbar-content::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari, Opera */
+}
+
+.toolbar-group {
+    display: flex !important;
+    gap: var(--space-s) !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
+
+.editor-toolbar button, .editor-toolbar .toolbar-button-link {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.editor-toolbar label {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.editor-toolbar select {
+    max-width: 150px !important;
+    flex-shrink: 0 !important;
+}
+
+/* 小屏幕：只显示汉堡菜单 */
+@media (max-width: 1200px) {
+    .desktop-toolbar-content { display: none !important; }
+    .hamburger-menu { display: block !important; }
+    
+    .hamburger-menu button {
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer !important;
+        padding: var(--space-s) !important;
+        border-radius: var(--radius-slight) !important;
+        color: var(--text-secondary) !important;
+        transition: all 0.2s !important;
+        clip-path: var(--clip-path-button) !important;
+    }
+    
+    .hamburger-menu button:hover {
+        background-color: rgba(252, 238, 10, 0.15) !important;
+        color: var(--cp77-yellow) !important;
+        text-shadow: var(--text-shadow-yellow) !important;
+    }
+    
+    .editor-toolbar.top-toolbar { justify-content: flex-end !important; padding: 8px 16px !important; }
+}
+
+/* 中等屏幕：隐藏按钮文字，只显示图标 */
+@media (min-width: 1201px) and (max-width: 1400px) {
+    .toolbar-button-text { display: none !important; }
+    .desktop-toolbar-content { gap: var(--space-m) !important; }
+    .toolbar-group { gap: 6px !important; }
+    .toolbar-group label { display: none !important; }
+    .editor-toolbar select {
+        margin-left: 0 !important;
+        min-width: 90px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 28px 6px 8px !important;
+    }
+}
+
+/* 较大屏幕：隐藏部分 label */
+@media (min-width: 1401px) and (max-width: 1600px) {
+    .desktop-toolbar-content { gap: var(--space-m) !important; }
+    .toolbar-group { gap: 6px !important; }
+}
+
+/* 大屏幕：显示完整内容 */
+@media (min-width: 1201px) {
+    .hamburger-menu { display: none !important; }
+    .desktop-toolbar-content { display: flex !important; }
 }
 @media (max-width: 480px) { .profile-section-layout { grid-template-columns: 1fr; grid-template-areas: "avatar" "info" "qrcode"; justify-items: center; text-align: center; } }
 .profile-section-layout { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto auto; grid-template-areas: "avatar" "info" "qrcode"; gap: var(--space-m); justify-items: center; }
