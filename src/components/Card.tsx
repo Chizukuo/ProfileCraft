@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useProfile } from '../context/ProfileContext';
 import { CardData, CardElement } from '../types/data';
+import { useTranslation } from '../hooks/useTranslation';
 import EditableText from './ui/EditableText';
 import ActionButton from './ui/ActionButton';
 import ConfirmDialog from './ui/ConfirmDialog';
@@ -19,6 +20,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
   const { updateProfileData } = useProfile();
+  const { t } = useTranslation();
   const [isAddElementModalOpen, setAddElementModalOpen] = useState(false);
   const [isHoveringDelete, setIsHoveringDelete] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -84,7 +86,7 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
       >
         <ActionButton 
           icon={<X size={14} />} 
-          title="删除此卡片" 
+          title={t('card.deleteCard')}
           onClick={() => setDeleteCardConfirm(true)}
           variant="delete"
           className={isCardHovered ? 'is-visible' : ''}
@@ -104,8 +106,8 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
         <div className="card-content-wrapper">
           {cardData.elements.map(renderElement)}
         </div>
-        <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon">
-              <PlusCircle size={18} /> 添加新区块到此卡片
+        <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon" title={t('card.addNewBlock')}>
+              <PlusCircle size={18} /> {t('card.addNewBlock')}
         </button>
       </div>
       
@@ -119,9 +121,9 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
         isOpen={deleteCardConfirm}
         onClose={() => setDeleteCardConfirm(false)}
         onConfirm={deleteCard}
-        title="确认删除卡片"
-        message={`确定要删除卡片 "${cardData.title.replace(/<[^>]*>/g, '')}" 吗？此操作无法撤销。`}
-        confirmText="删除"
+        title={t('modal.confirmDeleteCard')}
+        message={t('modal.confirmDeleteCardMessage', { title: cardData.title.replace(/<[^>]*>/g, '') })}
+        confirmText={t('modal.delete')}
         isDangerous={true}
       />
       
@@ -129,9 +131,9 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
         isOpen={deleteElementIndex !== null}
         onClose={() => setDeleteElementIndex(null)}
         onConfirm={confirmDeleteElement}
-        title="确认删除区块"
-        message="确定要删除此区块吗？此操作无法撤销。"
-        confirmText="删除"
+        title={t('modal.confirmDeleteBlock')}
+        message={t('modal.confirmDeleteBlockMessage')}
+        confirmText={t('modal.delete')}
         isDangerous={true}
       />
     </>

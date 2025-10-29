@@ -1,6 +1,26 @@
 import html2canvas from 'html2canvas';
 import { ProfileData } from '../types/data';
 import themesManifest from '../config/themes.json'; // Import themes manifest
+import { loadTranslations, createT } from './i18n.ts';
+import { Locale } from '../context/LocaleContext';
+
+// 缓存翻译函数
+let cachedT: ((key: string, params?: Record<string, string | number>) => string) | null = null;
+let currentLocale: string | null = null;
+
+/**
+ * 获取翻译函数
+ */
+async function getTranslationFunction(locale: Locale) {
+  if (cachedT && currentLocale === locale) {
+    return cachedT;
+  }
+  
+  currentLocale = locale;
+  const translations = await loadTranslations(locale);
+  cachedT = createT(translations);
+  return cachedT;
+}
 
 // Define Theme type if needed (adjust according to your JSON structure)
 export type Theme = keyof typeof themesManifest; // Export Theme type
@@ -47,11 +67,13 @@ function applyThemeColorsToElement(element: HTMLElement, accent: string) {
  * 此函数将当前主题的 CSS 和 App.css 内容直接嵌入到 HTML 中，并移除编辑器控件
  * @param profileData 用户的个人资料数据
  * @param currentThemeName 当前选择的主题名称
+ * @param locale 当前语言
  */
-export const exportToHtml = async (profileData: ProfileData, currentThemeName: Theme) => {
+export const exportToHtml = async (profileData: ProfileData, currentThemeName: Theme, locale: Locale) => {
+    const t = await getTranslationFunction(locale);
     const container = document.getElementById('profileCardContainer');
     if (!container) {
-        showNotification('未找到要导出的内容容器', 'error');
+        showNotification(t('notification.exportContainerNotFound') || 'Container not found', 'error');
         return;
     }
 
@@ -208,10 +230,11 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         link.click();
         URL.revokeObjectURL(link.href);
         
-        showNotification('HTML 文件导出成功！', 'success');
+        showNotification(t('notification.exportHtmlSuccess') || 'Export successful', 'success');
     } catch (error) {
         console.error('导出 HTML 失败:', error);
-        showNotification('导出 HTML 失败，请重试', 'error');
+        const t = await getTranslationFunction(locale);
+        showNotification(t('notification.exportHtmlError') || 'Export failed', 'error');
     }
 };
 
@@ -220,8 +243,10 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
  * 导出为图片文件
  * @param element 要导出的 HTML 元素
  * @param profileData 用户的个人资料数据
+ * @param locale 当前语言
  */
-export const exportToImage = (element: HTMLElement, profileData: ProfileData | null) => {
+export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale) => {
+    const t = await getTranslationFunction(locale);
     if (!element || !profileData) return;
 
     // 隐藏编辑器 UI 元素
@@ -278,10 +303,11 @@ export const exportToImage = (element: HTMLElement, profileData: ProfileData | n
         link.click();
         
         // 显示成功提示
-        showNotification('图片导出成功！', 'success');
-    }).catch((err: Error) => {
+        showNotification(t('notification.exportImageSuccess') || 'Export successful', 'success');
+    }).catch(async (err: Error) => {
         console.error("导出图片失败:", err);
-        showNotification('导出图片失败，请查看控制台获取更多信息。', 'error');
+        const t = await getTranslationFunction(locale);
+        showNotification(t('notification.exportImageError') || 'Export failed', 'error');
     }).finally(() => {
         // 恢复隐藏的编辑器 UI
         elementsToHide.forEach(el => (el as HTMLElement).style.display = '');

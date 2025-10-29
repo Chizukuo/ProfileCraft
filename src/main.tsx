@@ -4,13 +4,16 @@ import App from './components/App';
 import './styles/App.css';
 import { ProfileProvider } from './context/ProfileContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LocaleProvider } from './context/LocaleContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <ProfileProvider>
-        <App />
-      </ProfileProvider>
-    </ThemeProvider>
+    <LocaleProvider>
+      <ThemeProvider>
+        <ProfileProvider>
+          <App />
+        </ProfileProvider>
+      </ThemeProvider>
+    </LocaleProvider>
   </React.StrictMode>
 );
