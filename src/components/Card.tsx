@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useProfile } from '../context/ProfileContext';
 import { CardData, CardElement } from '../types/data';
 import EditableText from './ui/EditableText';
 import ActionButton from './ui/ActionButton';
+import ConfirmDialog from './ui/ConfirmDialog';
 import { X, PlusCircle } from 'lucide-react';
 import ProfileInfoBlock from './blocks/ProfileInfoBlock';
 import ParagraphBlock from './blocks/ParagraphBlock';
@@ -21,50 +22,42 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
   const [isAddElementModalOpen, setAddElementModalOpen] = useState(false);
   const [isHoveringDelete, setIsHoveringDelete] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
+  const [deleteCardConfirm, setDeleteCardConfirm] = useState(false);
+  const [deleteElementIndex, setDeleteElementIndex] = useState<number | null>(null);
 
-  const handleUpdateCard = (field: keyof CardData, value: any) => {
+  const handleUpdateCard = useCallback((field: keyof CardData, value: any) => {
     updateProfileData(prev => ({
         ...prev!,
         cards: prev!.cards.map((card, i) => i === cardIndex ? { ...card, [field]: value } : card)
     }));
-  };
+  }, [cardIndex, updateProfileData]);
   
-  const deleteCard = () => {
-    // TODO: Replace with a custom modal confirmation
-    if (window.confirm(`确定要删除卡片 "${cardData.title}" 吗？`)) {
-      updateProfileData(prev => ({
-        ...prev!,
-        cards: prev!.cards.filter((_, i) => i !== cardIndex)
-      }));
-    }
-  };
+  const deleteCard = useCallback(() => {
+    updateProfileData(prev => ({
+      ...prev!,
+      cards: prev!.cards.filter((_, i) => i !== cardIndex)
+    }));
+  }, [cardIndex, updateProfileData]);
 
-  const addElement = (element: CardElement) => {
+  const addElement = useCallback((element: CardElement) => {
     handleUpdateCard('elements', [...cardData.elements, element]);
-  };
+  }, [cardData.elements, handleUpdateCard]);
   
-  const deleteElement = (elementIndex: number) => {
-    // TODO: Replace with a custom modal confirmation
-     if (window.confirm(`确定要删除此区块吗？`)) {
-        handleUpdateCard('elements', cardData.elements.filter((_, i) => i !== elementIndex));
+  const confirmDeleteElement = useCallback(() => {
+    if (deleteElementIndex !== null) {
+      handleUpdateCard('elements', cardData.elements.filter((_, i) => i !== deleteElementIndex));
+      setDeleteElementIndex(null);
     }
-  };
+  }, [deleteElementIndex, cardData.elements, handleUpdateCard]);
 
-  // --- FIX START: 修改 renderElement 函数 ---
-  // 这里是修复 `key` 属性警告的关键部分。
-  // 我们将 `key` 属性从 `commonProps` 中分离出来，并直接传递给组件。
-  const renderElement = (element: CardElement, elementIndex: number) => {
-    // 1. 为每个列表项创建一个唯一的 key。
+  const renderElement = useCallback((element: CardElement, elementIndex: number) => {
     const key = `${cardData.id}-el-${elementIndex}`;
-
-    // 2. 创建一个不包含 `key` 的 props 对象。
     const commonProps = {
         cardIndex,
         elementIndex,
-        onDelete: () => deleteElement(elementIndex)
+        onDelete: () => setDeleteElementIndex(elementIndex)
     };
     
-    // 3. 在渲染组件时，直接传递 `key` 属性，然后传递 `element` 数据，最后展开 `commonProps`。
     switch (element.type) {
       case 'profileInfo':
         return <ProfileInfoBlock key={key} element={element} {...commonProps} />;
@@ -79,8 +72,7 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
       default:
         return null;
     }
-  };
-  // --- FIX END ---
+  }, [cardData.id, cardIndex]);
 
   return (
     <>
@@ -93,7 +85,7 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
         <ActionButton 
           icon={<X size={14} />} 
           title="删除此卡片" 
-          onClick={deleteCard} 
+          onClick={() => setDeleteCardConfirm(true)}
           variant="delete"
           className={isCardHovered ? 'is-visible' : ''}
           onMouseEnter={() => setIsHoveringDelete(true)}
@@ -116,13 +108,34 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
               <PlusCircle size={18} /> 添加新区块到此卡片
         </button>
       </div>
+      
       <AddElementModal 
         isOpen={isAddElementModalOpen}
         onClose={() => setAddElementModalOpen(false)}
         onAddElement={addElement}
       />
+      
+      <ConfirmDialog
+        isOpen={deleteCardConfirm}
+        onClose={() => setDeleteCardConfirm(false)}
+        onConfirm={deleteCard}
+        title="确认删除卡片"
+        message={`确定要删除卡片 "${cardData.title.replace(/<[^>]*>/g, '')}" 吗？此操作无法撤销。`}
+        confirmText="删除"
+        isDangerous={true}
+      />
+      
+      <ConfirmDialog
+        isOpen={deleteElementIndex !== null}
+        onClose={() => setDeleteElementIndex(null)}
+        onConfirm={confirmDeleteElement}
+        title="确认删除区块"
+        message="确定要删除此区块吗？此操作无法撤销。"
+        confirmText="删除"
+        isDangerous={true}
+      />
     </>
   );
 };
 
-export default Card;
+export default React.memo(Card);

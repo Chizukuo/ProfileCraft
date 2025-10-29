@@ -43,35 +43,37 @@ function applyThemeColorsToElement(element: HTMLElement, accent: string) {
 
 
 /**
- * 导出为 HTML 文件。
- * 此函数现在将当前主题的CSS和App.css内容直接嵌入到HTML中，并移除编辑器控件。
- * @param profileData 用户的个人资料数据。
- * @param currentThemeName 当前选择的主题名称。
+ * 导出为 HTML 文件
+ * 此函数将当前主题的 CSS 和 App.css 内容直接嵌入到 HTML 中，并移除编辑器控件
+ * @param profileData 用户的个人资料数据
+ * @param currentThemeName 当前选择的主题名称
  */
 export const exportToHtml = async (profileData: ProfileData, currentThemeName: Theme) => {
     const container = document.getElementById('profileCardContainer');
-    if (!container) return;
+    if (!container) {
+        showNotification('未找到要导出的内容容器', 'error');
+        return;
+    }
 
-    // 获取当前主题的CSS文件路径
+    // 获取当前主题的 CSS 文件路径
     const themeInfo = themesManifest[currentThemeName];
-    const themeCssPath = themeInfo ? themeInfo.path : ''; // e.g., '/themes/cyberpunk.css'
+    const themeCssPath = themeInfo ? themeInfo.path : '';
 
     let themeCssContent = '';
     if (themeCssPath) {
         try {
-            // 从公共文件夹获取主题CSS内容
             const response = await fetch(themeCssPath);
             if (response.ok) {
                 themeCssContent = await response.text();
             } else {
-                console.error(`Failed to fetch theme CSS: ${response.statusText}`);
+                console.warn(`无法获取主题 CSS: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('Error fetching theme CSS:', error);
+            console.error('获取主题 CSS 时出错:', error);
         }
     }
 
-    // 动态生成主题颜色相关的CSS变量 (从当前计算样式获取)
+    // 动态生成主题颜色相关的 CSS 变量
     const accent = profileData.userSettings.accentColor;
     const computedStyle = getComputedStyle(document.documentElement);
     const getCssVar = (name: string) => computedStyle.getPropertyValue(name).trim();
@@ -86,92 +88,108 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         --theme-text-strong: ${getCssVar('--theme-text-strong')};
         --theme-divider: ${getCssVar('--theme-divider')};
         --button-text-on-accent: ${getCssVar('--button-text-on-accent')};
+        --qr-code-fg-color: ${getCssVar('--qr-code-fg-color')};
     }
     `;
 
-    // 克隆并清理HTML内容
+    // 克隆并清理 HTML 内容
     const exportContainer = container.cloneNode(true) as HTMLElement;
 
     // 移除所有编辑器相关的控件和交互元素
     const elementsToRemoveSelectors = [
         '.action-button',
+        '.delete-action-btn',
         '.add-tag-button-container',
         '.tag-actions-container',
         '.delete-element-btn',
-        '.action-button-text-with-icon', // 移除此行，因为它不应该被移除
         '.card-actions-container',
         '.edit-popup',
         '.qr-code-link-input',
         '.rich-text-toolbar',
-        '.profile-info-text [contenteditable]:hover::after', // 移除编辑提示
-        '.avatar-container:hover::after' // 移除头像更换提示
+        '.qr-code-wrapper p.text-sm',
+        '.hamburger-menu'
     ];
+    
     elementsToRemoveSelectors.forEach(selector => {
-        exportContainer.querySelectorAll(selector).forEach(el => el.remove());
+        exportContainer.querySelectorAll(selector).forEach((el: Element) => el.remove());
     });
 
     // 移除 contenteditable 属性，并清理编辑时的视觉样式
-    exportContainer.querySelectorAll('[contenteditable]').forEach(el => {
+    exportContainer.querySelectorAll('[contenteditable]').forEach((el: Element) => {
         el.removeAttribute('contenteditable');
-        (el as HTMLElement).style.backgroundColor = 'transparent'; // 移除编辑时的背景色
-        (el as HTMLElement).style.border = 'none'; // 移除编辑时的边框
-        // 移除之前强制设为0的padding和margin，让其回归原有布局
-        (el as HTMLElement).style.padding = ''; 
-        (el as HTMLElement).style.margin = ''; 
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.backgroundColor = 'transparent';
+        htmlEl.style.border = 'none';
+        htmlEl.style.cursor = 'default';
+        htmlEl.style.padding = '';
+        htmlEl.style.margin = '';
     });
     
-    // 确保 QR 码下方的提示文本在导出时显示为静态文本（如果存在）
-    const qrCodeWrapper = exportContainer.querySelector('.qr-code-wrapper');
-    if (qrCodeWrapper) {
-        qrCodeWrapper.querySelectorAll('p').forEach(p => {
-            if (p.classList.contains('text-sm')) {
-                p.remove();
-            }
-        });
-    }
+    // 移除头像的 hover 提示
+    exportContainer.querySelectorAll('.avatar-container').forEach((el: Element) => {
+        (el as HTMLElement).style.cursor = 'default';
+    });
 
-    // 更新页脚信息 - 保持为英文 "Powered by ProfileCraft"
+    // 更新页脚信息
     const footerP = exportContainer.querySelector('.page-footer p');
     if (footerP) {
         const poweredByLink = " | Powered by <a href='https://chizukuo.github.io/ProfileCraft/' target='_blank' rel='noopener noreferrer' style='color: var(--theme-accent); text-decoration: none;'>ProfileCraft</a>";
         footerP.innerHTML += poweredByLink;
     }
 
-    // 构建最终的HTML文件
+    // 构建最终的 HTML 文件
     const fullHtml = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>导出的扩列条</title>
+    <meta name="description" content="使用 ProfileCraft 创建的个人扩列条">
+    <title>${profileData.userSettings.mainTitle.replace(/<[^>]*>/g, '')} - 扩列条</title>
     <link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* App.css content */
+        /* App.css 内容 */
         ${appCssContent}
-        /* Current theme CSS content */
+        
+        /* 当前主题 CSS 内容 */
         ${themeCssContent}
-        /* Dynamic theme variables (override if needed) */
+        
+        /* 动态主题变量 */
         ${dynamicThemeStyleBlock}
 
-        /* 导出时隐藏特定的UI元素 */
-        .editor-toolbar, .edit-popup, .rich-text-toolbar,
-        .action-button, .add-tag-button-container, .tag-actions-container,
-        .delete-element-btn, .card-actions-container,
-        .qr-code-link-input, .avatar-container:hover::after,
-        /* 移除 contenteditable 的 hover 效果 */
+        /* 导出时隐藏的元素 */
+        .editor-toolbar,
+        .edit-popup,
+        .rich-text-toolbar,
+        .action-button,
+        .delete-action-btn,
+        .add-tag-button-container,
+        .tag-actions-container,
+        .delete-element-btn,
+        .card-actions-container,
+        .qr-code-link-input,
+        .hamburger-menu,
+        .avatar-container:hover::after,
         [contenteditable]:hover { 
             display: none !important;
         }
-        /* 强制 contenteditable 元素变为静态，仅移除交互样式 */
+        
+        /* 静态元素样式 */
         [contenteditable] {
             cursor: default !important;
             border: none !important;
             background-color: transparent !important;
             outline: none !important;
-            /* 允许其原有的 padding/margin 生效，不再强制设为0 */
         }
-        /* 确保页面主体没有多余的上边距，因为它在原应用中是为固定工具栏预留的 */
-        body { padding-top: 0 !important; }
+        
+        /* 移除工具栏预留空间 */
+        body { 
+            padding-top: 0 !important; 
+        }
+        
+        /* 确保头像不可点击 */
+        .avatar-container {
+            cursor: default !important;
+        }
     </style>
 </head>
 <body>
@@ -182,20 +200,31 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
 </html>`;
 
     // 创建并触发下载
-    const blob = new Blob([fullHtml], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = '扩列条.html';
-    link.click();
-    URL.revokeObjectURL(link.href);
+    try {
+        const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = '扩列条.html';
+        link.click();
+        URL.revokeObjectURL(link.href);
+        
+        showNotification('HTML 文件导出成功！', 'success');
+    } catch (error) {
+        console.error('导出 HTML 失败:', error);
+        showNotification('导出 HTML 失败，请重试', 'error');
+    }
 };
 
 
-// 导出为图片文件 (保持不变，但修改了 alert 消息)
+/**
+ * 导出为图片文件
+ * @param element 要导出的 HTML 元素
+ * @param profileData 用户的个人资料数据
+ */
 export const exportToImage = (element: HTMLElement, profileData: ProfileData | null) => {
     if (!element || !profileData) return;
 
-    // 隐藏编辑器UI
+    // 隐藏编辑器 UI 元素
     const elementsToHide = document.querySelectorAll('.editor-toolbar, .edit-popup, .rich-text-toolbar');
     elementsToHide.forEach(el => (el as HTMLElement).style.display = 'none');
     
@@ -205,37 +234,117 @@ export const exportToImage = (element: HTMLElement, profileData: ProfileData | n
         backgroundColor: pageBgColor,
         scale: 3,
         useCORS: true,
-        logging: true,
-        onclone: (clonedDoc) => {
-            // 在克隆的文档中应用主题并移除不必要的元素
+        logging: false,
+        onclone: (clonedDoc: Document) => {
+            // 在克隆的文档中应用主题颜色
             const clonedRoot = clonedDoc.documentElement;
             applyThemeColorsToElement(clonedRoot, profileData.userSettings.accentColor);
-            // 修正：不再移除 .action-button-text-with-icon，因为它包含应导出的边框样式
-            clonedDoc.querySelectorAll('.action-button, .add-tag-button-container, .tag-actions-container, .delete-element-btn, .card-actions-container, .qr-code-wrapper p, .avatar-container:hover::after, .edit-popup, .qr-code-link-input, .rich-text-toolbar').forEach(el => el.remove());
+            
+            // 移除编辑器控件和交互元素，但保留内容样式
+            const selectorsToRemove = [
+                '.action-button',           // 删除按钮
+                '.delete-action-btn',       // 删除按钮
+                '.add-tag-button-container',// 添加标签按钮
+                '.tag-actions-container',   // 标签操作容器
+                '.delete-element-btn',      // 删除元素按钮
+                '.card-actions-container',  // 卡片操作容器
+                '.qr-code-link-input',      // 二维码链接输入框
+                '.edit-popup',              // 编辑弹窗
+                '.rich-text-toolbar',       // 富文本工具栏
+                '.qr-code-wrapper .text-sm', // 二维码下方的提示文本
+                '.action-button-text-with-icon' 
+            ];
+            
+            selectorsToRemove.forEach(selector => {
+                clonedDoc.querySelectorAll(selector).forEach((el: Element) => el.remove());
+            });
+            
+            // 移除头像容器的 hover 提示
+            clonedDoc.querySelectorAll('.avatar-container').forEach((el: Element) => {
+                (el as HTMLElement).style.setProperty('cursor', 'default');
+            });
+            
+            // 移除所有 contenteditable 属性
+            clonedDoc.querySelectorAll('[contenteditable]').forEach((el: Element) => {
+                el.removeAttribute('contenteditable');
+            });
         }
-    }).then(canvas => {
+    }).then((canvas: HTMLCanvasElement) => {
         // 创建并触发下载
         const image = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = image;
         link.download = '扩列条.png';
         link.click();
-    }).catch(err => {
+        
+        // 显示成功提示
+        showNotification('图片导出成功！', 'success');
+    }).catch((err: Error) => {
         console.error("导出图片失败:", err);
-        // 使用自定义消息框替代 alert()
-        const messageBox = document.createElement('div');
-        messageBox.style.cssText = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999; text-align: center;
-        `;
-        messageBox.innerHTML = `
-            <p>导出图片失败，请查看控制台获取更多信息。</p>
-            <button onclick="this.parentNode.remove()" style="margin-top: 10px; padding: 8px 16px; border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer;">确定</button>
-        `;
-        document.body.appendChild(messageBox);
+        showNotification('导出图片失败，请查看控制台获取更多信息。', 'error');
     }).finally(() => {
-        // 恢复隐藏的编辑器UI
+        // 恢复隐藏的编辑器 UI
         elementsToHide.forEach(el => (el as HTMLElement).style.display = '');
     });
+};
+
+/**
+ * 显示通知消息
+ * @param message 通知消息内容
+ * @param type 通知类型：success 或 error
+ */
+const showNotification = (message: string, type: 'success' | 'error') => {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = message;
+    
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    
+    // 3 秒后自动移除
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+            notification.remove();
+            style.remove();
+        }, 300);
+    }, 3000);
 };
