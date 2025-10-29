@@ -21,12 +21,20 @@ export const loadTranslations = async (locale: Locale): Promise<TranslationObjec
   }
 
   try {
-    console.log('[i18n] 尝试加载翻译文件:', `/locales/${locale}.json`);
-    // 动态导入翻译文件（从 public 目录）
-    const translations = await import(`/locales/${locale}.json`);
-    console.log('[i18n] 成功加载翻译:', locale, translations.default);
-    translationCache.set(locale, translations.default);
-    return translations.default;
+    console.log('[i18n] 尝试加载翻译文件:', locale);
+    // 使用 import.meta.env.BASE_URL 获取正确的 base 路径
+    const basePath = import.meta.env.BASE_URL || '/';
+    const url = `${basePath}locales/${locale}.json`;
+    console.log('[i18n] 请求 URL:', url);
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const translations = await response.json();
+    console.log('[i18n] 成功加载翻译:', locale, translations);
+    translationCache.set(locale, translations);
+    return translations;
   } catch (error) {
     console.error(`[i18n] 加载翻译失败: ${locale}`, error);
     // 如果加载失败，尝试加载默认语言（简体中文）
