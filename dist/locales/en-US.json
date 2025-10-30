@@ -22,7 +22,8 @@
   },
   "card": {
     "deleteCard": "Delete This Card",
-    "addNewBlock": "Add New Block to This Card"
+    "addNewBlock": "Add New Block to This Card",
+    "dragHandle": "Drag Card"
   },
   "modal": {
     "confirmReset": "Confirm Reset",

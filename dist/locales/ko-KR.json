@@ -22,7 +22,8 @@
   },
   "card": {
     "deleteCard": "이 카드 삭제",
-    "addNewBlock": "이 카드에 새 블록 추가"
+    "addNewBlock": "이 카드에 새 블록 추가",
+    "dragHandle": "카드 드래그"
   },
   "modal": {
     "confirmReset": "재설정 확인",

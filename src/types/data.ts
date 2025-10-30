@@ -86,6 +86,12 @@ export interface CardData {
   titleStyles: Styles;
   layoutSpan: string;
   elements: CardElement[];
+  layout?: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
 }
 
 export interface ProfileData {

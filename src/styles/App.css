@@ -96,6 +96,128 @@ main#profileCardContainer {
     }
 }
 
+/* React Grid Layout 样式 */
+.grid-layout {
+    position: relative;
+    width: 100%;
+    max-width: 1024px;
+}
+
+.react-grid-item {
+    transition: all 200ms ease;
+    transition-property: left, top, width, height;
+}
+
+.react-grid-item.cssTransforms {
+    transition-property: transform, width, height;
+}
+
+.react-grid-item.resizing {
+    transition: none;
+    z-index: 100;
+}
+
+.react-grid-item.react-draggable-dragging {
+    transition: none;
+    z-index: 100;
+}
+
+.react-grid-item.dropping {
+    visibility: hidden;
+}
+
+.react-grid-item.react-grid-placeholder {
+    background: var(--theme-accent);
+    opacity: 0.2;
+    transition-duration: 100ms;
+    z-index: 2;
+    border-radius: var(--radius-l);
+}
+
+.react-grid-item > .react-resizable-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+}
+
+.react-grid-item > .react-resizable-handle::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--ui-text-tertiary);
+    border-bottom: 2px solid var(--ui-text-tertiary);
+    opacity: 0.5;
+    transition: opacity var(--transition-base);
+}
+
+.react-grid-item:hover > .react-resizable-handle::after {
+    opacity: 1;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-sw {
+    bottom: 0;
+    left: 0;
+    cursor: sw-resize;
+    transform: rotate(90deg);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-nw {
+    top: 0;
+    left: 0;
+    cursor: nw-resize;
+    transform: rotate(180deg);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-ne {
+    top: 0;
+    right: 0;
+    cursor: ne-resize;
+    transform: rotate(-90deg);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-w,
+.react-grid-item > .react-resizable-handle.react-resizable-handle-e {
+    top: 50%;
+    margin-top: -10px;
+    cursor: ew-resize;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-w {
+    left: 0;
+    transform: rotate(135deg);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-e {
+    right: 0;
+    transform: rotate(-45deg);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-n,
+.react-grid-item > .react-resizable-handle.react-resizable-handle-s {
+    left: 50%;
+    margin-left: -10px;
+    cursor: ns-resize;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-n {
+    top: 0;
+    transform: rotate(-135deg);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-s {
+    bottom: 0;
+    transform: rotate(45deg);
+}
+
 /* 卡片跨度样式 */
 .profile-card-span,
 .about-me-card-span,
@@ -621,6 +743,45 @@ h2.section-title {
     background-color: var(--delete-red-hover);
     box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.5);
     transform: scale(1.1);
+}
+
+/* 拖动手柄 */
+.drag-handle {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: move;
+    cursor: grab;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity var(--transition-base) ease-in-out,
+                transform var(--transition-base) ease-in-out,
+                background-color var(--transition-base) ease-in-out;
+    color: var(--ui-text-secondary);
+}
+
+.drag-handle.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.drag-handle:hover {
+    background-color: var(--hover-bg-color);
+    transform: scale(1.1);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
 }
 
 /* 删除状态 */

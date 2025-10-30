@@ -22,7 +22,8 @@
   },
   "card": {
     "deleteCard": "删除此卡片",
-    "addNewBlock": "添加新区块到此卡片"
+    "addNewBlock": "添加新区块到此卡片",
+    "dragHandle": "拖动卡片"
   },
   "modal": {
     "confirmReset": "确认重置",

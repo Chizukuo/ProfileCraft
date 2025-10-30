@@ -22,7 +22,8 @@
   },
   "card": {
     "deleteCard": "このカードを削除",
-    "addNewBlock": "このカードに新しいブロックを追加"
+    "addNewBlock": "このカードに新しいブロックを追加",
+    "dragHandle": "カードをドラッグ"
   },
   "modal": {
     "confirmReset": "リセット確認",

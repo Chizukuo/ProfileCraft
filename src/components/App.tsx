@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useProfile } from '../context/ProfileContext';
 import { useTheme } from '../context/ThemeContext';
+import { Layout } from 'react-grid-layout';
 import Toolbar from './Toolbar';
 import ProfileHeader from './ProfileHeader';
-import Card from './Card';
+import DraggableGrid from './DraggableGrid';
 import AddCardModal from './AddCardModal';
 import { applyThemeColors } from '../utils/colorUtils';
 import EditableText from './ui/EditableText';
@@ -74,6 +75,29 @@ function App() {
     }
   }, [profileData?.userSettings.accentColor]);
 
+  const handleLayoutChange = useCallback((layouts: Layout[]) => {
+    if (profileData) {
+      updateProfileData(prev => ({
+        ...prev!,
+        cards: prev!.cards.map(card => {
+          const layoutItem = layouts.find(l => l.i === card.id);
+          if (layoutItem) {
+            return {
+              ...card,
+              layout: {
+                x: layoutItem.x,
+                y: layoutItem.y,
+                w: layoutItem.w,
+                h: layoutItem.h,
+              }
+            };
+          }
+          return card;
+        })
+      }));
+    }
+  }, [profileData, updateProfileData]);
+
   const handleFooterUpdate = (html: string) => {
     if (profileData) {
         updateProfileData(prev => ({
@@ -93,11 +117,10 @@ function App() {
       <Toolbar onAddCardClick={() => setAddCardModalOpen(true)} />
       <main id="profileCardContainer" className="py-10 px-4 md:px-6 lg:px-8 min-h-screen flex flex-col items-center">
         <ProfileHeader />
-        <div className="grid-container">
-          {profileData.cards.map((card, index) => (
-            <Card key={card.id} cardData={card} cardIndex={index} />
-          ))}
-        </div>
+        <DraggableGrid 
+          cards={profileData.cards}
+          onLayoutChange={handleLayoutChange}
+        />
         <footer className="page-footer">
             <EditableText 
               as="p"

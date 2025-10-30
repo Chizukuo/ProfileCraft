@@ -5,7 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import EditableText from './ui/EditableText';
 import ActionButton from './ui/ActionButton';
 import ConfirmDialog from './ui/ConfirmDialog';
-import { X, PlusCircle } from 'lucide-react';
+import { X, PlusCircle, GripVertical } from 'lucide-react';
 import ProfileInfoBlock from './blocks/ProfileInfoBlock';
 import ParagraphBlock from './blocks/ParagraphBlock';
 import TagSectionBlock from './blocks/TagSectionBlock';
@@ -84,6 +84,12 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
         onMouseEnter={() => setIsCardHovered(true)}
         onMouseLeave={() => setIsCardHovered(false)}
       >
+        <div 
+          className={`drag-handle ${isCardHovered ? 'is-visible' : ''}`}
+          title={t('card.dragHandle')}
+        >
+          <GripVertical size={18} />
+        </div>
         <ActionButton 
           icon={<X size={14} />} 
           title={t('card.deleteCard')}
