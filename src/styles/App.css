@@ -96,7 +96,7 @@ main#profileCardContainer {
     }
 }
 
-/* React Grid Layout 样式 */
+/* React Grid Layout styles */
 .grid-layout {
     position: relative;
     width: 100%;
@@ -745,7 +745,7 @@ h2.section-title {
     transform: scale(1.1);
 }
 
-/* 拖动手柄 */
+/* Drag handle */
 .drag-handle {
     position: absolute;
     top: 8px;
