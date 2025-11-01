@@ -67,6 +67,28 @@ body {
     transition: background-color var(--transition-slow) ease-in-out;
 }
 
+/* 根据语言设置字体 */
+html[data-locale="zh-CN"] body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "微软雅黑", 
+                 "Hiragino Sans GB", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif;
+}
+
+html[data-locale="ja-JP"] body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN", 
+                 "Yu Gothic", "游ゴシック", "Meiryo", "メイリオ", "Source Han Sans JP", 
+                 "Noto Sans CJK JP", sans-serif;
+}
+
+html[data-locale="ko-KR"] body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", 
+                 "Nanum Gothic", "나눔고딕", "Source Han Sans KR", "Noto Sans CJK KR", sans-serif;
+}
+
+html[data-locale="en-US"] body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", 
+                 "Helvetica Neue", Arial, "Inter", sans-serif;
+}
+
 /* 主容器 */
 main#profileCardContainer {
     width: 100%;

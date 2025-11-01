@@ -162,7 +162,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
 
     // 构建最终的 HTML 文件
     const fullHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${locale}" data-locale="${locale}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

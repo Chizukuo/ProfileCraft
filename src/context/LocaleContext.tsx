@@ -16,7 +16,6 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     // 首先检查 localStorage
     const savedLocale = localStorage.getItem('profilecraft-locale') as Locale;
     if (savedLocale && Object.keys(localesManifest).includes(savedLocale)) {
-      console.log('[LocaleContext] 从 localStorage 恢复语言:', savedLocale);
       return savedLocale;
     }
 
@@ -24,11 +23,8 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     const browserLang = navigator.language;
     const supportedLocales = Object.keys(localesManifest) as Locale[];
     
-    console.log('[LocaleContext] 浏览器语言:', browserLang);
-    
     // 尝试完全匹配
     if (supportedLocales.includes(browserLang as Locale)) {
-      console.log('[LocaleContext] 完全匹配浏览器语言:', browserLang);
       return browserLang as Locale;
     }
     
@@ -39,20 +35,20 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     );
     
     if (matchedLocale) {
-      console.log('[LocaleContext] 部分匹配浏览器语言:', matchedLocale);
       return matchedLocale;
     }
     
-    console.log('[LocaleContext] 使用默认语言: zh-CN');
     return 'zh-CN';
   };
 
   const [locale, setLocale] = useState<Locale>(getDefaultLocale);
 
   useEffect(() => {
-    console.log('[LocaleContext] 语言改变:', locale);
     // 更新 HTML lang 属性
     document.documentElement.lang = locale;
+    
+    // 设置语言数据属性，用于 CSS 字体选择
+    document.documentElement.setAttribute('data-locale', locale);
     
     // 保存到 localStorage
     localStorage.setItem('profilecraft-locale', locale);

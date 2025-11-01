@@ -44,7 +44,8 @@ function App() {
     `;
 
         const versionInfo = `
-        芝士扩列条编辑器 V2.2.0
+        芝士扩列条编辑器 V2.3.3
+        构建时间: ${process.env.REACT_APP_BUILD_TIME ?? import.meta?.env?.VITE_BUILD_TIME ?? new Date().toLocaleString()}
          chizukuo@icloud.com
     `;
 
