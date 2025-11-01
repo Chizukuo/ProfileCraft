@@ -281,8 +281,8 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
         scale: 3,
         useCORS: true,
         logging: false,
-        width: Math.max(element.scrollWidth, 800),
-        windowWidth: Math.max(element.scrollWidth, 800),
+        width: Math.max(element.scrollWidth, 1200),
+        windowWidth: Math.max(element.scrollWidth, 1200),
         onclone: (clonedDoc: Document) => {
             const clonedRoot = clonedDoc.documentElement;
             applyThemeColorsToElement(clonedRoot, profileData.userSettings.accentColor);
