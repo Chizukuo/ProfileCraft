@@ -1,0 +1,79 @@
+{
+  "toolbar": {
+    "openMenu": "Open Menu",
+    "themeColor": "Theme Color",
+    "selectThemeColor": "Select Theme Color",
+    "addCard": "Add Card",
+    "addNewCard": "Add New Card",
+    "resetStyle": "Reset Style",
+    "restoreDefault": "Restore Default Template",
+    "exportHtml": "Export HTML",
+    "exportImage": "Export Image",
+    "themeStyle": "Theme Style",
+    "selectTheme": "Select Theme Style",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "github": "Github",
+    "starOnGithub": "Star on GitHub"
+  },
+  "sidebar": {
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "card": {
+    "deleteCard": "Delete This Card",
+    "addNewBlock": "Add New Block to This Card"
+  },
+  "modal": {
+    "confirmReset": "Confirm Reset",
+    "confirmResetMessage": "Are you sure you want to reset all content to the default template? This action cannot be undone.",
+    "confirmResetButton": "Confirm Reset",
+    "cancel": "Cancel",
+    "confirmDeleteCard": "Confirm Delete Card",
+    "confirmDeleteCardMessage": "Are you sure you want to delete the card \"{title}\"? This action cannot be undone.",
+    "delete": "Delete",
+    "confirmDeleteBlock": "Confirm Delete Block",
+    "confirmDeleteBlockMessage": "Are you sure you want to delete this block? This action cannot be undone.",
+    "addCard": "Add Card",
+    "selectCardType": "Select the type of card to add",
+    "addElement": "Add Block",
+    "selectElementType": "Select the type of block to add"
+  },
+  "notification": {
+    "exportHtmlSuccess": "HTML file exported successfully!",
+    "exportHtmlError": "Failed to export HTML, please try again",
+    "exportImageSuccess": "Image exported successfully!",
+    "exportImageError": "Failed to export image, please check the console for more information.",
+    "containerNotFound": "Content container to export not found"
+  },
+  "cardTypes": {
+    "profileCard": "Profile Card",
+    "profileCardDesc": "Display avatar, basic info and QR code",
+    "aboutMeCard": "About Me",
+    "aboutMeCardDesc": "Introduce yourself with paragraphs",
+    "oshiCard": "Recommendation Card",
+    "oshiCardDesc": "Show your recommendations",
+    "fullWidthCard": "Full Width Card",
+    "fullWidthCardDesc": "Card spanning the full width"
+  },
+  "blockTypes": {
+    "profileInfo": "Profile Info",
+    "profileInfoDesc": "Avatar, info and QR code",
+    "paragraph": "Paragraph",
+    "paragraphDesc": "Free-form text content",
+    "tagSection": "Tag Section",
+    "tagSectionDesc": "Display a list of tags",
+    "oshiSection": "Recommendation Section",
+    "oshiSectionDesc": "Show recommendations",
+    "groupedTagSection": "Grouped Tags",
+    "groupedTagSectionDesc": "Tags grouped by category"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "clickToChange": "Click to change"
+  },
+  "footer": {
+    "poweredBy": "Powered by"
+  }
+}
+
