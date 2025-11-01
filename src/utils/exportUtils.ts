@@ -88,10 +88,10 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
             if (response.ok) {
                 themeCssContent = await response.text();
             } else {
-                console.warn(`无法获取主题 CSS: ${response.statusText}`);
+                console.warn(`Failed to fetch theme CSS: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('获取主题 CSS 时出错:', error);
+            console.error('Error fetching theme CSS:', error);
         }
     }
 
@@ -129,7 +129,8 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         '.qr-code-link-input',
         '.rich-text-toolbar',
         '.qr-code-wrapper p.text-sm',
-        '.hamburger-menu'
+        '.hamburger-menu',
+        '.action-button-text-with-icon'
     ];
     
     elementsToRemoveSelectors.forEach(selector => {
@@ -190,6 +191,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         .card-actions-container,
         .qr-code-link-input,
         .hamburger-menu,
+        .action-button-text-with-icon,
         .avatar-container:hover::after,
         [contenteditable]:hover { 
             display: none !important;
@@ -232,7 +234,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         
         showNotification(t('notification.exportHtmlSuccess') || 'Export successful', 'success');
     } catch (error) {
-        console.error('导出 HTML 失败:', error);
+        console.error('Failed to export HTML:', error);
         const t = await getTranslationFunction(locale);
         showNotification(t('notification.exportHtmlError') || 'Export failed', 'error');
     }
@@ -244,8 +246,9 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
  * @param element 要导出的 HTML 元素
  * @param profileData 用户的个人资料数据
  * @param locale 当前语言
+ * @param currentThemeName 当前选择的主题名称
  */
-export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale) => {
+export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale, currentThemeName: Theme) => {
     const t = await getTranslationFunction(locale);
     if (!element || !profileData) return;
 
@@ -255,28 +258,54 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     
     const pageBgColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim();
 
+    // Fetch current theme CSS file content
+    const themeInfo = themesManifest[currentThemeName];
+    const themeCssPath = themeInfo ? themeInfo.path : '';
+    let themeCssContent = '';
+    
+    if (themeCssPath) {
+        try {
+            const response = await fetch(themeCssPath);
+            if (response.ok) {
+                themeCssContent = await response.text();
+            } else {
+                console.warn(`Failed to fetch theme CSS: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error fetching theme CSS:', error);
+        }
+    }
+
     html2canvas(element, {
         backgroundColor: pageBgColor,
         scale: 3,
         useCORS: true,
         logging: false,
+        width: Math.max(element.scrollWidth, 800),
+        windowWidth: Math.max(element.scrollWidth, 800),
         onclone: (clonedDoc: Document) => {
-            // 在克隆的文档中应用主题颜色
             const clonedRoot = clonedDoc.documentElement;
             applyThemeColorsToElement(clonedRoot, profileData.userSettings.accentColor);
             
-            // 移除编辑器控件和交互元素，但保留内容样式
+            // Inject theme CSS into cloned document
+            if (themeCssContent) {
+                const styleElement = clonedDoc.createElement('style');
+                styleElement.textContent = themeCssContent;
+                clonedDoc.head.appendChild(styleElement);
+            }
+            
+            // Remove editor controls and interactive elements while preserving content styles
             const selectorsToRemove = [
-                '.action-button',           // 删除按钮
-                '.delete-action-btn',       // 删除按钮
-                '.add-tag-button-container',// 添加标签按钮
-                '.tag-actions-container',   // 标签操作容器
-                '.delete-element-btn',      // 删除元素按钮
-                '.card-actions-container',  // 卡片操作容器
-                '.qr-code-link-input',      // 二维码链接输入框
-                '.edit-popup',              // 编辑弹窗
-                '.rich-text-toolbar',       // 富文本工具栏
-                '.qr-code-wrapper .text-sm', // 二维码下方的提示文本
+                '.action-button',
+                '.delete-action-btn',
+                '.add-tag-button-container',
+                '.tag-actions-container',
+                '.delete-element-btn',
+                '.card-actions-container',
+                '.qr-code-link-input',
+                '.edit-popup',
+                '.rich-text-toolbar',
+                '.qr-code-wrapper .text-sm',
                 '.action-button-text-with-icon' 
             ];
             
@@ -284,28 +313,24 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
                 clonedDoc.querySelectorAll(selector).forEach((el: Element) => el.remove());
             });
             
-            // 移除头像容器的 hover 提示
             clonedDoc.querySelectorAll('.avatar-container').forEach((el: Element) => {
                 (el as HTMLElement).style.setProperty('cursor', 'default');
             });
             
-            // 移除所有 contenteditable 属性
             clonedDoc.querySelectorAll('[contenteditable]').forEach((el: Element) => {
                 el.removeAttribute('contenteditable');
             });
         }
     }).then((canvas: HTMLCanvasElement) => {
-        // 创建并触发下载
         const image = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = image;
         link.download = '扩列条.png';
         link.click();
         
-        // 显示成功提示
         showNotification(t('notification.exportImageSuccess') || 'Export successful', 'success');
     }).catch(async (err: Error) => {
-        console.error("导出图片失败:", err);
+        console.error("Failed to export image:", err);
         const t = await getTranslationFunction(locale);
         showNotification(t('notification.exportImageError') || 'Export failed', 'error');
     }).finally(() => {
