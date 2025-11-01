@@ -88,10 +88,10 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
             if (response.ok) {
                 themeCssContent = await response.text();
             } else {
-                console.warn(`无法获取主题 CSS: ${response.statusText}`);
+                console.warn(`Failed to fetch theme CSS: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('获取主题 CSS 时出错:', error);
+            console.error('Error fetching theme CSS:', error);
         }
     }
 
@@ -234,7 +234,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         
         showNotification(t('notification.exportHtmlSuccess') || 'Export successful', 'success');
     } catch (error) {
-        console.error('导出 HTML 失败:', error);
+        console.error('Failed to export HTML:', error);
         const t = await getTranslationFunction(locale);
         showNotification(t('notification.exportHtmlError') || 'Export failed', 'error');
     }
@@ -258,7 +258,7 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     
     const pageBgColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim();
 
-    // 获取当前主题的 CSS 文件内容
+    // Fetch current theme CSS file content
     const themeInfo = themesManifest[currentThemeName];
     const themeCssPath = themeInfo ? themeInfo.path : '';
     let themeCssContent = '';
@@ -269,10 +269,10 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
             if (response.ok) {
                 themeCssContent = await response.text();
             } else {
-                console.warn(`无法获取主题 CSS: ${response.statusText}`);
+                console.warn(`Failed to fetch theme CSS: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('获取主题 CSS 时出错:', error);
+            console.error('Error fetching theme CSS:', error);
         }
     }
 
@@ -281,32 +281,31 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
         scale: 3,
         useCORS: true,
         logging: false,
-        width: Math.max(element.scrollWidth, 800), // 设置最小宽度为800px，避免移动端导出太窄
+        width: Math.max(element.scrollWidth, 800),
         windowWidth: Math.max(element.scrollWidth, 800),
         onclone: (clonedDoc: Document) => {
-            // 在克隆的文档中应用主题颜色
             const clonedRoot = clonedDoc.documentElement;
             applyThemeColorsToElement(clonedRoot, profileData.userSettings.accentColor);
             
-            // 如果有主题 CSS，将其注入到克隆的文档中
+            // Inject theme CSS into cloned document
             if (themeCssContent) {
                 const styleElement = clonedDoc.createElement('style');
                 styleElement.textContent = themeCssContent;
                 clonedDoc.head.appendChild(styleElement);
             }
             
-            // 移除编辑器控件和交互元素，但保留内容样式
+            // Remove editor controls and interactive elements while preserving content styles
             const selectorsToRemove = [
-                '.action-button',           // 删除按钮
-                '.delete-action-btn',       // 删除按钮
-                '.add-tag-button-container',// 添加标签按钮
-                '.tag-actions-container',   // 标签操作容器
-                '.delete-element-btn',      // 删除元素按钮
-                '.card-actions-container',  // 卡片操作容器
-                '.qr-code-link-input',      // 二维码链接输入框
-                '.edit-popup',              // 编辑弹窗
-                '.rich-text-toolbar',       // 富文本工具栏
-                '.qr-code-wrapper .text-sm', // 二维码下方的提示文本
+                '.action-button',
+                '.delete-action-btn',
+                '.add-tag-button-container',
+                '.tag-actions-container',
+                '.delete-element-btn',
+                '.card-actions-container',
+                '.qr-code-link-input',
+                '.edit-popup',
+                '.rich-text-toolbar',
+                '.qr-code-wrapper .text-sm',
                 '.action-button-text-with-icon' 
             ];
             
@@ -314,28 +313,24 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
                 clonedDoc.querySelectorAll(selector).forEach((el: Element) => el.remove());
             });
             
-            // 移除头像容器的 hover 提示
             clonedDoc.querySelectorAll('.avatar-container').forEach((el: Element) => {
                 (el as HTMLElement).style.setProperty('cursor', 'default');
             });
             
-            // 移除所有 contenteditable 属性
             clonedDoc.querySelectorAll('[contenteditable]').forEach((el: Element) => {
                 el.removeAttribute('contenteditable');
             });
         }
     }).then((canvas: HTMLCanvasElement) => {
-        // 创建并触发下载
         const image = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = image;
         link.download = '扩列条.png';
         link.click();
         
-        // 显示成功提示
         showNotification(t('notification.exportImageSuccess') || 'Export successful', 'success');
     }).catch(async (err: Error) => {
-        console.error("导出图片失败:", err);
+        console.error("Failed to export image:", err);
         const t = await getTranslationFunction(locale);
         showNotification(t('notification.exportImageError') || 'Export failed', 'error');
     }).finally(() => {
