@@ -129,7 +129,8 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         '.qr-code-link-input',
         '.rich-text-toolbar',
         '.qr-code-wrapper p.text-sm',
-        '.hamburger-menu'
+        '.hamburger-menu',
+        '.action-button-text-with-icon'
     ];
     
     elementsToRemoveSelectors.forEach(selector => {
@@ -190,6 +191,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         .card-actions-container,
         .qr-code-link-input,
         .hamburger-menu,
+        .action-button-text-with-icon,
         .avatar-container:hover::after,
         [contenteditable]:hover { 
             display: none !important;
