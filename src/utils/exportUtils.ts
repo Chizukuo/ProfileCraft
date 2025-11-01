@@ -246,8 +246,9 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
  * @param element 要导出的 HTML 元素
  * @param profileData 用户的个人资料数据
  * @param locale 当前语言
+ * @param currentThemeName 当前选择的主题名称
  */
-export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale) => {
+export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale, currentThemeName: Theme) => {
     const t = await getTranslationFunction(locale);
     if (!element || !profileData) return;
 
@@ -257,15 +258,42 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     
     const pageBgColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim();
 
+    // 获取当前主题的 CSS 文件内容
+    const themeInfo = themesManifest[currentThemeName];
+    const themeCssPath = themeInfo ? themeInfo.path : '';
+    let themeCssContent = '';
+    
+    if (themeCssPath) {
+        try {
+            const response = await fetch(themeCssPath);
+            if (response.ok) {
+                themeCssContent = await response.text();
+            } else {
+                console.warn(`无法获取主题 CSS: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('获取主题 CSS 时出错:', error);
+        }
+    }
+
     html2canvas(element, {
         backgroundColor: pageBgColor,
         scale: 3,
         useCORS: true,
         logging: false,
+        width: Math.max(element.scrollWidth, 800), // 设置最小宽度为800px，避免移动端导出太窄
+        windowWidth: Math.max(element.scrollWidth, 800),
         onclone: (clonedDoc: Document) => {
             // 在克隆的文档中应用主题颜色
             const clonedRoot = clonedDoc.documentElement;
             applyThemeColorsToElement(clonedRoot, profileData.userSettings.accentColor);
+            
+            // 如果有主题 CSS，将其注入到克隆的文档中
+            if (themeCssContent) {
+                const styleElement = clonedDoc.createElement('style');
+                styleElement.textContent = themeCssContent;
+                clonedDoc.head.appendChild(styleElement);
+            }
             
             // 移除编辑器控件和交互元素，但保留内容样式
             const selectorsToRemove = [

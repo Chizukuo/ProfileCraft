@@ -94,9 +94,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
   const handleExportImage = useCallback(() => {
       const container = document.getElementById('profileCardContainer');
       if (container) {
-        exportToImage(container, profileData, locale);
+        exportToImage(container, profileData, locale, theme);
       }
-  }, [profileData, locale]);
+  }, [profileData, locale, theme]);
 
   if (!profileData) {
     return null;
