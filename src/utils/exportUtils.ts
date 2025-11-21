@@ -179,6 +179,40 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         [contenteditable]:hover { 
             display: none !important;
         }
+
+        /* 修复导出时的布局问题：重置 react-grid-layout 为 CSS Grid */
+        .layout {
+            height: auto !important;
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 32px 24px !important;
+            width: 100% !important;
+        }
+        .react-grid-item {
+            position: relative !important;
+            transform: none !important;
+            top: auto !important;
+            left: auto !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+        .profile-card-span { grid-column: span 1 !important; }
+        .about-me-card-span { grid-column: span 2 !important; }
+        .oshi-card-span,
+        .full-width-card-span { grid-column: span 3 !important; }
+        
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr !important;
+            }
+            .profile-card-span,
+            .about-me-card-span,
+            .oshi-card-span,
+            .full-width-card-span { 
+                grid-column: span 1 !important; 
+            }
+        }
         
         /* 静态元素样式 */
         [contenteditable] {
@@ -302,15 +336,30 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
             max-width: 1080px !important;
             margin: 0 auto !important;
             padding: 48px 32px 32px 32px !important;
+            height: auto !important;
         }
-        #export-root .grid-container {
+        /* 重置 react-grid-layout 为 CSS Grid 以消除留白 */
+        #export-root .layout {
+            height: auto !important;
+            display: grid !important;
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: var(--space-l, 24px) !important;
+            gap: 32px 24px !important;
+            width: 100% !important;
+        }
+        #export-root .react-grid-item {
+            position: relative !important;
+            transform: none !important;
+            top: auto !important;
+            left: auto !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
         }
         #export-root .profile-card-span { grid-column: span 1 !important; }
         #export-root .about-me-card-span { grid-column: span 2 !important; }
         #export-root .oshi-card-span,
         #export-root .full-width-card-span { grid-column: span 3 !important; }
+
         #export-root .sidebar-container,
         #export-root .hamburger-menu { display: none !important; }
     `;

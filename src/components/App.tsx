@@ -248,7 +248,7 @@ function App() {
                     isResizable={false}
                 >
                     {profileData.cards.map((card, index) => (
-                        <div key={card.id} data-grid={card.layout || { x: (index) % 3, y: Math.floor(index / 3) * 10, w: 1, h: 10, i: card.id }}>
+                        <div key={card.id} className={card.layoutSpan} data-grid={card.layout || { x: (index) % 3, y: Math.floor(index / 3) * 10, w: 1, h: 10, i: card.id }}>
                             <Card 
                                 key={card.id} 
                                 cardData={card} 
