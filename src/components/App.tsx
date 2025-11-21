@@ -191,7 +191,7 @@ function App() {
 
           // Convert to grid units
           const rowHeight = 10;
-          const marginY = 24;
+          const marginY = 32;
           const requiredH = Math.ceil((maxPixelHeight + marginY) / (rowHeight + marginY));
           
           if (card.layout?.h !== requiredH) {
@@ -241,7 +241,7 @@ function App() {
                     breakpoints={{ lg: 960, md: 600, sm: 0 }}
                     cols={{ lg: 3, md: 2, sm: 1 }}
                     rowHeight={10}
-                    margin={[24, 24]}
+                    margin={[24, 32]}
                     onLayoutChange={(layout) => handleLayoutChange(layout)}
                     draggableHandle=".drag-handle"
                     isDraggable={true}

@@ -35,8 +35,8 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
           for (let entry of entries) {
               const element = entry.target as HTMLElement;
               // Use scrollHeight to ensure we capture all content
-              // Add padding (24px * 2) + border (2px) + buffer (20px) = 70px
-              onHeightChange(element.scrollHeight + 70);
+              // Add padding (24px * 2) + border (2px) + minimal buffer (10px) = 58px
+              onHeightChange(element.scrollHeight + 58);
           }
       });
       // Observe the content wrapper instead of the card itself

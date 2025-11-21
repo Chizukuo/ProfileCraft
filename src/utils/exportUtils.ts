@@ -301,7 +301,7 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
             width: 1080px !important;
             max-width: 1080px !important;
             margin: 0 auto !important;
-            padding: 48px 32px !important;
+            padding: 48px 32px 32px 32px !important;
         }
         #export-root .grid-container {
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;

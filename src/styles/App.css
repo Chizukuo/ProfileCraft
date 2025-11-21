@@ -409,7 +409,7 @@ body[data-theme='dark'] .sidebar-item select {
     overflow: visible;
     position: relative;
     top: 0;
-    padding: 0 var(--space-l) var(--space-l) var(--space-l);
+    padding: 0 var(--space-l) var(--space-m) var(--space-l);
     display: flex;
     flex-direction: column;
 }
