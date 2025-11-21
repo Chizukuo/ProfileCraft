@@ -409,7 +409,7 @@ body[data-theme='dark'] .sidebar-item select {
     overflow: visible;
     position: relative;
     top: 0;
-    padding: var(--space-l);
+    padding: 0 var(--space-l) var(--space-l) var(--space-l);
     display: flex;
     flex-direction: column;
 }
@@ -417,6 +417,10 @@ body[data-theme='dark'] .sidebar-item select {
 .ui-card:hover {
     box-shadow: var(--shadow-lg);
     top: -2px;
+}
+
+.section-title-container {
+    margin-top: var(--space-l);
 }
 
 h2.section-title {
@@ -1150,4 +1154,131 @@ h2.section-title {
 
 .sidebar-item-button span {
     flex-grow: 1;
+}
+
+/* React Grid Layout Overrides */
+.react-grid-item.react-grid-placeholder {
+    background: rgba(255, 195, 0, 0.2) !important;
+    border-radius: var(--radius-l) !important;
+    opacity: 0.5 !important;
+}
+
+.react-resizable-handle {
+    background-image: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    bottom: 5px !important;
+    right: 5px !important;
+    cursor: se-resize !important;
+}
+
+.react-resizable-handle::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--ui-text-tertiary);
+    border-bottom: 2px solid var(--ui-text-tertiary);
+}
+
+/* Drag Handle */
+.drag-handle {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: grab;
+    padding: 8px;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: 10;
+    color: var(--ui-text-tertiary);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.ui-card:hover .drag-handle {
+    opacity: 1;
+}
+
+/* Width Control */
+.width-control-container {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.ui-card:hover .width-control-container {
+    opacity: 1;
+}
+
+.width-control-btn {
+    padding: 4px;
+    border-radius: var(--radius-s);
+    background: transparent;
+    border: none;
+    color: var(--ui-text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.width-control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--ui-text-primary);
+}
+
+.width-dropdown {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: 4px;
+    background-color: white;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--radius-s);
+    box-shadow: var(--shadow-lg);
+    padding: 4px;
+    min-width: 120px;
+    display: none;
+    z-index: 50;
+}
+
+/* Invisible bridge to prevent hover loss */
+.width-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+
+.width-control-container:hover .width-dropdown {
+    display: block;
+}
+
+.width-dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ui-text-secondary);
+    border-radius: var(--radius-xs);
+}
+
+.width-dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--ui-text-primary);
 }

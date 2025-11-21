@@ -80,11 +80,20 @@ export type CardElement =
   | GroupedTagSectionElement
   | OshiSectionElement;
 
+export interface CardLayout {
+    i: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
 export interface CardData {
   id: string;
   title: string;
   titleStyles: Styles;
   layoutSpan: string;
+  layout?: CardLayout;
   elements: CardElement[];
 }
 

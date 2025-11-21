@@ -20,6 +20,7 @@ export const getDefaultProfileData = (): ProfileData => ({
             title: '基本信息',
             titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
             layoutSpan: 'profile-card-span',
+            layout: { i: `card_${Date.now()}_1`, x: 0, y: 0, w: 1, h: 10 },
             elements: [
                 { type: 'profileInfo', nickname: '小芝士', gender: '男', age: 'XX', location: '武汉', mbti: 'INTP-T', textStyles: { fontWeight: '400', fontSize: '15', fontFamily: '' } }
             ]
@@ -29,6 +30,7 @@ export const getDefaultProfileData = (): ProfileData => ({
             title: '关于我',
             titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
             layoutSpan: 'about-me-card-span',
+            layout: { i: `card_${Date.now()}_2`, x: 1, y: 0, w: 2, h: 10 },
             elements: [
                 { type: 'paragraph', text: '<strong>女声优痴</strong> | 成分非常复杂，广泛涉猎。Weiss Schwarz 还在入门。偶尔看看地偶', styles: { fontWeight: '400', fontSize: '15', fontFamily: '' } },
                 { type: 'paragraph', text: '“自适应在纯良和厄介中切换。”', styles: { fontWeight: '400', fontSize: '15', fontFamily: '' } },
@@ -50,6 +52,7 @@ export const getDefaultProfileData = (): ProfileData => ({
             title: '我的推し',
             titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
             layoutSpan: 'oshi-card-span',
+            layout: { i: `card_${Date.now()}_3`, x: 0, y: 10, w: 3, h: 10 },
             elements: [
                 {
                     type: 'tagSectionTwo',
@@ -78,6 +81,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
             title: '新卡片标题',
             titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
             layoutSpan: 'profile-card-span',
+            layout: { i: '', x: 0, y: Infinity, w: 1, h: 10 },
             elements: [
                 { type: 'paragraph', text: '新段落内容...', styles: { fontWeight: '400', fontSize: '15', fontFamily: '' } }
             ]
@@ -90,6 +94,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
             title: '关于我',
             titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
             layoutSpan: 'about-me-card-span',
+            layout: { i: '', x: 0, y: Infinity, w: 2, h: 10 },
             elements: [
                 { type: 'paragraph', text: '在这里写下更多关于你的介绍。', styles: { fontWeight: '400', fontSize: '15', fontFamily: '' } }
             ]
@@ -102,6 +107,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
             title: '我的最爱',
             titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
             layoutSpan: 'oshi-card-span',
+            layout: { i: '', x: 0, y: Infinity, w: 3, h: 10 },
             elements: [
                  {
                     type: 'tagSectionTwo',

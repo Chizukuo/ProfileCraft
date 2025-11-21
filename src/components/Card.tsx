@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useProfile } from '../context/ProfileContext';
-import { CardData, CardElement } from '../types/data';
+import { CardData, CardElement, ProfileData } from '../types/data';
 import { useTranslation } from '../hooks/useTranslation';
 import EditableText from './ui/EditableText';
 import ActionButton from './ui/ActionButton';
 import ConfirmDialog from './ui/ConfirmDialog';
-import { X, PlusCircle } from 'lucide-react';
+import { X, PlusCircle, GripHorizontal, Columns } from 'lucide-react';
 import ProfileInfoBlock from './blocks/ProfileInfoBlock';
 import ParagraphBlock from './blocks/ParagraphBlock';
 import TagSectionBlock from './blocks/TagSectionBlock';
@@ -16,9 +16,10 @@ import AddElementModal from './AddElementModal';
 interface CardProps {
   cardData: CardData;
   cardIndex: number;
+  onHeightChange?: (height: number) => void;
 }
 
-const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
+const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
   const { updateProfileData } = useProfile();
   const { t } = useTranslation();
   const [isAddElementModalOpen, setAddElementModalOpen] = useState(false);
@@ -26,16 +27,54 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [deleteCardConfirm, setDeleteCardConfirm] = useState(false);
   const [deleteElementIndex, setDeleteElementIndex] = useState<number | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+      if (!cardRef.current || !onHeightChange) return;
+      const resizeObserver = new ResizeObserver((entries) => {
+          for (let entry of entries) {
+              const element = entry.target as HTMLElement;
+              // Use scrollHeight to ensure we capture all content
+              // Add padding (24px * 2) + border (2px) + buffer (20px) = 70px
+              onHeightChange(element.scrollHeight + 70);
+          }
+      });
+      // Observe the content wrapper instead of the card itself
+      const contentWrapper = cardRef.current.querySelector('.card-inner-content');
+      if (contentWrapper) {
+          resizeObserver.observe(contentWrapper);
+      }
+      return () => resizeObserver.disconnect();
+  }, [onHeightChange]);
 
   const handleUpdateCard = useCallback((field: keyof CardData, value: any) => {
-    updateProfileData(prev => ({
+    updateProfileData((prev: ProfileData | null) => ({
         ...prev!,
         cards: prev!.cards.map((card, i) => i === cardIndex ? { ...card, [field]: value } : card)
     }));
   }, [cardIndex, updateProfileData]);
+
+  const setWidth = (width: number) => {
+      updateProfileData((prev: ProfileData | null) => {
+          if (!prev) return null;
+          const newCards = prev.cards.map(c => {
+              if (c.id === cardData.id) {
+                  return {
+                      ...c,
+                      layout: {
+                          ...(c.layout || { i: c.id, x: 0, y: 0, h: 10 }),
+                          w: width
+                      }
+                  };
+              }
+              return c;
+          });
+          return { ...prev, cards: newCards };
+      });
+  };
   
   const deleteCard = useCallback(() => {
-    updateProfileData(prev => ({
+    updateProfileData((prev: ProfileData | null) => ({
       ...prev!,
       cards: prev!.cards.filter((_, i) => i !== cardIndex)
     }));
@@ -79,36 +118,53 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex }) => {
   return (
     <>
       <div 
+        ref={cardRef}
         className={`ui-card ${cardData.layoutSpan} ${isHoveringDelete ? 'is-deleting' : ''}`} 
         data-card-id={cardData.id}
         onMouseEnter={() => setIsCardHovered(true)}
         onMouseLeave={() => setIsCardHovered(false)}
+        style={{ height: '100%' }}
       >
-        <ActionButton 
-          icon={<X size={14} />} 
-          title={t('card.deleteCard')}
-          onClick={() => setDeleteCardConfirm(true)}
-          variant="delete"
-          className={isCardHovered ? 'is-visible' : ''}
-          onMouseEnter={() => setIsHoveringDelete(true)}
-          onMouseLeave={() => setIsHoveringDelete(false)}
-        />
-        <div className="section-title-container">
-          <EditableText
-            as="h2"
-            className="section-title"
-            html={cardData.title}
-            styles={cardData.titleStyles}
-            onUpdate={(html) => handleUpdateCard('title', html)}
-            onStyleUpdate={(styles) => handleUpdateCard('titleStyles', styles)}
-          />
+        <div className="card-inner-content" style={{ height: 'auto', display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box' }}>
+        <div className="drag-handle" style={{ opacity: isCardHovered ? 1 : 0 }}>
+            <GripHorizontal size={20} />
         </div>
-        <div className="card-content-wrapper">
-          {cardData.elements.map(renderElement)}
+
+        <div className="width-control-container" style={{ opacity: isCardHovered ? 1 : 0 }}>
+            <button className="width-control-btn" title={t('card.adjustWidth')}>
+                <Columns size={16} />
+            </button>
+            <div className="width-dropdown">
+                <button onClick={() => setWidth(1)} className="width-dropdown-item">1 Column</button>
+                <button onClick={() => setWidth(2)} className="width-dropdown-item">2 Columns</button>
+                <button onClick={() => setWidth(3)} className="width-dropdown-item">3 Columns</button>
+            </div>
+        </div>            <ActionButton 
+            icon={<X size={14} />} 
+            title={t('card.deleteCard')}
+            onClick={() => setDeleteCardConfirm(true)}
+            variant="delete"
+            className={isCardHovered ? 'is-visible' : ''}
+            onMouseEnter={() => setIsHoveringDelete(true)}
+            onMouseLeave={() => setIsHoveringDelete(false)}
+            />
+            <div className="section-title-container">
+            <EditableText
+                as="h2"
+                className="section-title"
+                html={cardData.title}
+                styles={cardData.titleStyles}
+                onUpdate={(html) => handleUpdateCard('title', html)}
+                onStyleUpdate={(styles) => handleUpdateCard('titleStyles', styles)}
+            />
+            </div>
+            <div className="card-content-wrapper">
+            {cardData.elements.map(renderElement)}
+            </div>
+            <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon" title={t('card.addNewBlock')}>
+                <PlusCircle size={18} /> {t('card.addNewBlock')}
+            </button>
         </div>
-        <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon" title={t('card.addNewBlock')}>
-              <PlusCircle size={18} /> {t('card.addNewBlock')}
-        </button>
       </div>
       
       <AddElementModal 

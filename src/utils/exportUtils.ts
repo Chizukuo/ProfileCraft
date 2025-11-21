@@ -107,7 +107,10 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         '.rich-text-toolbar',
         '.qr-code-wrapper p.text-sm',
         '.hamburger-menu',
-        '.action-button-text-with-icon'
+        '.action-button-text-with-icon',
+        '.drag-handle',
+        '.width-control-container',
+        '.react-resizable-handle'
     ];
     
     elementsToRemoveSelectors.forEach(selector => {
@@ -169,6 +172,9 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         .qr-code-link-input,
         .hamburger-menu,
         .action-button-text-with-icon,
+        .drag-handle,
+        .width-control-container,
+        .react-resizable-handle,
         .avatar-container:hover::after,
         [contenteditable]:hover { 
             display: none !important;
@@ -347,7 +353,10 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
         '.qr-code-wrapper .text-sm',
         '.action-button-text-with-icon',
         '.sidebar-container',
-        '.hamburger-menu'
+        '.hamburger-menu',
+        '.drag-handle',
+        '.width-control-container',
+        '.react-resizable-handle'
     ];
     selectorsToRemove.forEach(selector => {
         clonedElement.querySelectorAll(selector).forEach((el: Element) => el.remove());

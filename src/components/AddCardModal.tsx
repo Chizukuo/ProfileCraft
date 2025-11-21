@@ -29,9 +29,11 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose }) => {
 
   const handleAddCard = (template: CardTemplate) => {
     updateProfileData(prev => {
+      const id = `card_${Date.now()}`;
       const newCard = {
         ...template.data,
-        id: `card_${Date.now()}`,
+        id,
+        layout: template.data.layout ? { ...template.data.layout, i: id } : undefined
       };
       return { ...prev!, cards: [...prev!.cards, newCard] };
     });
