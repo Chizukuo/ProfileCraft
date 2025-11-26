@@ -33,13 +33,19 @@ export interface ParagraphElement extends BaseElement {
   text: string;
 }
 
+export interface ProfileItem {
+  label: string;
+  value: string;
+}
+
 export interface ProfileInfoElement extends BaseElement {
   type: 'profileInfo';
-  nickname: string;
-  gender: string;
-  age: string;
-  location: string;
-  mbti: string;
+  nickname?: string;
+  gender?: string;
+  age?: string;
+  location?: string;
+  mbti?: string;
+  items?: ProfileItem[];
   textStyles: Styles;
 }
 
