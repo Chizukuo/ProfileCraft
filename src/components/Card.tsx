@@ -59,8 +59,14 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
           if (!prev) return null;
           const newCards = prev.cards.map(c => {
               if (c.id === cardData.id) {
+                  let newLayoutSpan = c.layoutSpan;
+                  if (width === 1) newLayoutSpan = 'profile-card-span';
+                  else if (width === 2) newLayoutSpan = 'about-me-card-span';
+                  else if (width === 3) newLayoutSpan = 'full-width-card-span';
+
                   return {
                       ...c,
+                      layoutSpan: newLayoutSpan,
                       layout: {
                           ...(c.layout || { i: c.id, x: 0, y: 0, h: 10 }),
                           w: width

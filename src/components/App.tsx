@@ -51,7 +51,7 @@ function App() {
 
         const versionInfo = `
         芝士扩列条编辑器 V2.4.0
-        构建时间: ${process.env.REACT_APP_BUILD_TIME ?? import.meta?.env?.VITE_BUILD_TIME ?? new Date().toLocaleString()}
+        构建时间: ${import.meta.env.VITE_BUILD_TIME ?? new Date().toLocaleString()}
          chizukuo@icloud.com
     `;
 
@@ -81,23 +81,37 @@ function App() {
     }
   }, [profileData?.userSettings.accentColor]);
 
-  // Migration effect: Ensure all cards have a layout property
+  // Migration effect: Ensure all cards have a layout property and sync layoutSpan
   useEffect(() => {
       if (!profileData) return;
       let updatesNeeded = false;
       const newCards = profileData.cards.map((card, index) => {
-          if (!card.layout) {
+          let newCard = { ...card };
+
+          // 1. Ensure layout exists
+          if (!newCard.layout) {
               updatesNeeded = true;
               let w = 1;
-              if (card.layoutSpan?.includes('span 2')) w = 2;
-              if (card.layoutSpan?.includes('span 3')) w = 3;
+              if (newCard.layoutSpan?.includes('span 2')) w = 2;
+              if (newCard.layoutSpan?.includes('span 3')) w = 3;
               // Simple default layout logic
-              return {
-                  ...card,
-                  layout: { i: card.id, x: (index * w) % 3, y: Infinity, w, h: 10 }
-              };
+              newCard.layout = { i: newCard.id, x: (index * w) % 3, y: Infinity, w, h: 10 };
           }
-          return card;
+
+          // 2. Sync layoutSpan with layout.w
+          if (newCard.layout) {
+              let expectedSpan = newCard.layoutSpan;
+              if (newCard.layout.w === 1) expectedSpan = 'profile-card-span';
+              else if (newCard.layout.w === 2) expectedSpan = 'about-me-card-span';
+              else if (newCard.layout.w === 3 && newCard.layoutSpan !== 'oshi-card-span') expectedSpan = 'full-width-card-span';
+
+              if (newCard.layoutSpan !== expectedSpan) {
+                  updatesNeeded = true;
+                  newCard.layoutSpan = expectedSpan;
+              }
+          }
+
+          return newCard;
       });
 
       if (updatesNeeded) {
@@ -135,8 +149,15 @@ function App() {
             const newCards = prev.cards.map(card => {
                 const layoutItem = layout.find((l: any) => l.i === card.id);
                 if (layoutItem) {
+                    // Determine new layoutSpan based on width
+                    let newLayoutSpan = card.layoutSpan;
+                    if (layoutItem.w === 1) newLayoutSpan = 'profile-card-span';
+                    else if (layoutItem.w === 2) newLayoutSpan = 'about-me-card-span';
+                    else if (layoutItem.w === 3) newLayoutSpan = 'full-width-card-span';
+
                     return {
                         ...card,
+                        layoutSpan: newLayoutSpan,
                         layout: {
                             i: layoutItem.i,
                             x: layoutItem.x,
