@@ -110,7 +110,9 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         '.action-button-text-with-icon',
         '.drag-handle',
         '.width-control-container',
-        '.react-resizable-handle'
+        '.react-resizable-handle',
+        '.delete-item-btn',
+        '.add-item-btn'
     ];
     
     elementsToRemoveSelectors.forEach(selector => {
@@ -175,43 +177,23 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         .drag-handle,
         .width-control-container,
         .react-resizable-handle,
+        .delete-item-btn,
+        .add-item-btn,
         .avatar-container:hover::after,
         [contenteditable]:hover { 
             display: none !important;
         }
 
-        /* 修复导出时的布局问题：重置 react-grid-layout 为 CSS Grid */
+        /* 保持卡片在编辑器中的实际位置 */
         .layout {
-            height: auto !important;
-            display: grid !important;
-            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 32px 24px !important;
+            position: relative !important;
             width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
         }
         .react-grid-item {
-            position: relative !important;
-            transform: none !important;
-            top: auto !important;
-            left: auto !important;
-            width: auto !important;
-            height: auto !important;
-            margin: 0 !important;
-        }
-        .profile-card-span { grid-column: span 1 !important; }
-        .about-me-card-span { grid-column: span 2 !important; }
-        .oshi-card-span,
-        .full-width-card-span { grid-column: span 3 !important; }
-        
-        @media (max-width: 768px) {
-            .layout {
-                grid-template-columns: 1fr !important;
-            }
-            .profile-card-span,
-            .about-me-card-span,
-            .oshi-card-span,
-            .full-width-card-span { 
-                grid-column: span 1 !important; 
-            }
+            position: absolute !important;
+            /* transform, top, left, width, height 保持元素原有的内联样式，由 react-grid-layout 计算得出 */
         }
         
         /* 静态元素样式 */
@@ -405,7 +387,9 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
         '.hamburger-menu',
         '.drag-handle',
         '.width-control-container',
-        '.react-resizable-handle'
+        '.react-resizable-handle',
+        '.delete-item-btn',
+        '.add-item-btn'
     ];
     selectorsToRemove.forEach(selector => {
         clonedElement.querySelectorAll(selector).forEach((el: Element) => el.remove());

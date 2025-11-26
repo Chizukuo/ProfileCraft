@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useProfile } from '../../context/ProfileContext';
-import { ProfileInfoElement } from '../../types/data';
+import { ProfileInfoElement, ProfileItem } from '../../types/data';
 import EditableText from '../ui/EditableText';
 import QRCodeDisplay from '../QRCodeDisplay';
 import ActionButton from '../ui/ActionButton';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 
 interface ProfileInfoBlockProps {
     element: ProfileInfoElement;
@@ -15,6 +15,37 @@ interface ProfileInfoBlockProps {
 
 const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex, elementIndex, onDelete }) => {
     const { profileData, updateProfileData } = useProfile();
+
+    // Migration effect: Convert old fields to items array if items is missing
+    useEffect(() => {
+        if (!element.items && profileData) {
+            const newItems: ProfileItem[] = [
+                { label: '昵称', value: element.nickname || '你的昵称' },
+                { label: '性别', value: element.gender || '保密' },
+                { label: '年龄', value: element.age || '18' },
+                { label: '常驻', value: element.location || '虚拟世界' },
+                { label: 'MBTI', value: element.mbti || 'INFP' },
+            ];
+            
+            updateProfileData(prev => ({
+                ...prev!,
+                cards: prev!.cards.map((card, i) => {
+                    if (i === cardIndex) {
+                        return {
+                            ...card,
+                            elements: card.elements.map((el, j) => {
+                                if (j === elementIndex) {
+                                    return { ...el, items: newItems };
+                                }
+                                return el;
+                            })
+                        };
+                    }
+                    return card;
+                })
+            }));
+        }
+    }, [element.items, cardIndex, elementIndex, updateProfileData, element.nickname, element.gender, element.age, element.location, element.mbti, profileData]);
 
     const handleUpdate = (field: keyof ProfileInfoElement | 'qrCodeLink' | 'avatarSrc', value: any) => {
         if (field === 'qrCodeLink' || field === 'avatarSrc') {
@@ -43,6 +74,24 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
         }
     };
 
+    const handleItemUpdate = (index: number, field: keyof ProfileItem, value: string) => {
+        if (!element.items) return;
+        const newItems = [...element.items];
+        newItems[index] = { ...newItems[index], [field]: value };
+        handleUpdate('items', newItems);
+    };
+
+    const handleAddItem = () => {
+        const newItems = [...(element.items || []), { label: '新项目', value: '内容' }];
+        handleUpdate('items', newItems);
+    };
+
+    const handleDeleteItem = (index: number) => {
+        if (!element.items) return;
+        const newItems = element.items.filter((_, i) => i !== index);
+        handleUpdate('items', newItems);
+    };
+
     const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -56,8 +105,6 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
     
     if(!profileData) return null;
 
-    const labels: Record<keyof Omit<ProfileInfoElement, 'type'|'styles'|'textStyles'>, string> = { nickname: '昵称', gender: '性别', age: '年龄', location: '常驻', mbti: 'MBTI' };
-
     return (
         <div className="element-container profile-section-layout">
             <div className="avatar-container">
@@ -66,18 +113,64 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
             </div>
 
             <div className="profile-info-text">
-                {(Object.keys(labels) as Array<keyof typeof labels>).map(key => (
-                    <p className="content-text mb-1" key={key}>
-                        <strong>{labels[key]}: </strong>
-                        <EditableText
-                            as="span"
-                            html={element[key]}
-                            styles={element.textStyles}
-                            onUpdate={(html) => handleUpdate(key, html)}
-                            onStyleUpdate={(styles) => handleUpdate('textStyles', styles)}
-                        />
-                    </p>
+                {element.items?.map((item, index) => (
+                    <div className="content-text mb-1 profile-item-row" key={index} style={{ display: 'flex', alignItems: 'baseline', gap: '4px', position: 'relative' }}>
+                        <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                            <EditableText
+                                as="span"
+                                html={item.label}
+                                onUpdate={(val) => handleItemUpdate(index, 'label', val)}
+                            />
+                            <span style={{ marginLeft: '2px' }}>:</span>
+                        </div>
+                        <div style={{ wordBreak: 'break-word' }}>
+                            <EditableText
+                                as="span"
+                                html={item.value}
+                                styles={element.textStyles}
+                                onUpdate={(val) => handleItemUpdate(index, 'value', val)}
+                                onStyleUpdate={(styles) => handleUpdate('textStyles', styles)}
+                            />
+                        </div>
+                        <button 
+                            onClick={() => handleDeleteItem(index)} 
+                            className="delete-item-btn action-button"
+                            style={{ 
+                                position: 'absolute',
+                                right: '-28px',
+                                top: '0',
+                                width: '24px', 
+                                height: '24px', 
+                                padding: '4px', 
+                                opacity: 0, 
+                                transition: 'opacity 0.2s',
+                                zIndex: 10
+                            }}
+                            title="删除此项"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
                 ))}
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                    <button 
+                        onClick={handleAddItem} 
+                        className="add-item-btn action-button"
+                        style={{ width: 'auto', height: 'auto', padding: '4px 12px', fontSize: '12px', borderRadius: '12px' }}
+                    >
+                        <Plus size={12} style={{ marginRight: '4px' }} /> 添加信息
+                    </button>
+                </div>
+                
+                <style>{`
+                    .profile-item-row:hover .delete-item-btn {
+                        opacity: 1 !important;
+                    }
+                    /* Hide buttons during export */
+                    @media print {
+                        .delete-item-btn, .add-item-btn { display: none !important; }
+                    }
+                `}</style>
             </div>
 
             <div className="qr-code-wrapper">
