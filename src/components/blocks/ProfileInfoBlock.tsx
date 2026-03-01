@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useProfile } from '../../context/ProfileContext';
 import { ProfileInfoElement, ProfileItem } from '../../types/data';
 import EditableText from '../ui/EditableText';
@@ -92,6 +92,8 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
         handleUpdate('items', newItems);
     };
 
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+
     const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -108,8 +110,8 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
     return (
         <div className="element-container profile-section-layout">
             <div className="avatar-container">
-                <img src={profileData.userSettings.avatarSrc} alt="用户头像" onClick={() => document.getElementById('avatarUploadInput')?.click()} />
-                <input type="file" id="avatarUploadInput" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
+                <img src={profileData.userSettings.avatarSrc} alt="用户头像" onClick={() => avatarInputRef.current?.click()} />
+                <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
             </div>
 
             <div className="profile-info-text">
