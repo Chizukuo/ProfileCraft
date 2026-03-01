@@ -110,8 +110,21 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
     return (
         <div className="element-container profile-section-layout">
             <div className="avatar-container">
-                <img src={profileData.userSettings.avatarSrc} alt="用户头像" onClick={() => avatarInputRef.current?.click()} />
-                <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
+                <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    aria-label="上传头像"
+                    style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer' }}
+                >
+                    <img src={profileData.userSettings.avatarSrc} alt="用户头像" />
+                </button>
+                <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleAvatarUpload}
+                />
             </div>
 
             <div className="profile-info-text">
