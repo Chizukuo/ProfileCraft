@@ -1,42 +1,94 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import themesManifest from '../config/themes.json';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { useProfile } from './ProfileContext';
+import type { ResolvedTheme, ThemeOption } from '../types/theme';
+import { getThemeCssPath, getThemeOptions, isKnownTheme, resolveTheme, type ThemeKey } from '../utils/themeUtils';
 
-export type Theme = keyof typeof themesManifest;
+const THEME_STORAGE_KEY = 'profilecraft-theme';
 
 interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  theme: ThemeKey;
+  setTheme: (theme: string) => void;
+  resolvedTheme: ResolvedTheme;
+  themeOptions: ThemeOption[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const getStoredTheme = (): ThemeKey => {
+  if (typeof window === 'undefined') {
+    return 'default';
+  }
+
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return stored && isKnownTheme(stored) ? stored : 'default';
+};
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>('default');
+  const { profileData, updateProfileData } = useProfile();
+  const [theme, setThemeState] = useState<ThemeKey>(getStoredTheme);
+
+  const resolvedTheme = useMemo(() => resolveTheme(theme), [theme]);
+  const themeOptions = useMemo(() => getThemeOptions(), []);
+
+  const setTheme = useCallback((nextTheme: string) => {
+    const resolvedKey = resolveTheme(nextTheme).key as ThemeKey;
+    setThemeState(resolvedKey);
+
+    updateProfileData((prev) => {
+      if (prev.userSettings.theme === resolvedKey) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        userSettings: {
+          ...prev.userSettings,
+          theme: resolvedKey
+        }
+      };
+    });
+  }, [updateProfileData]);
 
   useEffect(() => {
-    const themeInfo = themesManifest[theme];
-    const themePath = themeInfo?.path; // Get the path from the manifest
+    window.localStorage.setItem(THEME_STORAGE_KEY, resolvedTheme.key);
+  }, [resolvedTheme.key]);
+
+  useEffect(() => {
+    const profileTheme = profileData?.userSettings.theme;
+    if (profileTheme && isKnownTheme(profileTheme) && profileTheme !== theme) {
+      setThemeState(profileTheme);
+    }
+  }, [profileData?.userSettings.theme, theme]);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const themePath = getThemeCssPath(resolvedTheme.key);
+
+    html.dataset.theme = resolvedTheme.key;
+    html.dataset.themeScheme = resolvedTheme.colorScheme;
+    body.dataset.theme = resolvedTheme.key;
+    body.dataset.themeScheme = resolvedTheme.colorScheme;
+    html.style.colorScheme = resolvedTheme.colorScheme;
 
     let themeLink = document.getElementById('theme-link') as HTMLLinkElement | null;
 
-    if (themePath && themePath.trim() !== '') { // If there's a valid, non-empty theme path
+    if (themePath) {
       if (!themeLink) {
         themeLink = document.createElement('link');
         themeLink.rel = 'stylesheet';
         themeLink.id = 'theme-link';
         document.head.appendChild(themeLink);
       }
-      themeLink.href = themePath; // Set the href to the theme's CSS file
-    } else { // If themePath is empty, null, or undefined (e.g., for the default theme)
-      if (themeLink) {
-        // Remove the href attribute to effectively unload/disable the stylesheet
-        themeLink.removeAttribute('href');
-      }
+
+      themeLink.href = themePath;
+    } else if (themeLink) {
+      themeLink.removeAttribute('href');
     }
-  }, [theme]);
+  }, [resolvedTheme.key, resolvedTheme.colorScheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme, themeOptions }}>
       {children}
     </ThemeContext.Provider>
   );

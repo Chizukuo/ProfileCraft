@@ -1,11 +1,30 @@
 {
   "default": {
     "name": "默认 (Default)",
-    "path": ""
+    "path": "",
+    "colorScheme": "light",
+    "description": "柔和暖色的默认编辑主题，支持强调色自定义。",
+    "preview": {
+      "primary": "#FFC300",
+      "secondary": "#8B4513",
+      "surface": "#FFFDF5"
+    },
+    "settings": {
+      "isAccentColorEnabled": true
+    }
   },
   "cyberpunk": {
     "name": "赛博朋克 (Cyberpunk)",
     "path": "themes/cyberpunk.css",
-    "isAccentColorEnabled": false
+    "colorScheme": "dark",
+    "description": "夜城霓虹界面风格，固定高对比荧光配色与 HUD 质感。",
+    "preview": {
+      "primary": "#fcee0a",
+      "secondary": "#00f0ff",
+      "surface": "#080a0f"
+    },
+    "settings": {
+      "isAccentColorEnabled": false
+    }
   }
 }

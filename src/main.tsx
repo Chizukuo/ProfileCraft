@@ -9,11 +9,11 @@ import { LocaleProvider } from './context/LocaleContext';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <LocaleProvider>
-      <ThemeProvider>
-        <ProfileProvider>
+      <ProfileProvider>
+        <ThemeProvider>
           <App />
-        </ProfileProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </ProfileProvider>
     </LocaleProvider>
   </React.StrictMode>
 );

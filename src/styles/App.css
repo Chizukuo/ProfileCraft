@@ -242,6 +242,24 @@ main#profileCardContainer {
     color: var(--ui-text-primary);
 }
 
+.feature-beta-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(255, 195, 0, 0.14);
+    border: 1px solid rgba(255, 195, 0, 0.38);
+    color: var(--theme-text-strong);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
 .editor-toolbar input[type="color"] {
     width: 36px;
     height: 36px;
@@ -1154,6 +1172,10 @@ h2.section-title {
 
 .sidebar-item-button span {
     flex-grow: 1;
+}
+
+.sidebar-item-button .feature-beta-badge {
+    margin-left: 8px;
 }
 
 /* React Grid Layout Overrides */

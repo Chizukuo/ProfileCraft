@@ -3,7 +3,6 @@ import { FileCode2, Image, PlusSquare, RotateCcw, Star, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { useLocale } from '../context/LocaleContext';
-import themes from '../config/themes.json'; // 引入主题配置文件
 import locales from '../config/locales.json'; // 引入语言配置文件
 
 interface SidebarProps {
@@ -19,7 +18,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onResetClick, onExportHtmlClick, onExportImageClick, displayColor, onColorChange, isAccentColorEnabled }) => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme, themeOptions } = useTheme();
   const { t } = useTranslation();
   const { locale, setLocale } = useLocale();
 
@@ -63,9 +62,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onRe
             <FileCode2 size={20} />
             <span>{t('toolbar.exportHtml')}</span>
           </button>
-          <button onClick={() => handleButtonClick(onExportImageClick)} className="button-style sidebar-item-button">
+          <button onClick={() => handleButtonClick(onExportImageClick)} className="button-style sidebar-item-button" title={`${t('toolbar.exportImage')} Beta`} aria-label={`${t('toolbar.exportImage')} Beta`}>
             <Image size={20} />
-            <span>{t('toolbar.exportImage')}</span>
+            <span>
+              {t('toolbar.exportImage')}
+              <span className="feature-beta-badge">Beta</span>
+            </span>
           </button>
           <a href="https://github.com/Chizukuo/ProfileCraft" target="_blank" rel="noopener noreferrer" className="button-style sidebar-item-button">
             <Star size={20} />
@@ -76,12 +78,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onRe
             <select
               id="sidebarThemeSwitcher"
               value={theme}
-              onChange={e => setTheme(e.target.value as any)}
+              onChange={e => setTheme(e.target.value)}
               style={{ marginLeft: 4 }}
               aria-label={t('toolbar.selectTheme')}
+              title={resolvedTheme.description}
             >
-              {Object.entries(themes).map(([key, value]) => (
-                <option key={key} value={key}>{value.name}</option>
+              {themeOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </div>

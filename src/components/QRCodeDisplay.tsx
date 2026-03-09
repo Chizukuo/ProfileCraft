@@ -9,29 +9,34 @@ interface QRCodeDisplayProps {
 
 const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ link }) => {
     const { profileData } = useProfile();
-    const { theme } = useTheme(); // Use the theme context
+    const { theme, resolvedTheme } = useTheme();
     const accentColor = profileData?.userSettings.accentColor || '#000';
     const [qrColors, setQrColors] = useState({ dark: "#000000", light: "#ffffff" });
 
     useEffect(() => {
-        // This function now runs whenever the theme or accent color changes.
-        // We use a short timeout to allow the browser to apply the new theme's CSS file
-        // before we read the computed style values.
-        const timer = setTimeout(() => {
-            // UPDATED: Read the correct CSS variable for the QR code foreground.
+        let frameId = 0;
+        const updateQrColors = () => {
             const colorDark = getComputedStyle(document.documentElement).getPropertyValue('--qr-code-fg-color').trim() || 
                               getComputedStyle(document.documentElement).getPropertyValue('--theme-text-strong').trim() || 
                               "#000000";
             const colorLight = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim() || "#ffffff";
             setQrColors({ dark: colorDark, light: colorLight });
-        }, 100); // Increased delay slightly to ensure theme CSS is applied
+        };
 
-        return () => clearTimeout(timer);
+        frameId = window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(updateQrColors);
+        });
 
-    }, [theme, profileData?.userSettings.accentColor]); // Rerun effect when theme or accent color changes
+        return () => window.cancelAnimationFrame(frameId);
+
+    }, [theme, profileData?.userSettings.accentColor]);
+
+    const qrContainerStyle = resolvedTheme.settings.isAccentColorEnabled
+        ? { borderColor: accentColor }
+        : undefined;
 
     return (
-        <div className="qr-code-container" style={{borderColor: accentColor}}>
+        <div className="qr-code-container" style={qrContainerStyle}>
             <QRCodeSVG
                 value={link}
                 size={128}

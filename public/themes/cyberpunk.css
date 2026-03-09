@@ -1,447 +1,694 @@
-/* * ======================================================
- * == CYBERPUNK 2077 INSPIRED THEME - NIGHT CITY CORE  ==
- * ======================================================
- * 核心改动：
- * 1. 引入赛博朋克2077标志性黄色，重塑核心视觉。
- * 2. 强化"切角" (Clip-Path) 设计，更具侵略性和不对称美感。
- * 3. 增强霓虹辉光 (Glow)，特别是黄色和青色的辉光。
- * 4. 调整全局"扫描线" (Scanline) 和背景纹理，增加数字噪点和HUD元素感。
- * 5. 优化文本样式，强调大写、锐利阴影和科技感字体。
- * 6. 所有关键样式均采用 `!important` 提升优先级。
-*/
+html[data-theme='cyberpunk'] {
+    --theme-accent: #fcee0a;
+    --theme-tag-bg: rgba(0, 240, 255, 0.12);
+    --theme-tag-bg-alt: rgba(252, 238, 10, 0.16);
+    --theme-bg-page: #070a10;
+    --theme-text-strong: #fcee0a;
+    --theme-divider: rgba(0, 240, 255, 0.36);
+    --theme-tag-hover-bg: rgba(0, 240, 255, 0.22);
+    --hover-bg-color: rgba(252, 238, 10, 0.12);
+    --qr-code-fg-color: #00f0ff;
 
-:root {
-    /* -- 核心颜色 -- */
-    --theme-bg-page: #080a0f !important; /* 深邃夜城黑 */
-    --theme-bg-card: rgba(10, 20, 45, 0.85) !important; /* 深蓝科技感半透明背景 */
-    --ui-bg-glass: rgba(8, 15, 35, 0.75) !important; /* HUD玻璃质感 */
+    --ui-text-primary: #edf7ff;
+    --ui-text-secondary: #8feeff;
+    --ui-text-tertiary: #69839b;
+    --ui-bg-card: rgba(8, 18, 36, 0.82);
+    --ui-border-default: rgba(0, 240, 255, 0.28);
+    --toolbar-bg: rgba(7, 11, 20, 0.78);
+    --toolbar-border: rgba(0, 240, 255, 0.3);
+    --toolbar-button-active-bg: rgba(252, 238, 10, 0.12);
+    --button-text-on-accent: #090b10;
+    --success-green: #64ffda;
 
-    /* -- 霓虹点缀色 -- */
-    --cp77-yellow: #fcee0a !important; /* 标志性黄色 */
-    --cp77-cyan: #00f0ff !important;
-    --cp77-magenta: #ff00aa !important;
-    --cp77-red: #ff003c !important; /* 警告/危险色 */
-    --cp77-lime: #64ffda !important; /* 另一种科技青色 */
-    
-    /* -- 文本颜色 -- */
-    --text-primary: #e0e0e0 !important;
-    --text-secondary: var(--cp77-cyan) !important;
-    --text-tertiary: #707080 !important;
-    --text-hud: var(--cp77-yellow) !important; /* HUD及重要提示文本 */
-    --text-on-neon: #05050a !important;
-
-    /* -- QR Code Specific Color -- */
-    --qr-code-fg-color: var(--cp77-cyan) !important; /* NEW: Explicit QR Code Color */
-    
-    /* -- UI 与边框 -- */
-    --border-color: rgba(0, 240, 255, 0.45) !important; /* 青色边框 */
-    --border-color-yellow: rgba(252, 238, 10, 0.6) !important; /* 黄色边框 */
-    --border-color-hover: var(--cp77-cyan) !important;
-    --toolbar-border: rgba(0, 240, 255, 0.3) !important;
-
-    /* -- 强化辉光效果 -- */
-    --glow-yellow-intense: 0 0 5px var(--cp77-yellow), 0 0 15px var(--cp77-yellow), 0 0 25px var(--cp77-yellow), 0 0 35px rgba(252, 238, 10, 0.7) !important;
-    --glow-cyan-intense: 0 0 5px var(--cp77-cyan), 0 0 15px var(--cp77-cyan), 0 0 25px var(--cp77-cyan), 0 0 35px rgba(0, 240, 255, 0.7) !important;
-    --glow-magenta-intense: 0 0 5px var(--cp77-magenta), 0 0 15px var(--cp77-magenta), 0 0 25px var(--cp77-magenta) !important;
-    --text-shadow-yellow: 0 0 3px rgba(252, 238, 10, 0.7), 0 0 6px var(--cp77-yellow) !important;
-    --text-shadow-cyan: 0 0 3px rgba(0, 240, 255, 0.6), 0 0 5px var(--cp77-cyan) !important;
-    --text-shadow-magenta: 0 0 3px rgba(255, 0, 170, 0.6), 0 0 5px var(--cp77-magenta) !important;
-    
-    /* -- 间距与圆角 -- */
-    --space-xs: 4px !important; --space-s: 8px !important; --space-m: 16px !important; --space-l: 24px !important; --space-xl: 32px !important;
-    --radius-sharp: 0 !important; /* CP2077 风格，几乎无圆角 */
-    --radius-slight: 2px !important;
-    --radius-full: 50% !important;
-    
-    /* -- 切角路径 -- */
-    --clip-path-hud: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%) !important; /* HUD 风格切角 */
-    --clip-path-card: polygon(0 10px, 10px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 12px 100%, 0 calc(100% - 12px)) !important;
-    --clip-path-button: polygon(0 5px, 5px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 5px), calc(100% - 5px) 100%, 3px 100%, 0 calc(100% - 3px)) !important;
-
-    /* -- 动画 -- */
-    --anim-glitch-speed: 0.65s !important;
-    --anim-flicker-speed: 3s !important;
+    --cp-surface-0: #05070d;
+    --cp-surface-1: rgba(10, 18, 34, 0.88);
+    --cp-surface-2: rgba(16, 26, 48, 0.92);
+    --cp-cyan: #00f0ff;
+    --cp-yellow: #fcee0a;
+    --cp-magenta: #ff2aa3;
+    --cp-lime: #64ffda;
+    --cp-danger: #ff355e;
+    --cp-grid: rgba(0, 240, 255, 0.08);
+    --cp-noise: rgba(252, 238, 10, 0.035);
+    --cp-shadow-cyan: 0 0 0 1px rgba(0, 240, 255, 0.12), 0 18px 40px rgba(0, 0, 0, 0.42), 0 0 22px rgba(0, 240, 255, 0.14);
+    --cp-shadow-yellow: 0 0 0 1px rgba(252, 238, 10, 0.18), 0 0 18px rgba(252, 238, 10, 0.24);
+    --cp-shadow-magenta: 0 0 0 1px rgba(255, 42, 163, 0.18), 0 0 18px rgba(255, 42, 163, 0.2);
+    --cp-text-shadow-cyan: 0 0 10px rgba(0, 240, 255, 0.32);
+    --cp-text-shadow-yellow: 0 0 14px rgba(252, 238, 10, 0.28);
+    --cp-card-clip: polygon(0 12px, 12px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 18px 100%, 0 calc(100% - 18px));
+    --cp-button-clip: polygon(0 7px, 7px 0, calc(100% - 5px) 0, 100% 5px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 5px 100%, 0 calc(100% - 5px));
+    --cp-hud-clip: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
 }
 
-/* 动态效果的关键帧动画 */
-@keyframes flicker-and-jitter {
-  0%, 100% {
-    opacity: 1;
-    text-shadow: var(--glow-yellow-intense);
-    transform: translate(0, 0);
-  }
-  /* Jitter bursts */
-  5% { transform: translate(-1px, 1px); }
-  10% { transform: translate(1px, -1px); }
-  15% { transform: translate(-1px, -1px); }
-  20% { transform: translate(1px, 1px); }
-  /* Flicker and reset jitter */
-  25% {
-    opacity: 0.8;
-    text-shadow: 0 0 20px var(--cp77-yellow), 0 0 30px var(--cp77-yellow);
-    transform: translate(0, 0);
-  }
-  30% { transform: translate(0.5px, -0.5px); } /* subtle jitter */
-  35% { transform: translate(-0.5px, 0.5px); }
-  40% { transform: translate(0,0); }
-  /* Deeper flicker and reset jitter */
-  50% {
-    opacity: 0.7;
-    text-shadow: 0 0 15px var(--cp77-yellow);
-    transform: translate(0,0);
-  }
-  55% { transform: translate(1px, 0px); } /* subtle jitter */
-  60% { transform: translate(-1px, 0px); }
-  65% { transform: translate(0,0); }
-  /* Flicker back and reset jitter */
-  75% {
-    opacity: 0.9;
-    text-shadow: 0 0 20px var(--cp77-yellow), 0 0 30px var(--cp77-yellow);
-    transform: translate(0,0);
-  }
-  80% { transform: translate(0px, 1px); } /* subtle jitter */
-  85% { transform: translate(0px, -1px); }
-  90% { transform: translate(0,0); }
-}
-@keyframes scanline {
-  0% { transform: translateY(0); } 100% { transform: translateY(100%); }
+@keyframes cyberpunk-scanlines {
+    0% {
+        transform: translateY(-8%);
+        opacity: 0.2;
+        background-position: 0 0, 0 0;
+    }
+    35% {
+        opacity: 0.42;
+    }
+    50% {
+        transform: translateY(0%);
+        opacity: 0.34;
+    }
+    100% {
+        transform: translateY(8%);
+        opacity: 0.22;
+        background-position: 0 18px, 0 0;
+    }
 }
 
-/* 1. 基础、字体与背景 */
-body {
-    font-family: 'Rajdhani', 'Chakra Petch', 'Share Tech Mono', sans-serif !important; /* 更具科技感的字体 */
-    -webkit-font-smoothing: antialiased !important; -moz-osx-font-smoothing: grayscale !important;
-    background-color: var(--theme-bg-page) !important;
-    background-image: 
-        /* Digital noise overlay */
-        radial-gradient(circle, rgba(252, 238, 10, 0.03) 1px, transparent 1.5px),
-        /* Grid lines */
-        linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px) !important;
-    background-size: 5px 5px, 50px 50px, 50px 50px !important; /* Noise, Grid X, Grid Y */
-    background-position: 0 0, 25px 25px, 25px 25px !important;
-    margin: 0 !important; 
-    padding-top: 80px !important; /* 确保工具栏空间 */
-    color: var(--text-primary) !important;
-    position: relative !important;
-    overflow-x: hidden !important;
+@keyframes cyberpunk-scan-beam {
+    0% {
+        transform: translateY(-120%);
+        opacity: 0;
+    }
+    12% {
+        opacity: 0.18;
+    }
+    20% {
+        opacity: 0.3;
+    }
+    55% {
+        opacity: 0.14;
+    }
+    100% {
+        transform: translateY(120%);
+        opacity: 0;
+    }
 }
-/* 全局扫描线效果 */
-body::before {
-    content: ' ';
-    display: block;
+
+@keyframes cyberpunk-title-flicker {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) skewX(0deg);
+        text-shadow: 0 0 14px rgba(252, 238, 10, 0.32), 0 0 28px rgba(252, 238, 10, 0.16);
+        opacity: 1;
+    }
+    8% {
+        transform: translate3d(-1px, 0, 0) skewX(-2deg);
+    }
+    9% {
+        transform: translate3d(1px, 0, 0) skewX(2deg);
+    }
+    10% {
+        transform: translate3d(0, 0, 0) skewX(0deg);
+        opacity: 0.9;
+    }
+    24% {
+        text-shadow: 0 0 18px rgba(252, 238, 10, 0.48), 0 0 34px rgba(252, 238, 10, 0.24), 2px 0 0 rgba(255, 42, 163, 0.2), -2px 0 0 rgba(0, 240, 255, 0.18);
+    }
+    25% {
+        transform: translate3d(2px, 0, 0) skewX(4deg);
+        opacity: 0.82;
+    }
+    26% {
+        transform: translate3d(-2px, 0, 0) skewX(-4deg);
+        opacity: 0.94;
+    }
+    27% {
+        transform: translate3d(0, 0, 0) skewX(0deg);
+    }
+    52% {
+        transform: translate3d(0, 1px, 0);
+    }
+    53% {
+        transform: translate3d(0, -1px, 0);
+    }
+    54% {
+        transform: translate3d(0, 0, 0);
+    }
+    78% {
+        opacity: 0.86;
+        text-shadow: 0 0 22px rgba(252, 238, 10, 0.52), 0 0 40px rgba(252, 238, 10, 0.24);
+    }
+    79% {
+        opacity: 0.98;
+    }
+}
+
+@keyframes cyberpunk-subtitle-jitter {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+        text-shadow: 0 0 12px rgba(0, 240, 255, 0.18);
+    }
+    18% {
+        transform: translate3d(1px, 0, 0);
+    }
+    19% {
+        transform: translate3d(-1px, 0, 0);
+    }
+    20% {
+        transform: translate3d(0, 0, 0);
+    }
+    48% {
+        text-shadow: 0 0 18px rgba(0, 240, 255, 0.3), 1px 0 0 rgba(255, 42, 163, 0.14);
+    }
+    49% {
+        transform: translate3d(2px, 0, 0);
+    }
+    50% {
+        transform: translate3d(-1px, 0, 0);
+    }
+    51% {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes cyberpunk-panel-hum {
+    0%,
+    100% {
+        box-shadow: var(--cp-shadow-cyan);
+    }
+    50% {
+        box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.18), 0 18px 40px rgba(0, 0, 0, 0.42), 0 0 30px rgba(0, 240, 255, 0.2);
+    }
+}
+
+html[data-theme='cyberpunk'] body {
+    color: var(--ui-text-primary);
+    background-color: var(--theme-bg-page);
+    background-image:
+        radial-gradient(circle at 20% 20%, rgba(255, 42, 163, 0.08), transparent 24%),
+        radial-gradient(circle at 80% 0%, rgba(0, 240, 255, 0.08), transparent 28%),
+        linear-gradient(var(--cp-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cp-grid) 1px, transparent 1px),
+        radial-gradient(circle, var(--cp-noise) 1px, transparent 1.5px);
+    background-size: auto, auto, 48px 48px, 48px 48px, 6px 6px;
+    background-position: center, center, 24px 24px, 24px 24px, 0 0;
+    position: relative;
+}
+
+html[data-theme='cyberpunk'] body::before {
+    content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 200% !important; /* 拉长以实现滚动效果 */
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(252, 238, 10, 0.03), rgba(0, 240, 255, 0.02), rgba(255, 0, 170, 0.03)) !important;
-    background-size: 100% 3px, 100% 100% !important; /* 更细的扫描线 */
-    z-index: 2002 !important;
-    pointer-events: none !important;
-    animation: scanline 12s linear infinite !important;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2001;
+    background:
+        linear-gradient(to bottom, rgba(8, 10, 16, 0) 0%, rgba(8, 10, 16, 0.22) 50%, rgba(8, 10, 16, 0) 100%),
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+    mix-blend-mode: screen;
+    opacity: 0.45;
+    animation: cyberpunk-scanlines 8s linear infinite;
 }
 
-/* 2. 主要布局 */
-main#profileCardContainer {
-    width: 100%; max-width: 1024px; margin: 0 auto; box-sizing: border-box; padding: var(--space-xl) var(--space-m);
-}
-.grid-container { display: grid; gap: var(--space-l); width: 100%; grid-template-columns: 1fr; }
-@media (min-width: 768px) { .grid-container { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-.profile-card-span, .about-me-card-span, .oshi-card-span, .full-width-card-span { grid-column: span 1; }
-@media (min-width: 768px) { .about-me-card-span, .oshi-card-span, .full-width-card-span { grid-column: span 2; } }
-@media (min-width: 1024px) { .oshi-card-span, .full-width-card-span { grid-column: span 3; } }
-
-.main-header-container { margin-bottom: var(--space-xl) !important; text-align: center !important; }
-.main-title {
-    font-size: 4.5rem !important; font-weight: 700 !important; color: var(--text-hud) !important;
-    text-shadow: var(--glow-yellow-intense) !important;
-    margin-bottom: var(--space-s) !important; text-transform: uppercase !important; letter-spacing: 4px !important;
-    animation: flicker-and-jitter var(--anim-flicker-speed) infinite linear !important;
-}
-.subtitle {
-    font-size: 1.3rem !important; color: var(--cp77-cyan) !important; font-weight: 500 !important;
-    text-transform: uppercase !important; letter-spacing: 2px !important;
-    text-shadow: var(--text-shadow-cyan) !important;
-}
-.page-footer { text-align: center; font-size: 0.875rem; color: var(--text-tertiary); margin-top: 4rem; padding-bottom: 2rem; opacity: 0.6; }
-
-/* 3. 工具栏 (全息界面) */
-.editor-toolbar.top-toolbar {
-    position: fixed; top: 0; left: 0; width: 100%;
-    background-color: var(--ui-bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border-bottom: 2px solid var(--toolbar-border) !important; padding: 8px 24px !important; z-index: 1002 !important;
-    display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;
-    clip-path: var(--clip-path-hud) !important;
-}
-.desktop-toolbar-content, .toolbar-group { display: flex !important; align-items: center !important; }
-.desktop-toolbar-content { gap: var(--space-l); width: 100%; }
-.toolbar-group { gap: var(--space-s); }
-.toolbar-group-right { margin-left: auto; }
-
-.editor-toolbar button, .editor-toolbar .toolbar-button-link, .editor-toolbar label {
-    padding: var(--space-s) 12px; border: 1px solid transparent; background-color: transparent;
-    color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; font-weight: 600; text-transform: uppercase;
-    transition: all 0.2s ease-in-out !important; display: inline-flex !important; align-items: center !important; gap: var(--space-s) !important; text-decoration: none !important;
-    clip-path: var(--clip-path-button) !important;
-}
-.editor-toolbar button:hover, .editor-toolbar .toolbar-button-link:hover {
-    background-color: rgba(252, 238, 10, 0.15) !important; color: var(--cp77-yellow) !important;
-    text-shadow: var(--text-shadow-yellow) !important; border-color: var(--border-color-yellow) !important;
-}
-.editor-toolbar input[type="color"], .sidebar-item input[type="color"], label[for="themeColorPicker"] { display: none !important; }
-
-/* 4. 卡片 (数据终端) - 核心视觉升级 */
-.ui-card {
-    background-color: var(--theme-bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.15), 0 0 15px rgba(0, 240, 255, 0.2) !important;
-    transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out, transform 0.3s ease !important;
-    position: relative !important; padding: var(--space-l) !important; display: flex !important; flex-direction: column !important;
-    clip-path: var(--clip-path-card) !important; /* 应用切角 */
-}
-.ui-card:hover {
-    border-color: var(--cp77-cyan) !important;
-    box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.25), var(--glow-cyan-intense) !important;
-    transform: translateY(-3px) !important;
-}
-h2.section-title {
-    font-size: 1.6rem !important; font-weight: 700 !important; color: var(--text-hud) !important; margin: 0 0 var(--space-s) 0 !important; padding-bottom: var(--space-m) !important;
-    border-bottom: 1px solid var(--border-color-yellow) !important; text-transform: uppercase !important; letter-spacing: 1.5px !important;
-    text-shadow: var(--text-shadow-yellow) !important;
-}
-.content-text { color: var(--text-secondary) !important; line-height: 1.7 !important; font-size: 1rem !important; margin-bottom: var(--space-s) !important; }
-.content-text strong, .content-text b{
-    color: var(--cp77-yellow) !important;
-    font-weight: 700 !important;
-    text-shadow: 0 0 2px var(--cp77-yellow), 0 0 4px var(--cp77-yellow), 0 0 8px rgba(252, 238, 10, 0.4) !important;
+html[data-theme='cyberpunk'] body::after {
+    content: '';
+    position: fixed;
+    inset: -35% 0 auto 0;
+    height: 28vh;
+    pointer-events: none;
+    z-index: 2000;
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0), rgba(0, 240, 255, 0.09) 35%, rgba(252, 238, 10, 0.08) 60%, rgba(255, 42, 163, 0));
+    mix-blend-mode: screen;
+    animation: cyberpunk-scan-beam 6.5s linear infinite;
 }
 
-.action-button-text-with-icon {
-    background-color: transparent !important; border: 1px dashed var(--border-color-yellow) !important; padding: 12px !important;
-    color: var(--cp77-yellow) !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: var(--space-s) !important;
-    cursor: pointer !important; transition: all 0.2s !important; margin-top: var(--space-m) !important; width: 100% !important; text-transform: uppercase !important;
-    clip-path: var(--clip-path-button) !important;
-}
-.action-button-text-with-icon:hover {
-    border-color: var(--cp77-lime) !important; background-color: rgba(100, 255, 218, 0.15) !important; color: var(--cp77-lime) !important;
-    box-shadow: inset 0 0 10px rgba(100, 255, 218, 0.3), 0 0 10px var(--cp77-lime) !important;
+html[data-theme='cyberpunk'] body,
+html[data-theme='cyberpunk'] button,
+html[data-theme='cyberpunk'] select,
+html[data-theme='cyberpunk'] input,
+html[data-theme='cyberpunk'] textarea {
+    font-family: 'Rajdhani', 'Chakra Petch', 'Segoe UI', sans-serif;
 }
 
-/* 5. 可复用UI组件 */
-[contenteditable] {
-    cursor: text; transition: all 0.2s ease-in-out; padding: 2px 4px; margin: -2px -4px;
-    outline: none; border: 1px solid transparent;
-}
-[contenteditable]:hover { background-color: rgba(252, 238, 10, 0.1) !important; }
-[contenteditable].is-focused { background-color: rgba(252, 238, 10, 0.15) !important; box-shadow: 0 0 0 2px var(--cp77-yellow) !important; border-color: var(--cp77-yellow) !important; }
-
-.tag, .oshi-tag, .oshi-meta-tag {
-    display: inline-block; padding: 0.3rem 0.8rem; font-size: 0.8125rem;
-    font-weight: 700; margin: 0.25rem; transition: all 0.2s ease; text-transform: uppercase;
-    background: rgba(0, 240, 255, 0.15) !important; border: 1px solid var(--border-color) !important; color: var(--cp77-cyan) !important;
-    clip-path: var(--clip-path-button) !important;
-    text-shadow: 0 0 2px rgba(0,240,255,0.5) !important;
-}
-.oshi-tag { background: rgba(252, 238, 10, 0.15) !important; border-color: var(--border-color-yellow) !important; color: var(--cp77-yellow) !important; text-shadow: 0 0 2px rgba(252,238,10,0.5) !important; }
-.oshi-meta-tag { border-style: dashed !important; opacity: 0.8 !important; }
-.tag-wrapper:hover .tag, .tag-wrapper:hover .oshi-tag {
-    transform: translateY(-2px) scale(1.05) !important;
-    box-shadow: 0 0 10px var(--cp77-cyan) !important;
-}
-.tag-wrapper:hover .oshi-tag { color: var(--cp77-yellow) !important; box-shadow: 0 0 10px var(--cp77-yellow) !important; }
-
-/* 6. 特定区块 */
-.avatar-container {
-    border-radius: var(--radius-full) !important; overflow: hidden !important; border: 3px solid var(--cp77-yellow) !important; cursor: pointer !important;
-    position: relative !important; box-shadow: var(--glow-yellow-intense) !important; transition: all 0.3s ease !important;
-}
-.avatar-container:hover { transform: scale(1.05) !important; box-shadow: 0 0 20px var(--cp77-yellow), 0 0 45px var(--cp77-yellow) !important; }
-.avatar-container img { width: 100% !important; height: 100% !important; object-fit: cover !important; filter: saturate(1.2) contrast(1.1) !important; }
-.card-content-subheading {
-    font-weight: 700 !important; color: var(--cp77-magenta) !important; font-size: 1.2rem !important; margin: var(--space-s) 0 !important;
-    padding-bottom: var(--space-s) !important; border-bottom: 1px solid rgba(255,0,170,0.3) !important; text-transform: uppercase !important;
-    text-shadow: var(--text-shadow-magenta) !important;
+html[data-theme='cyberpunk'] .main-header-container {
+    position: relative;
 }
 
-/* 7. 模态框与侧边栏 */
-.modal-overlay {
-    position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 2000 !important;
-    background-color: rgba(8, 10, 15, 0.85) !important; display: flex !important; align-items: center !important; justify-content: center !important; backdrop-filter: blur(8px) !important;
-}
-.modal-content {
-    background: var(--theme-bg-card) !important; padding: var(--space-l) !important; border: 2px solid var(--border-color-yellow) !important;
-    box-shadow: var(--glow-yellow-intense) !important; width: 90% !important; max-width: 600px !important; max-height: 80vh !important;
-    display: flex !important; flex-direction: column !important;
-    clip-path: var(--clip-path-card) !important;
-}
-.modal-title { color: var(--cp77-yellow) !important; text-shadow: var(--text-shadow-yellow) !important; font-size: 1.7rem !important; text-transform: uppercase !important; margin: 0 !important; letter-spacing: 1px !important; }
-.modal-button-primary {
-    background-color: var(--cp77-yellow) !important; color: var(--text-on-neon) !important; border: 1px solid var(--cp77-yellow) !important;
-    clip-path: var(--clip-path-button) !important;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.3) !important;
-}
-.modal-button-primary:hover { background-color: #fff854 !important; box-shadow: var(--glow-yellow-intense) !important; border-color: #fff854 !important; }
-.modal-button-secondary { clip-path: var(--clip-path-button) !important; border-color: var(--cp77-cyan) !important; color: var(--cp77-cyan) !important; }
-.modal-button-secondary:hover { background-color: rgba(0,240,255,0.1) !important; box-shadow: 0 0 10px var(--cp77-cyan) !important; }
-
-.template-option {
-    border: 1px solid var(--border-color) !important; padding: var(--space-m) !important; cursor: pointer !important;
-    transition: all 0.2s ease-in-out !important; background-color: rgba(10, 20, 45, 0.6) !important;
-    clip-path: var(--clip-path-card) !important;
-}
-.template-option:hover { transform: translateY(-4px) !important; border-color: var(--cp77-yellow) !important; box-shadow: 0 0 15px var(--cp77-yellow) !important; }
-
-/* QR Code Container Styles */
-.qr-code-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: var(--space-m);
-    border-radius: var(--radius-sharp);
-    background: var(--theme-bg-card);
-    border: 2px solid var(--cp77-cyan);
-    clip-path: var(--clip-path-card);
-    box-shadow: var(--glow-cyan-intense);
+html[data-theme='cyberpunk'] .main-title {
+    color: var(--cp-yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    text-shadow: var(--cp-text-shadow-yellow);
+    position: relative;
+    animation: cyberpunk-title-flicker 5.8s steps(18, end) infinite;
 }
 
-
-/* ... 其余所有原始样式均已适配新的赛博朋克变量和风格 ... */
-/* responsive, rich-text-toolbar, delete-btn etc. styles are inherited or slightly adapted by the new variables */
-
-/* 响应式工具栏优化 - 防止换行 */
-.desktop-toolbar-content {
-    display: flex !important;
-    gap: var(--space-l) !important;
-    align-items: center !important;
-    width: 100% !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scrollbar-width: none !important; /* Firefox */
-    -ms-overflow-style: none !important; /* IE and Edge */
+html[data-theme='cyberpunk'] .subtitle {
+    color: var(--cp-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-shadow: var(--cp-text-shadow-cyan);
+    position: relative;
+    animation: cyberpunk-subtitle-jitter 6.2s steps(14, end) infinite;
 }
 
-.desktop-toolbar-content::-webkit-scrollbar {
-    display: none !important; /* Chrome, Safari, Opera */
+html[data-theme='cyberpunk'] .page-footer {
+    color: var(--ui-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
-.toolbar-group {
-    display: flex !important;
-    gap: var(--space-s) !important;
-    align-items: center !important;
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
+html[data-theme='cyberpunk'] .editor-toolbar.top-toolbar {
+    background: linear-gradient(135deg, rgba(5, 9, 17, 0.94), rgba(10, 18, 34, 0.76));
+    border-bottom: 1px solid var(--toolbar-border);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34);
+    clip-path: var(--cp-hud-clip);
 }
 
-.editor-toolbar button, .editor-toolbar .toolbar-button-link {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
+html[data-theme='cyberpunk'] .editor-toolbar.top-toolbar::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(252, 238, 10, 0.45), rgba(0, 240, 255, 0.6), transparent);
+    pointer-events: none;
 }
 
-.editor-toolbar label {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
+html[data-theme='cyberpunk'] .editor-toolbar button,
+html[data-theme='cyberpunk'] .editor-toolbar .toolbar-button-link,
+html[data-theme='cyberpunk'] .hamburger-menu button,
+html[data-theme='cyberpunk'] .sidebar-item-button,
+html[data-theme='cyberpunk'] .modal-button-primary,
+html[data-theme='cyberpunk'] .modal-button-secondary,
+html[data-theme='cyberpunk'] .action-button-text-with-icon {
+    border-radius: 0;
+    clip-path: var(--cp-button-clip);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
-.editor-toolbar select {
-    max-width: 150px !important;
-    flex-shrink: 0 !important;
+html[data-theme='cyberpunk'] .editor-toolbar button,
+html[data-theme='cyberpunk'] .editor-toolbar .toolbar-button-link,
+html[data-theme='cyberpunk'] .hamburger-menu button {
+    color: var(--ui-text-secondary);
+    border: 1px solid transparent;
 }
 
-/* 小屏幕：只显示汉堡菜单 */
+html[data-theme='cyberpunk'] .toolbar-group-right .toolbar-button-link {
+    margin-left: auto;
+}
+
+html[data-theme='cyberpunk'] .editor-toolbar button:hover,
+html[data-theme='cyberpunk'] .editor-toolbar .toolbar-button-link:hover,
+html[data-theme='cyberpunk'] .hamburger-menu button:hover {
+    color: var(--cp-yellow);
+    background: rgba(252, 238, 10, 0.1);
+    border-color: rgba(252, 238, 10, 0.38);
+    box-shadow: var(--cp-shadow-yellow);
+}
+
+html[data-theme='cyberpunk'] .editor-toolbar label,
+html[data-theme='cyberpunk'] .sidebar-item label {
+    color: var(--ui-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+html[data-theme='cyberpunk'] .feature-beta-badge {
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 0;
+    background: rgba(255, 42, 163, 0.12);
+    border: 1px solid rgba(255, 42, 163, 0.32);
+    color: #ff9bd8;
+    box-shadow: 0 0 12px rgba(255, 42, 163, 0.12);
+    clip-path: var(--cp-button-clip);
+}
+
+html[data-theme='cyberpunk'] .editor-toolbar select,
+html[data-theme='cyberpunk'] .sidebar-item select {
+    background-color: rgba(5, 10, 18, 0.9);
+    color: var(--ui-text-primary);
+    border-color: rgba(0, 240, 255, 0.24);
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.1), 0 0 20px rgba(0, 240, 255, 0.08);
+}
+
+html[data-theme='cyberpunk'] .editor-toolbar select:hover,
+html[data-theme='cyberpunk'] .sidebar-item select:hover,
+html[data-theme='cyberpunk'] .editor-toolbar select:focus,
+html[data-theme='cyberpunk'] .sidebar-item select:focus {
+    border-color: var(--cp-cyan);
+    box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.14), 0 0 24px rgba(0, 240, 255, 0.12);
+}
+
+html[data-theme='cyberpunk'] .ui-card,
+html[data-theme='cyberpunk'] .template-option,
+html[data-theme='cyberpunk'] .modal-content,
+html[data-theme='cyberpunk'] .sidebar-menu {
+    background:
+        linear-gradient(180deg, rgba(16, 27, 48, 0.92), rgba(7, 12, 24, 0.9)),
+        linear-gradient(135deg, rgba(0, 240, 255, 0.08), transparent 35%, rgba(255, 42, 163, 0.05) 100%);
+    border-radius: 0;
+    border: 1px solid rgba(0, 240, 255, 0.24);
+    box-shadow: var(--cp-shadow-cyan);
+    clip-path: var(--cp-card-clip);
+    animation: cyberpunk-panel-hum 5.4s ease-in-out infinite;
+}
+
+html[data-theme='cyberpunk'] .ui-card {
+    overflow: hidden;
+}
+
+html[data-theme='cyberpunk'] .section-title-container,
+html[data-theme='cyberpunk'] .card-content-wrapper,
+html[data-theme='cyberpunk'] .element-container {
+    position: relative;
+}
+
+html[data-theme='cyberpunk'] .ui-card::before,
+html[data-theme='cyberpunk'] .template-option::before,
+html[data-theme='cyberpunk'] .modal-content::before,
+html[data-theme='cyberpunk'] .sidebar-menu::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(252, 238, 10, 0.08), transparent 28%, transparent 70%, rgba(0, 240, 255, 0.06));
+    pointer-events: none;
+}
+
+html[data-theme='cyberpunk'] .ui-card:hover,
+html[data-theme='cyberpunk'] .template-option:hover {
+    border-color: rgba(0, 240, 255, 0.54);
+    box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.22), 0 0 24px rgba(0, 240, 255, 0.2), 0 24px 50px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='cyberpunk'] h2.section-title,
+html[data-theme='cyberpunk'] .modal-title {
+    color: var(--cp-yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-shadow: var(--cp-text-shadow-yellow);
+}
+
+html[data-theme='cyberpunk'] h2.section-title {
+    border-bottom-color: rgba(252, 238, 10, 0.32);
+}
+
+html[data-theme='cyberpunk'] .content-text,
+html[data-theme='cyberpunk'] .profile-info-text {
+    color: var(--ui-text-secondary);
+}
+
+html[data-theme='cyberpunk'] .music-game-label,
+html[data-theme='cyberpunk'] .template-description,
+html[data-theme='cyberpunk'] .qr-code-wrapper .text-sm,
+html[data-theme='cyberpunk'] .sidebar-item,
+html[data-theme='cyberpunk'] .rich-text-toolbar label {
+    color: var(--ui-text-tertiary);
+}
+
+html[data-theme='cyberpunk'] .content-text strong,
+html[data-theme='cyberpunk'] .content-text b,
+html[data-theme='cyberpunk'] .profile-label {
+    color: var(--cp-yellow);
+}
+
+html[data-theme='cyberpunk'] .card-content-subheading {
+    color: var(--cp-magenta);
+    border-bottom-color: rgba(255, 42, 163, 0.24);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 14px rgba(255, 42, 163, 0.26);
+}
+
+html[data-theme='cyberpunk'] .tag,
+html[data-theme='cyberpunk'] .oshi-tag,
+html[data-theme='cyberpunk'] .oshi-meta-tag {
+    border-radius: 0;
+    clip-path: var(--cp-button-clip);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+html[data-theme='cyberpunk'] .tag {
+    background: rgba(0, 240, 255, 0.12);
+    color: var(--cp-cyan);
+    border-color: rgba(0, 240, 255, 0.22);
+}
+
+html[data-theme='cyberpunk'] .oshi-tag {
+    background: rgba(252, 238, 10, 0.12);
+    color: var(--cp-yellow);
+    border-color: rgba(252, 238, 10, 0.26);
+}
+
+html[data-theme='cyberpunk'] .oshi-meta-tag {
+    background: rgba(255, 42, 163, 0.08);
+    color: #ff8dd2;
+    border-color: rgba(255, 42, 163, 0.22);
+}
+
+html[data-theme='cyberpunk'] .tag-wrapper:hover .tag,
+html[data-theme='cyberpunk'] .tag-wrapper:hover .oshi-tag,
+html[data-theme='cyberpunk'] .tag-wrapper:hover .oshi-meta-tag {
+    transform: translateY(-2px);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.16);
+}
+
+html[data-theme='cyberpunk'] .add-tag-input,
+html[data-theme='cyberpunk'] .qr-code-link-input,
+html[data-theme='cyberpunk'] .rich-text-toolbar .toolbar-input,
+html[data-theme='cyberpunk'] .width-dropdown {
+    background: rgba(5, 10, 18, 0.92);
+    color: var(--ui-text-primary);
+    border: 1px solid rgba(0, 240, 255, 0.24);
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.08);
+}
+
+html[data-theme='cyberpunk'] .add-tag-input:focus,
+html[data-theme='cyberpunk'] .qr-code-link-input:focus,
+html[data-theme='cyberpunk'] .rich-text-toolbar .toolbar-input:focus {
+    outline: none;
+    border-color: var(--cp-yellow);
+    box-shadow: 0 0 0 2px rgba(252, 238, 10, 0.1), 0 0 18px rgba(252, 238, 10, 0.12);
+}
+
+html[data-theme='cyberpunk'] .rich-text-toolbar {
+    background: rgba(4, 8, 16, 0.96);
+    border-color: rgba(0, 240, 255, 0.28);
+    border-radius: 0;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 18px rgba(0, 240, 255, 0.14);
+    clip-path: var(--cp-button-clip);
+}
+
+html[data-theme='cyberpunk'] .rich-text-toolbar button {
+    color: var(--ui-text-secondary);
+    border-radius: 0;
+}
+
+html[data-theme='cyberpunk'] .rich-text-toolbar button:hover,
+html[data-theme='cyberpunk'] .rich-text-toolbar button.is-active {
+    background: rgba(0, 240, 255, 0.12);
+    color: var(--cp-cyan);
+}
+
+html[data-theme='cyberpunk'] .toolbar-separator {
+    background-color: rgba(0, 240, 255, 0.2);
+}
+
+html[data-theme='cyberpunk'] .action-button {
+    background: rgba(6, 10, 18, 0.78);
+    color: var(--ui-text-secondary);
+    border: 1px solid rgba(0, 240, 255, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.06);
+}
+
+html[data-theme='cyberpunk'] .action-button:hover,
+html[data-theme='cyberpunk'] .width-control-btn:hover {
+    background: rgba(0, 240, 255, 0.12);
+    color: var(--cp-cyan);
+}
+
+html[data-theme='cyberpunk'] .action-button-text-with-icon,
+html[data-theme='cyberpunk'] .sidebar-item-button,
+html[data-theme='cyberpunk'] .modal-button-secondary {
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.28);
+    color: var(--cp-cyan);
+}
+
+html[data-theme='cyberpunk'] .action-button-text-with-icon:hover,
+html[data-theme='cyberpunk'] .sidebar-item-button:hover,
+html[data-theme='cyberpunk'] .modal-button-secondary:hover {
+    background: rgba(0, 240, 255, 0.14);
+    box-shadow: var(--cp-shadow-cyan);
+}
+
+html[data-theme='cyberpunk'] .modal-button-primary {
+    background: linear-gradient(135deg, #fcee0a, #ffd400);
+    border: 1px solid rgba(252, 238, 10, 0.52);
+    color: #0a0d13;
+    box-shadow: var(--cp-shadow-yellow);
+}
+
+html[data-theme='cyberpunk'] .modal-button-primary:hover {
+    filter: brightness(1.04);
+}
+
+html[data-theme='cyberpunk'] .modal-header {
+    border-bottom-color: rgba(0, 240, 255, 0.16);
+    box-shadow: inset 0 -1px 0 rgba(252, 238, 10, 0.08);
+}
+
+html[data-theme='cyberpunk'] .modal-close-btn {
+    color: var(--ui-text-secondary);
+}
+
+html[data-theme='cyberpunk'] .modal-close-btn:hover {
+    background: rgba(255, 42, 163, 0.1);
+    color: #ff8dd2;
+}
+
+html[data-theme='cyberpunk'] .template-name {
+    color: var(--cp-yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+html[data-theme='cyberpunk'] .avatar-container {
+    border-color: var(--cp-yellow);
+    box-shadow: 0 0 0 3px rgba(252, 238, 10, 0.12), 0 0 22px rgba(252, 238, 10, 0.24);
+}
+
+html[data-theme='cyberpunk'] .avatar-container img {
+    filter: saturate(1.18) contrast(1.08);
+}
+
+html[data-theme='cyberpunk'] .avatar-container:hover::after {
+    background: linear-gradient(135deg, rgba(252, 238, 10, 0.18), rgba(0, 240, 255, 0.16));
+}
+
+html[data-theme='cyberpunk'] .qr-code-container {
+    background: rgba(5, 10, 20, 0.86);
+    border-color: var(--cp-cyan);
+    box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.14), 0 0 22px rgba(0, 240, 255, 0.14);
+    clip-path: var(--cp-card-clip);
+}
+
+html[data-theme='cyberpunk'] .profile-section-layout {
+    align-items: start;
+}
+
+html[data-theme='cyberpunk'] .profile-info-text {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.06);
+}
+
+html[data-theme='cyberpunk'] [contenteditable]:hover,
+html[data-theme='cyberpunk'] [contenteditable].is-focused {
+    background: rgba(252, 238, 10, 0.08);
+}
+
+html[data-theme='cyberpunk'] [contenteditable].is-focused {
+    box-shadow: inset 0 0 0 1px rgba(252, 238, 10, 0.32), 0 0 0 2px rgba(252, 238, 10, 0.08);
+    border-color: rgba(252, 238, 10, 0.32);
+}
+
+html[data-theme='cyberpunk'] .template-option {
+    position: relative;
+}
+
+html[data-theme='cyberpunk'] .sidebar-overlay,
+html[data-theme='cyberpunk'] .modal-overlay {
+    background: rgba(2, 4, 10, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+html[data-theme='cyberpunk'] .sidebar-header h3 {
+    color: var(--cp-yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+html[data-theme='cyberpunk'] .sidebar-close-btn {
+    color: var(--cp-cyan);
+}
+
+html[data-theme='cyberpunk'] .sidebar-close-btn:hover {
+    color: var(--cp-yellow);
+}
+
+html[data-theme='cyberpunk'] .sidebar-item input[type='color'],
+html[data-theme='cyberpunk'] .editor-toolbar input[type='color'] {
+    border: 1px solid rgba(252, 238, 10, 0.32);
+    background: rgba(5, 10, 18, 0.9);
+    box-shadow: var(--cp-shadow-yellow);
+}
+
+html[data-theme='cyberpunk'] .sidebar-item {
+    border: 1px solid rgba(0, 240, 255, 0.08);
+    background: rgba(255, 255, 255, 0.01);
+}
+
+html[data-theme='cyberpunk'] .delete-action-btn,
+html[data-theme='cyberpunk'] .delete-item-btn,
+html[data-theme='cyberpunk'] .delete-element-btn {
+    color: var(--cp-danger);
+}
+
+html[data-theme='cyberpunk'] .delete-action-btn {
+    background: rgba(255, 53, 94, 0.92);
+    box-shadow: 0 0 14px rgba(255, 53, 94, 0.18);
+}
+
+html[data-theme='cyberpunk'] .delete-action-btn:hover {
+    background: #ff355e;
+    box-shadow: 0 0 18px rgba(255, 53, 94, 0.34);
+}
+
+html[data-theme='cyberpunk'] .is-deleting,
+html[data-theme='cyberpunk'] .tag-wrapper.is-deleting > span {
+    background-color: rgba(255, 53, 94, 0.06) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 53, 94, 0.52), 0 0 20px rgba(255, 53, 94, 0.08) !important;
+}
+
+html[data-theme='cyberpunk'] .react-grid-item.react-grid-placeholder {
+    background: rgba(0, 240, 255, 0.12) !important;
+    border: 1px dashed rgba(0, 240, 255, 0.32) !important;
+    border-radius: 0 !important;
+    clip-path: var(--cp-card-clip) !important;
+}
+
+html[data-theme='cyberpunk'] .react-resizable-handle::after {
+    border-right-color: var(--cp-cyan);
+    border-bottom-color: var(--cp-cyan);
+}
+
+html[data-theme='cyberpunk'] .drag-handle,
+html[data-theme='cyberpunk'] .width-control-btn {
+    color: var(--ui-text-tertiary);
+}
+
+html[data-theme='cyberpunk'] .ui-card:hover .drag-handle,
+html[data-theme='cyberpunk'] .ui-card:hover .width-control-container {
+    color: var(--cp-cyan);
+}
+
+html[data-theme='cyberpunk'] .width-dropdown {
+    border-radius: 0;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 18px rgba(0, 240, 255, 0.12);
+}
+
+html[data-theme='cyberpunk'] .width-dropdown button,
+html[data-theme='cyberpunk'] .width-dropdown .button-style {
+    color: var(--ui-text-secondary);
+}
+
 @media (max-width: 1200px) {
-    .desktop-toolbar-content { display: none !important; }
-    .hamburger-menu { display: block !important; }
-    
-    .hamburger-menu button {
-        background: transparent !important;
-        border: none !important;
-        cursor: pointer !important;
-        padding: var(--space-s) !important;
-        border-radius: var(--radius-slight) !important;
-        color: var(--text-secondary) !important;
-        transition: all 0.2s !important;
-        clip-path: var(--clip-path-button) !important;
+    html[data-theme='cyberpunk'] .editor-toolbar.top-toolbar {
+        border-bottom-color: rgba(252, 238, 10, 0.18);
     }
-    
-    .hamburger-menu button:hover {
-        background-color: rgba(252, 238, 10, 0.15) !important;
-        color: var(--cp77-yellow) !important;
-        text-shadow: var(--text-shadow-yellow) !important;
-    }
-    
-    .editor-toolbar.top-toolbar { justify-content: flex-end !important; padding: 8px 16px !important; }
-}
 
-/* 中等屏幕：隐藏按钮文字，只显示图标 */
-@media (min-width: 1201px) and (max-width: 1400px) {
-    .toolbar-button-text { display: none !important; }
-    .desktop-toolbar-content { gap: var(--space-m) !important; }
-    .toolbar-group { gap: 6px !important; }
-    .toolbar-group label { display: none !important; }
-    .editor-toolbar select {
-        margin-left: 0 !important;
-        min-width: 90px !important;
-        font-size: 0.85rem !important;
-        padding: 6px 28px 6px 8px !important;
+    html[data-theme='cyberpunk'] .sidebar-menu {
+        border-left: 1px solid rgba(0, 240, 255, 0.28);
     }
 }
 
-/* 较大屏幕：隐藏部分 label */
-@media (min-width: 1401px) and (max-width: 1600px) {
-    .desktop-toolbar-content { gap: var(--space-m) !important; }
-    .toolbar-group { gap: 6px !important; }
+@media (prefers-reduced-motion: reduce) {
+    html[data-theme='cyberpunk'] body::before,
+    html[data-theme='cyberpunk'] body::after,
+    html[data-theme='cyberpunk'] .main-title,
+    html[data-theme='cyberpunk'] .subtitle,
+    html[data-theme='cyberpunk'] .ui-card,
+    html[data-theme='cyberpunk'] .template-option,
+    html[data-theme='cyberpunk'] .modal-content,
+    html[data-theme='cyberpunk'] .sidebar-menu {
+        animation: none;
+    }
 }
-
-/* 大屏幕：显示完整内容 */
-@media (min-width: 1201px) {
-    .hamburger-menu { display: none !important; }
-    .desktop-toolbar-content { display: flex !important; }
-}
-@media (max-width: 480px) { .profile-section-layout { grid-template-columns: 1fr; grid-template-areas: "avatar" "info" "qrcode"; justify-items: center; text-align: center; } }
-.profile-section-layout { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto auto; grid-template-areas: "avatar" "info" "qrcode"; gap: var(--space-m); justify-items: center; }
-.avatar-container { grid-area: avatar; width: 100px; height: 100px; flex-shrink: 0; } .profile-info-text { grid-area: info; align-self: center; } .qr-code-wrapper { grid-area: qrcode; justify-self: center; margin-top: 0; }
-.qr-code-wrapper .text-sm { font-size: 0.8rem; color: var(--text-tertiary); margin-top: 0.25rem; }
-.music-game-label { font-weight: 500; color: var(--text-primary); font-size: 0.95rem; margin-right: var(--space-s); }
-.tag-group-container, .music-game-category, .oshi-tag-container { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-bottom: var(--space-m); align-items: center; }
-.rich-text-toolbar { position: absolute; z-index: 1001; background-color: var(--ui-bg-glass); border: 1px solid var(--toolbar-border); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); padding: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs); transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out; opacity: 0; transform: translateY(10px) scale(0.95); pointer-events: none; }
-.rich-text-toolbar.is-visible { opacity: 1 !important; transform: translateY(0) scale(1) !important; pointer-events: auto !important; }
-.rich-text-toolbar button { background: none !important; border: none !important; width: 32px !important; height: 32px !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; color: var(--text-secondary) !important; transition: all 0.2s ease !important; clip-path: var(--clip-path-button) !important; }
-.rich-text-toolbar button:hover { background-color: rgba(252, 238, 10, 0.2) !important; color: var(--cp77-yellow) !important; }
-.rich-text-toolbar button.is-active { background-color: var(--cp77-yellow) !important; color: var(--text-on-neon) !important; }
-.toolbar-separator { width: 1px; height: 20px; background-color: var(--toolbar-border); margin: 0 4px; }
-.rich-text-toolbar .toolbar-input, .add-tag-input, .qr-code-link-input { background: rgba(0,0,0,0.4) !important; color: var(--text-primary) !important; border: 1px solid var(--toolbar-border) !important; border-radius: var(--radius-slight) !important; padding: 6px 8px !important; font-family: 'Share Tech Mono', monospace !important; transition: all 0.2s !important; }
-.rich-text-toolbar .toolbar-input:focus, .add-tag-input:focus, .qr-code-link-input:focus { outline: none !important; border-color: var(--cp77-yellow) !important; box-shadow: var(--glow-yellow-intense) !important; }
-.delete-action-btn { position: absolute !important; top: 8px !important; right: 8px !important; width: 24px !important; height: 24px !important; background-color: var(--cp77-red) !important; color: var(--text-on-neon) !important; border-radius: var(--radius-full) !important; border: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; z-index: 10 !important; opacity: 0 !important; transform: scale(0.8) !important; transition: all 0.2s ease-in-out !important; }
-.delete-action-btn:hover { background-color: #ff3366 !important; box-shadow: 0 0 10px var(--cp77-red) !important; transform: scale(1.1) !important; }
-.delete-action-btn.is-visible { opacity: 1 !important; transform: scale(1) !important; }
-.tag-wrapper .delete-action-btn { top: -8px; right: -8px; width: 20px; height: 20px; }
-.is-deleting { box-shadow: inset 0 0 0 2px var(--cp77-red), 0 0 15px var(--cp77-red) !important; }
-.modal-header { display: flex !important; justify-content: space-between !important; align-items: center !important; border-bottom: 1px solid var(--border-color-yellow) !important; padding-bottom: var(--space-m) !important; margin-bottom: var(--space-l) !important; }
-.modal-close-btn { background: none !important; border: none !important; cursor: pointer !important; color: var(--text-tertiary) !important; padding: var(--space-s) !important; border-radius: var(--radius-full) !important; transition: all 0.2s !important; }
-.modal-close-btn:hover { background-color: rgba(252, 238, 10, 0.2) !important; color: var(--cp77-yellow) !important; }
-.modal-body { overflow-y: auto !important; }
-.modal-actions { display: flex !important; justify-content: flex-end !important; gap: var(--space-m) !important; margin-top: var(--space-l) !important; }
-.modal-button-secondary, .modal-button-primary { padding: var(--space-s) var(--space-m) !important; border: 1px solid var(--border-color) !important; background-color: transparent !important; cursor: pointer !important; font-size: 0.9rem !important; font-weight: 600 !important; transition: all 0.2s ease !important; text-transform: uppercase !important; color: var(--text-secondary) !important; }
-
-.template-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; gap: var(--space-m) !important; }
-.template-name { margin: 0 0 var(--space-s) 0 !important; font-size: 1.1rem !important; font-weight: 600 !important; color: var(--cp77-yellow) !important; text-shadow: var(--text-shadow-yellow) !important; }
-.template-description { margin: 0 !important; font-size: 0.9rem !important; color: var(--text-tertiary) !important; }
-.sidebar-container { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; z-index: 2001 !important; pointer-events: none !important; }
-.sidebar-container.is-open { pointer-events: auto !important; }
-.sidebar-overlay { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(8, 10, 15, 0.6) !important; backdrop-filter: blur(8px) !important; opacity: 0 !important; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; }
-.sidebar-container.is-open .sidebar-overlay { opacity: 1 !important; }
-.sidebar-menu { position: absolute !important; top: 0 !important; right: 0 !important; width: 280px !important; height: 100% !important; background-color: var(--ui-bg-glass) !important; border-left: 2px solid var(--border-color-yellow) !important; box-shadow: -5px 0 35px rgba(252, 238, 10, 0.3) !important; transform: translateX(100%) !important; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; display: flex !important; flex-direction: column !important; clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px) !important; } /* Added clip-path */
-.sidebar-container.is-open .sidebar-menu { transform: translateX(0) !important; }
-.sidebar-header { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: var(--space-m) var(--space-l) !important; border-bottom: 1px solid var(--toolbar-border) !important; flex-shrink: 0 !important; }
-.sidebar-header h3 { margin: 0 !important; font-size: 1.3rem !important; color: var(--cp77-yellow) !important; text-transform: uppercase !important; text-shadow: var(--text-shadow-yellow) !important; }
-.sidebar-close-btn { background: transparent !important; border: none !important; cursor: pointer !important; padding: var(--space-xs) !important; border-radius: var(--radius-full) !important; display: flex !important; align-items: center !important; justify-content: center !important; color: var(--text-tertiary) !important; transition: all 0.2s !important; }
-.sidebar-close-btn:hover { background-color: rgba(252, 238, 10, 0.2) !important; color: var(--cp77-yellow) !important; }
-.sidebar-nav { padding: var(--space-m) !important; display: flex !important; flex-direction: column !important; gap: var(--space-xs) !important; overflow-y: auto !important; }
-.sidebar-item, .sidebar-item-button { display: flex !important; align-items: center !important; gap: var(--space-m) !important; width: 100% !important; padding: 12px var(--space-m) !important; border: none !important; background: transparent !important; font-size: 1rem !important; color: var(--text-primary) !important; text-align: left !important; cursor: pointer !important; transition: background-color 0.2s, color 0.2s, text-shadow 0.2s !important; text-decoration: none !important; box-sizing: border-box !important; text-transform: uppercase !important; clip-path: var(--clip-path-button) !important; }
-.sidebar-item-button:hover { background-color: rgba(252, 238, 10, 0.1) !important; color: var(--cp77-yellow) !important; text-shadow: var(--text-shadow-yellow) !important; }
-.sidebar-item-button.is-active, .sidebar-item.is-active { background-color: rgba(252, 238, 10, 0.2) !important; color: var(--cp77-yellow) !important; text-shadow: var(--text-shadow-yellow) !important; font-weight: bold !important; }
-.sidebar-item-button.is-active:hover, .sidebar-item.is-active:hover { background-color: rgba(252, 238, 10, 0.3) !important; }

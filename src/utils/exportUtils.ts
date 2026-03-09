@@ -1,8 +1,8 @@
 import html2canvas from 'html2canvas';
 import { ProfileData } from '../types/data';
-import themesManifest from '../config/themes.json'; // Import themes manifest
 import { loadTranslations, createT } from './i18n.ts';
 import { Locale } from '../context/LocaleContext';
+import { getThemeCssPath, type ThemeKey } from './themeUtils';
 
 // 缓存翻译函数
 let cachedT: ((key: string, params?: Record<string, string | number>) => string) | null = null;
@@ -77,12 +77,12 @@ const stripHtmlTags = (value: string) => value.replace(/<[^>]*>/g, '');
 
 const getCssVarValue = (computedStyle: CSSStyleDeclaration, name: string) => computedStyle.getPropertyValue(name).trim();
 
-const getDynamicThemeStyleBlock = (accentColor: string) => {
+const getDynamicThemeStyleBlock = () => {
     const computedStyle = getComputedStyle(document.documentElement);
 
     return `
     :root {
-        --theme-accent: ${accentColor};
+        --theme-accent: ${getCssVarValue(computedStyle, '--theme-accent')};
         --theme-bg-page: ${getCssVarValue(computedStyle, '--theme-bg-page')};
         --theme-tag-bg: ${getCssVarValue(computedStyle, '--theme-tag-bg')};
         --theme-tag-bg-alt: ${getCssVarValue(computedStyle, '--theme-tag-bg-alt')};
@@ -95,8 +95,7 @@ const getDynamicThemeStyleBlock = (accentColor: string) => {
 };
 
 const getThemeCssContent = async (themeName: Theme) => {
-    const themeInfo = themesManifest[themeName];
-    const themeCssPath = themeInfo?.path ?? '';
+    const themeCssPath = getThemeCssPath(themeName);
 
     if (!themeCssPath) {
         return '';
@@ -115,8 +114,7 @@ const getThemeCssContent = async (themeName: Theme) => {
     }
 };
 
-// Define Theme type if needed (adjust according to your JSON structure)
-export type Theme = keyof typeof themesManifest; // Export Theme type
+export type Theme = ThemeKey;
 import appCssContent from '../styles/App.css?raw'; // Import App.css content directly
 
 // 将当前文档 (:root) 上定义的 CSS 变量复制到目标节点，确保主题变量可用
@@ -150,7 +148,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
     const themeCssContent = await getThemeCssContent(currentThemeName);
 
     // 动态生成主题颜色相关的 CSS 变量
-    const dynamicThemeStyleBlock = getDynamicThemeStyleBlock(profileData.userSettings.accentColor);
+    const dynamicThemeStyleBlock = getDynamicThemeStyleBlock();
 
     // 克隆并清理 HTML 内容
     const exportContainer = container.cloneNode(true) as HTMLElement;
@@ -171,7 +169,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
 
     // 构建最终的 HTML 文件
     const fullHtml = `<!DOCTYPE html>
-<html lang="${locale}" data-locale="${locale}">
+<html lang="${locale}" data-locale="${locale}" data-theme="${currentThemeName}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -242,7 +240,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         }
     </style>
 </head>
-<body>
+<body data-theme="${currentThemeName}">
     <main id="profileCardContainer">
         ${exportContainer.innerHTML}
     </main>

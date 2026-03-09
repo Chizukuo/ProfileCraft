@@ -4,12 +4,13 @@ import Toolbar from './Toolbar';
 import ProfileHeader from './ProfileHeader';
 import Card from './Card';
 import AddCardModal from './AddCardModal';
-import { applyThemeColors } from '../utils/colorUtils';
+import { applyThemeColors, resetThemeColors } from '../utils/colorUtils';
 import EditableText from './ui/EditableText';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { ProfileData } from '../types/data';
+import { useTheme } from '../context/ThemeContext';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -54,6 +55,7 @@ const SeoContent: React.FC = () => (
 
 function App() {
   const { profileData, isLoaded, updateProfileData } = useProfile();
+    const { resolvedTheme } = useTheme();
   const [isAddCardModalOpen, setAddCardModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [contentHeights, setContentHeights] = useState<Record<string, number>>({});
@@ -104,10 +106,12 @@ function App() {
 
     const accentColor = profileData?.userSettings.accentColor;
     useEffect(() => {
-        if (accentColor) {
+        if (resolvedTheme.settings.isAccentColorEnabled && accentColor) {
             applyThemeColors(accentColor);
+            return;
         }
-    }, [accentColor]);
+        resetThemeColors();
+    }, [accentColor, resolvedTheme.settings.isAccentColorEnabled]);
 
   // Migration effect: Ensure all cards have a layout property and sync layoutSpan
   useEffect(() => {

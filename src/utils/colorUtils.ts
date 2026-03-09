@@ -61,3 +61,22 @@ export const applyThemeColors = (accent: string) => {
     root.style.setProperty('--theme-tag-hover-bg', newTagHoverBg);
     root.style.setProperty('--hover-bg-color', hoverBgColor);
 };
+
+const dynamicThemeVariables = [
+    '--theme-accent',
+    '--theme-bg-page',
+    '--theme-tag-bg',
+    '--theme-tag-bg-alt',
+    '--theme-text-strong',
+    '--theme-divider',
+    '--theme-tag-hover-bg',
+    '--hover-bg-color',
+    '--button-text-on-accent'
+];
+
+export const resetThemeColors = () => {
+    const root = document.documentElement;
+    dynamicThemeVariables.forEach((variableName) => {
+        root.style.removeProperty(variableName);
+    });
+};

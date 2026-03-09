@@ -3,11 +3,9 @@ import { useProfile } from '../context/ProfileContext.tsx';
 import { exportToHtml, exportToImage } from '../utils/exportUtils.ts';
 import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu } from 'lucide-react';
 import ConfirmDialog from '../components/ui/ConfirmDialog.tsx';
-import { getThemeSettings, ThemeSettings } from '../utils/themeUtils.ts';
 import Sidebar from './Sidebar.tsx';
 import { useTheme } from '../context/ThemeContext.tsx';
 import { useTranslation } from '../hooks/useTranslation.ts';
-import themesManifest from '../config/themes.json';
 import localesManifest from '../config/locales.json';
 
 /**
@@ -44,19 +42,11 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
   const { profileData, updateProfileData, resetProfileData } = useProfile();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme, themeOptions } = useTheme();
   const { t, locale, setLocale } = useTranslation();
   const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [themeSettings, setThemeSettings] = useState<ThemeSettings>({ isAccentColorEnabled: true });
   const [displayColor, setDisplayColor] = useState(profileData?.userSettings.accentColor || '#FFC300');
-
-  useEffect(() => {
-      (async () => {
-        const settings = await getThemeSettings(theme);
-        setThemeSettings(settings);
-      })();
-    }, [theme]);
 
   const accentColor = profileData?.userSettings.accentColor;
   useEffect(() => {
@@ -102,12 +92,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
     return null;
   }
 
-  // 动态生成主题选项
-  const themeOptions = Object.entries(themesManifest).map(([value, info]) => ({
-    value,
-    label: info.name
-  }));
-
   // 动态生成语言选项
   const localeOptions = Object.entries(localesManifest).map(([value, info]) => ({
     value,
@@ -124,7 +108,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
         </div>
 
         <div className="desktop-toolbar-content">
-            {themeSettings.isAccentColorEnabled && (
+          {resolvedTheme.settings.isAccentColorEnabled && (
                 <div className="toolbar-group">
                     <label htmlFor="accentColorPicker">{t('toolbar.themeColor')}:</label>
                     <input
@@ -153,9 +137,12 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
                 <FileCode2 size={16} />
                 <span className="toolbar-button-text">{t('toolbar.exportHtml')}</span>
               </button>
-              <button onClick={handleExportImage} title={t('toolbar.exportImage')} aria-label={t('toolbar.exportImage')}>
+              <button onClick={handleExportImage} title={`${t('toolbar.exportImage')} Beta`} aria-label={`${t('toolbar.exportImage')} Beta`}>
                 <Image size={16} />
-                <span className="toolbar-button-text">{t('toolbar.exportImage')}</span>
+                <span className="toolbar-button-text">
+                  {t('toolbar.exportImage')}
+                  <span className="feature-beta-badge">Beta</span>
+                </span>
               </button>
             </div>
             <div className="toolbar-group">
@@ -163,9 +150,10 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
               <select
                 id="themeSwitcher"
                 value={theme}
-                onChange={e => setTheme(e.target.value as any)}
+                onChange={e => setTheme(e.target.value)}
                 style={{ marginLeft: 4 }}
                 aria-label={t('toolbar.selectTheme')}
+                title={resolvedTheme.description}
               >
                 {themeOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -211,7 +199,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
         onExportImageClick={handleExportImage}
         displayColor={displayColor}
         onColorChange={handleColorChange}
-        isAccentColorEnabled={themeSettings.isAccentColorEnabled}
+        isAccentColorEnabled={resolvedTheme.settings.isAccentColorEnabled}
       />
       
       <ConfirmDialog
