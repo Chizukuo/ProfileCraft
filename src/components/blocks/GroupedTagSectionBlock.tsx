@@ -37,7 +37,11 @@ const GroupedTagSectionBlock: React.FC<GroupedTagSectionBlockProps> = ({ element
         if(text.trim()){
             const newTag: TagData = { text: text.trim() };
             handleUpdateElement(group, [...element[group], newTag]);
-            group === 'arcade' ? setNewArcadeTag('') : setNewMobileTag('');
+            if (group === 'arcade') {
+                setNewArcadeTag('');
+            } else {
+                setNewMobileTag('');
+            }
         }
     };
     

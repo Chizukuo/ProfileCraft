@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useProfile } from '../context/ProfileContext';
-import { useTheme } from '../context/ThemeContext';
 import Toolbar from './Toolbar';
 import ProfileHeader from './ProfileHeader';
 import Card from './Card';
@@ -10,9 +9,38 @@ import EditableText from './ui/EditableText';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { CardData, ProfileData } from '../types/data';
+import { ProfileData } from '../types/data';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
+
+const GRID_COLUMNS = 3;
+const DEFAULT_CARD_HEIGHT = 10;
+
+const getWidthFromLayoutSpan = (layoutSpan?: string) => {
+    if (layoutSpan?.includes('span 2')) return 2;
+    if (layoutSpan?.includes('span 3')) return 3;
+    return 1;
+};
+
+const getLayoutSpanFromWidth = (width: number, currentLayoutSpan?: string) => {
+    if (width === 1) return 'profile-card-span';
+    if (width === 2) return 'about-me-card-span';
+
+    // Keep existing oshi full-width style when card width is 3.
+    if (currentLayoutSpan === 'oshi-card-span') return 'oshi-card-span';
+    return 'full-width-card-span';
+};
+
+const createDefaultLayout = (id: string, index: number, layoutSpan?: string): Layout => {
+    const width = getWidthFromLayoutSpan(layoutSpan);
+    return {
+        i: id,
+        x: (index * width) % GRID_COLUMNS,
+        y: Math.floor(index / GRID_COLUMNS) * DEFAULT_CARD_HEIGHT,
+        w: width,
+        h: DEFAULT_CARD_HEIGHT
+    };
+};
 
 const SeoContent: React.FC = () => (
     <div className="intro-section" style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', left: '-9999px', top: '-9999px', opacity: 0 }}>
@@ -26,7 +54,6 @@ const SeoContent: React.FC = () => (
 
 function App() {
   const { profileData, isLoaded, updateProfileData } = useProfile();
-  const { theme, setTheme } = useTheme();
   const [isAddCardModalOpen, setAddCardModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [contentHeights, setContentHeights] = useState<Record<string, number>>({});
@@ -75,35 +102,29 @@ function App() {
         console.log('%c' + versionInfo, styleVersion.trim());
   }, []); 
 
-  useEffect(() => {
-    if (profileData) {
-      applyThemeColors(profileData.userSettings.accentColor);
-    }
-  }, [profileData?.userSettings.accentColor]);
+    const accentColor = profileData?.userSettings.accentColor;
+    useEffect(() => {
+        if (accentColor) {
+            applyThemeColors(accentColor);
+        }
+    }, [accentColor]);
 
   // Migration effect: Ensure all cards have a layout property and sync layoutSpan
   useEffect(() => {
       if (!profileData) return;
       let updatesNeeded = false;
       const newCards = profileData.cards.map((card, index) => {
-          let newCard = { ...card };
+          const newCard = { ...card };
 
           // 1. Ensure layout exists
           if (!newCard.layout) {
               updatesNeeded = true;
-              let w = 1;
-              if (newCard.layoutSpan?.includes('span 2')) w = 2;
-              if (newCard.layoutSpan?.includes('span 3')) w = 3;
-              // Simple default layout logic
-              newCard.layout = { i: newCard.id, x: (index * w) % 3, y: Infinity, w, h: 10 };
+              newCard.layout = { ...createDefaultLayout(newCard.id, index, newCard.layoutSpan), y: Infinity };
           }
 
           // 2. Sync layoutSpan with layout.w
           if (newCard.layout) {
-              let expectedSpan = newCard.layoutSpan;
-              if (newCard.layout.w === 1) expectedSpan = 'profile-card-span';
-              else if (newCard.layout.w === 2) expectedSpan = 'about-me-card-span';
-              else if (newCard.layout.w === 3 && newCard.layoutSpan !== 'oshi-card-span') expectedSpan = 'full-width-card-span';
+              const expectedSpan = getLayoutSpanFromWidth(newCard.layout.w, newCard.layoutSpan);
 
               if (newCard.layoutSpan !== expectedSpan) {
                   updatesNeeded = true;
@@ -115,8 +136,7 @@ function App() {
       });
 
       if (updatesNeeded) {
-           updateProfileData((prev: ProfileData | null) => {
-              if (!prev) return null;
+           updateProfileData((prev: ProfileData) => {
               return { ...prev, cards: newCards };
           });
       }
@@ -124,9 +144,9 @@ function App() {
 
   const handleFooterUpdate = useCallback((html: string) => {
     if (profileData) {
-        updateProfileData((prev: ProfileData | null) => ({
-            ...prev!,
-            userSettings: { ...prev!.userSettings, footerText: html }
+        updateProfileData((prev: ProfileData) => ({
+            ...prev,
+            userSettings: { ...prev.userSettings, footerText: html }
         }));
     }
   }, [profileData, updateProfileData]);
@@ -144,16 +164,11 @@ function App() {
     });
 
     if (hasChanged) {
-        updateProfileData((prev: ProfileData | null) => {
-            if (!prev) return null;
+        updateProfileData((prev: ProfileData) => {
             const newCards = prev.cards.map(card => {
-                const layoutItem = layout.find((l: any) => l.i === card.id);
+                const layoutItem = layout.find((l) => l.i === card.id);
                 if (layoutItem) {
-                    // Determine new layoutSpan based on width
-                    let newLayoutSpan = card.layoutSpan;
-                    if (layoutItem.w === 1) newLayoutSpan = 'profile-card-span';
-                    else if (layoutItem.w === 2) newLayoutSpan = 'about-me-card-span';
-                    else if (layoutItem.w === 3) newLayoutSpan = 'full-width-card-span';
+                    const newLayoutSpan = getLayoutSpanFromWidth(layoutItem.w, card.layoutSpan);
 
                     return {
                         ...card,
@@ -219,15 +234,17 @@ function App() {
               updatesNeeded = true;
               return {
                   ...card,
-                  layout: { ...(card.layout || { i: card.id, x: 0, y: 0, w: 1 }), h: requiredH }
+                                    layout: {
+                                        ...(card.layout || createDefaultLayout(card.id, 0, card.layoutSpan)),
+                                        h: requiredH
+                                    }
               };
           }
           return card;
       });
 
       if (updatesNeeded) {
-          updateProfileData((prev: ProfileData | null) => {
-              if (!prev) return null;
+          updateProfileData((prev: ProfileData) => {
               return { ...prev, cards: newCards };
           });
       }
@@ -241,10 +258,7 @@ function App() {
   const layouts = {
       lg: profileData.cards.map((card, index) => {
           if (card.layout) return { ...card.layout, i: card.id };
-          let w = 1;
-          if (card.layoutSpan?.includes('span 2')) w = 2;
-          if (card.layoutSpan?.includes('span 3')) w = 3;
-          return { i: card.id, x: (index * w) % 3, y: Math.floor(index / 3) * 10, w, h: 10 };
+          return createDefaultLayout(card.id, index, card.layoutSpan);
       })
   };
 
@@ -263,13 +277,17 @@ function App() {
                     cols={{ lg: 3, md: 2, sm: 1 }}
                     rowHeight={10}
                     margin={[24, 32]}
-                    onLayoutChange={(layout) => handleLayoutChange(layout)}
+                    onLayoutChange={(layout: Layout[]) => handleLayoutChange(layout)}
                     draggableHandle=".drag-handle"
                     isDraggable={true}
                     isResizable={false}
                 >
                     {profileData.cards.map((card, index) => (
-                        <div key={card.id} className={card.layoutSpan} data-grid={card.layout || { x: (index) % 3, y: Math.floor(index / 3) * 10, w: 1, h: 10, i: card.id }}>
+                                                <div
+                                                    key={card.id}
+                                                    className={card.layoutSpan}
+                                                    data-grid={card.layout || createDefaultLayout(card.id, index, card.layoutSpan)}
+                                                >
                             <Card 
                                 key={card.id} 
                                 cardData={card} 

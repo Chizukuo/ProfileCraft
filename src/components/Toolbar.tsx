@@ -1,8 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useProfile } from '../context/ProfileContext.tsx';
 import { exportToHtml, exportToImage } from '../utils/exportUtils.ts';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu, Globe } from 'lucide-react';
-import Modal from '../components/ui/Modal.tsx';
+import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu } from 'lucide-react';
 import ConfirmDialog from '../components/ui/ConfirmDialog.tsx';
 import { getThemeSettings, ThemeSettings } from '../utils/themeUtils.ts';
 import Sidebar from './Sidebar.tsx';
@@ -59,11 +58,12 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
       })();
     }, [theme]);
 
+  const accentColor = profileData?.userSettings.accentColor;
   useEffect(() => {
-    if (profileData) {
-      setDisplayColor(profileData.userSettings.accentColor);
+    if (accentColor) {
+      setDisplayColor(accentColor);
     }
-  }, [profileData?.userSettings.accentColor]);
+  }, [accentColor]);
 
   const throttledUpdateGlobalColor = useThrottle((newColor: string) => {
     updateProfileData(prev => ({

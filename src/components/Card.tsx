@@ -32,7 +32,7 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
   useEffect(() => {
       if (!cardRef.current || !onHeightChange) return;
       const resizeObserver = new ResizeObserver((entries) => {
-          for (let entry of entries) {
+        for (const entry of entries) {
               const element = entry.target as HTMLElement;
               // Use scrollHeight to ensure we capture all content
               // Add padding (24px * 2) + border (2px) + minimal buffer (10px) = 58px
@@ -48,15 +48,14 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
   }, [onHeightChange]);
 
   const handleUpdateCard = useCallback((field: keyof CardData, value: any) => {
-    updateProfileData((prev: ProfileData | null) => ({
-        ...prev!,
-        cards: prev!.cards.map((card, i) => i === cardIndex ? { ...card, [field]: value } : card)
+    updateProfileData((prev: ProfileData) => ({
+      ...prev,
+      cards: prev.cards.map((card, i) => i === cardIndex ? { ...card, [field]: value } : card)
     }));
   }, [cardIndex, updateProfileData]);
 
   const setWidth = (width: number) => {
-      updateProfileData((prev: ProfileData | null) => {
-          if (!prev) return null;
+      updateProfileData((prev: ProfileData) => {
           const newCards = prev.cards.map(c => {
               if (c.id === cardData.id) {
                   let newLayoutSpan = c.layoutSpan;
@@ -80,9 +79,9 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
   };
   
   const deleteCard = useCallback(() => {
-    updateProfileData((prev: ProfileData | null) => ({
-      ...prev!,
-      cards: prev!.cards.filter((_, i) => i !== cardIndex)
+    updateProfileData((prev: ProfileData) => ({
+      ...prev,
+      cards: prev.cards.filter((_, i) => i !== cardIndex)
     }));
   }, [cardIndex, updateProfileData]);
 

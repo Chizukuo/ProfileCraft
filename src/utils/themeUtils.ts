@@ -1,4 +1,3 @@
-import appCss from '../styles/App.css?raw';
 // 通过 manifest 获取主题设置
 import themesManifest from '../config/themes.json';
 

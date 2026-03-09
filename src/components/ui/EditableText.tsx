@@ -38,7 +38,7 @@ const FormattingToolbar: React.FC<{
 
 
 // 主组件：可编辑文本
-const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', className, html, styles, onUpdate, onStyleUpdate }) => {
+const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', className, html, styles, onUpdate }) => {
     const textRef = useRef<HTMLElement>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [toolbarState, setToolbarState] = useState<{

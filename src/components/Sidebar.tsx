@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, X, Globe } from 'lucide-react';
+import React from 'react';
+import { FileCode2, Image, PlusSquare, RotateCcw, Star, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { useLocale } from '../context/LocaleContext';
