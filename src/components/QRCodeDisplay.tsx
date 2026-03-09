@@ -9,27 +9,25 @@ interface QRCodeDisplayProps {
 
 const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ link }) => {
     const { profileData } = useProfile();
-    const { theme, resolvedTheme } = useTheme();
+    const { resolvedTheme, themeAppliedVersion } = useTheme();
     const accentColor = profileData?.userSettings.accentColor || '#000';
     const [qrColors, setQrColors] = useState({ dark: "#000000", light: "#ffffff" });
 
     useEffect(() => {
-        let frameId = 0;
-        const updateQrColors = () => {
-            const colorDark = getComputedStyle(document.documentElement).getPropertyValue('--qr-code-fg-color').trim() || 
-                              getComputedStyle(document.documentElement).getPropertyValue('--theme-text-strong').trim() || 
-                              "#000000";
-            const colorLight = getComputedStyle(document.documentElement).getPropertyValue('--theme-bg-page').trim() || "#ffffff";
-            setQrColors({ dark: colorDark, light: colorLight });
-        };
+        const rootStyle = getComputedStyle(document.documentElement);
+        const colorDark = rootStyle.getPropertyValue('--qr-code-fg-color').trim() || 
+                          rootStyle.getPropertyValue('--theme-text-strong').trim() || 
+                          "#000000";
+        const colorLight = rootStyle.getPropertyValue('--theme-bg-page').trim() || "#ffffff";
 
-        frameId = window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(updateQrColors);
+        setQrColors((prev) => {
+            if (prev.dark === colorDark && prev.light === colorLight) {
+                return prev;
+            }
+
+            return { dark: colorDark, light: colorLight };
         });
-
-        return () => window.cancelAnimationFrame(frameId);
-
-    }, [theme, profileData?.userSettings.accentColor]);
+    }, [themeAppliedVersion, profileData?.userSettings.accentColor]);
 
     const qrContainerStyle = resolvedTheme.settings.isAccentColorEnabled
         ? { borderColor: accentColor }

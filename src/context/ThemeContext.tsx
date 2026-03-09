@@ -10,6 +10,7 @@ interface ThemeContextType {
   setTheme: (theme: string) => void;
   resolvedTheme: ResolvedTheme;
   themeOptions: ThemeOption[];
+  themeAppliedVersion: number;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -26,6 +27,7 @@ const getStoredTheme = (): ThemeKey => {
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { profileData, updateProfileData } = useProfile();
   const [theme, setThemeState] = useState<ThemeKey>(getStoredTheme);
+  const [themeAppliedVersion, setThemeAppliedVersion] = useState(0);
 
   const resolvedTheme = useMemo(() => resolveTheme(theme), [theme]);
   const themeOptions = useMemo(() => getThemeOptions(), []);
@@ -64,6 +66,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const html = document.documentElement;
     const body = document.body;
     const themePath = getThemeCssPath(resolvedTheme.key);
+    let frameId = 0;
 
     html.dataset.theme = resolvedTheme.key;
     html.dataset.themeScheme = resolvedTheme.colorScheme;
@@ -81,14 +84,39 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         document.head.appendChild(themeLink);
       }
 
+      const markThemeApplied = () => {
+        frameId = window.requestAnimationFrame(() => {
+          setThemeAppliedVersion((prev) => prev + 1);
+        });
+      };
+
+      themeLink.onload = markThemeApplied;
+      themeLink.onerror = markThemeApplied;
       themeLink.href = themePath;
     } else if (themeLink) {
+      themeLink.onload = null;
+      themeLink.onerror = null;
       themeLink.removeAttribute('href');
+      frameId = window.requestAnimationFrame(() => {
+        setThemeAppliedVersion((prev) => prev + 1);
+      });
+    } else {
+      frameId = window.requestAnimationFrame(() => {
+        setThemeAppliedVersion((prev) => prev + 1);
+      });
     }
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      if (themeLink) {
+        themeLink.onload = null;
+        themeLink.onerror = null;
+      }
+    };
   }, [resolvedTheme.key, resolvedTheme.colorScheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme, themeOptions }}>
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme, themeOptions, themeAppliedVersion }}>
       {children}
     </ThemeContext.Provider>
   );
