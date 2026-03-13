@@ -12,6 +12,16 @@ import TagSectionBlock from './blocks/TagSectionBlock';
 import OshiSectionBlock from './blocks/OshiSectionBlock';
 import GroupedTagSectionBlock from './blocks/GroupedTagSectionBlock';
 import AddElementModal from './AddElementModal';
+import { getWidthFromLayoutSpan } from '../hooks/useGridLayout';
+
+// 策略模式：元素类型 → 渲染组件映射表，新增元素类型只需在此注册
+const ELEMENT_RENDERERS: Record<CardElement['type'], React.ComponentType<any>> = {
+  profileInfo: ProfileInfoBlock,
+  paragraph: ParagraphBlock,
+  tagSection: TagSectionBlock,
+  tagSectionTwo: OshiSectionBlock,
+  groupedTagSection: GroupedTagSectionBlock,
+};
 
 interface CardProps {
   cardData: CardData;
@@ -27,7 +37,11 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [deleteCardConfirm, setDeleteCardConfirm] = useState(false);
   const [deleteElementIndex, setDeleteElementIndex] = useState<number | null>(null);
+  const [isWidthMenuOpen, setIsWidthMenuOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const widthControlRef = useRef<HTMLDivElement>(null);
+
+  const currentWidth = cardData.layout?.w ?? getWidthFromLayoutSpan(cardData.layoutSpan);
 
   useEffect(() => {
       if (!cardRef.current || !onHeightChange) return;
@@ -76,7 +90,36 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
           });
           return { ...prev, cards: newCards };
       });
+      setIsWidthMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!isWidthMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (!widthControlRef.current) return;
+      const target = event.target as Node;
+      if (!widthControlRef.current.contains(target)) {
+        setIsWidthMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsWidthMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isWidthMenuOpen]);
   
   const deleteCard = useCallback(() => {
     updateProfileData((prev: ProfileData) => ({
@@ -99,76 +142,76 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
   const renderElement = useCallback((element: CardElement, elementIndex: number) => {
     const key = `${cardData.id}-el-${elementIndex}`;
     const commonProps = {
-        cardIndex,
-        elementIndex,
-        onDelete: () => setDeleteElementIndex(elementIndex)
+      cardIndex,
+      elementIndex,
+      onDelete: () => setDeleteElementIndex(elementIndex),
     };
-    
-    switch (element.type) {
-      case 'profileInfo':
-        return <ProfileInfoBlock key={key} element={element} {...commonProps} />;
-      case 'paragraph':
-        return <ParagraphBlock key={key} element={element} {...commonProps} />;
-      case 'tagSection':
-        return <TagSectionBlock key={key} element={element} {...commonProps} />;
-      case 'tagSectionTwo':
-        return <OshiSectionBlock key={key} element={element} {...commonProps} />;
-      case 'groupedTagSection':
-        return <GroupedTagSectionBlock key={key} element={element} {...commonProps} />;
-      default:
-        return null;
-    }
+
+    const Renderer = ELEMENT_RENDERERS[element.type];
+    return Renderer ? <Renderer key={key} element={element} {...commonProps} /> : null;
   }, [cardData.id, cardIndex]);
 
   return (
     <>
-      <div 
+      <div
         ref={cardRef}
-        className={`ui-card ${cardData.layoutSpan} ${isHoveringDelete ? 'is-deleting' : ''}`} 
+        className={`ui-card ${cardData.layoutSpan} ${isHoveringDelete ? 'is-deleting' : ''}`}
         data-card-id={cardData.id}
         onMouseEnter={() => setIsCardHovered(true)}
         onMouseLeave={() => setIsCardHovered(false)}
-        style={{ height: '100%' }}
       >
-        <div className="card-inner-content" style={{ height: 'auto', display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box' }}>
-        <div className="drag-handle" style={{ opacity: isCardHovered ? 1 : 0 }}>
-            <GripHorizontal size={20} />
-        </div>
-
-        <div className="width-control-container" style={{ opacity: isCardHovered ? 1 : 0 }}>
-            <button className="width-control-btn" title={t('card.adjustWidth')}>
+        <div className="card-inner-content">
+          <div className={`card-top-controls ${isCardHovered || isWidthMenuOpen ? 'is-visible' : ''}`}>
+            <div className={`width-control-container ${isWidthMenuOpen ? 'is-open' : ''}`} ref={widthControlRef}>
+              <button
+                className="width-control-btn"
+                title={t('card.adjustWidth')}
+                aria-haspopup="menu"
+                aria-expanded={isWidthMenuOpen}
+                onClick={() => setIsWidthMenuOpen(prev => !prev)}
+              >
                 <Columns size={16} />
-            </button>
-            <div className="width-dropdown">
-                <button onClick={() => setWidth(1)} className="width-dropdown-item">1 Column</button>
-                <button onClick={() => setWidth(2)} className="width-dropdown-item">2 Columns</button>
-                <button onClick={() => setWidth(3)} className="width-dropdown-item">3 Columns</button>
+              </button>
+              <div className="width-dropdown">
+                <button onClick={() => setWidth(1)} className={`width-dropdown-item ${currentWidth === 1 ? 'is-active' : ''}`}>{t('card.width1')}</button>
+                <button onClick={() => setWidth(2)} className={`width-dropdown-item ${currentWidth === 2 ? 'is-active' : ''}`}>{t('card.width2')}</button>
+                <button onClick={() => setWidth(3)} className={`width-dropdown-item ${currentWidth === 3 ? 'is-active' : ''}`}>{t('card.width3')}</button>
+              </div>
             </div>
-        </div>            <ActionButton 
-            icon={<X size={14} />} 
-            title={t('card.deleteCard')}
-            onClick={() => setDeleteCardConfirm(true)}
-            variant="delete"
-            className={isCardHovered ? 'is-visible' : ''}
-            onMouseEnter={() => setIsHoveringDelete(true)}
-            onMouseLeave={() => setIsHoveringDelete(false)}
+
+            <div className="drag-handle">
+              <GripHorizontal size={20} />
+            </div>
+
+            <ActionButton
+              icon={<X size={14} />}
+              title={t('card.deleteCard')}
+              onClick={() => setDeleteCardConfirm(true)}
+              variant="delete"
+              className={`card-delete-btn ${isCardHovered ? 'is-visible' : ''}`}
+              onMouseEnter={() => setIsHoveringDelete(true)}
+              onMouseLeave={() => setIsHoveringDelete(false)}
             />
-            <div className="section-title-container">
+          </div>
+
+          <div className="section-title-container">
             <EditableText
-                as="h2"
-                className="section-title"
-                html={cardData.title}
-                styles={cardData.titleStyles}
-                onUpdate={(html) => handleUpdateCard('title', html)}
-                onStyleUpdate={(styles) => handleUpdateCard('titleStyles', styles)}
+              as="h2"
+              className="section-title"
+              html={cardData.title}
+              styles={cardData.titleStyles}
+              onUpdate={(html) => handleUpdateCard('title', html)}
+              onStyleUpdate={(styles) => handleUpdateCard('titleStyles', styles)}
             />
-            </div>
-            <div className="card-content-wrapper">
+          </div>
+
+          <div className="card-content-wrapper">
             {cardData.elements.map(renderElement)}
-            </div>
-            <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon" title={t('card.addNewBlock')}>
-                <PlusCircle size={18} /> {t('card.addNewBlock')}
-            </button>
+          </div>
+
+          <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon" title={t('card.addNewBlock')}>
+            <PlusCircle size={18} /> {t('card.addNewBlock')}
+          </button>
         </div>
       </div>
       

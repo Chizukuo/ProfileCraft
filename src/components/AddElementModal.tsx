@@ -35,7 +35,7 @@ const AddElementModal: React.FC<AddElementModalProps> = ({ isOpen, onClose, onAd
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('modal.addElement')}>
-      <p style={{ marginBottom: '16px', color: 'var(--text-color)', opacity: 0.8 }}>
+      <p className="modal-intro-text">
         {t('modal.selectElementType')}
       </p>
       <div className="template-grid">

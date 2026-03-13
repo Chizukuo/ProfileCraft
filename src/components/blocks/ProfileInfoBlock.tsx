@@ -126,21 +126,21 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
                 aria-label="更换头像"
             >
                 <img src={profileData.userSettings.avatarSrc} alt="用户头像" />
-                <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
+                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden-file-input" onChange={handleAvatarUpload} />
             </div>
 
             <div className="profile-info-text">
                 {element.items?.map((item, index) => (
-                    <div className="content-text mb-1 profile-item-row" key={index} style={{ display: 'flex', alignItems: 'baseline', gap: '4px', position: 'relative' }}>
-                        <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    <div className="content-text mb-1 profile-item-row" key={index}>
+                        <div className="profile-item-label">
                             <EditableText
                                 as="span"
                                 html={item.label}
                                 onUpdate={(val) => handleItemUpdate(index, 'label', val)}
                             />
-                            <span style={{ marginLeft: '2px' }}>:</span>
+                            <span className="profile-item-colon">:</span>
                         </div>
-                        <div style={{ wordBreak: 'break-word' }}>
+                        <div className="profile-item-value">
                             <EditableText
                                 as="span"
                                 html={item.value}
@@ -152,42 +152,20 @@ const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex,
                         <button 
                             onClick={() => handleDeleteItem(index)} 
                             className="delete-item-btn action-button"
-                            style={{ 
-                                position: 'absolute',
-                                right: '-28px',
-                                top: '0',
-                                width: '24px', 
-                                height: '24px', 
-                                padding: '4px', 
-                                opacity: 0, 
-                                transition: 'opacity 0.2s',
-                                zIndex: 10
-                            }}
                             title="删除此项"
                         >
                             <X size={14} />
                         </button>
                     </div>
                 ))}
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                <div className="add-item-button-container">
                     <button 
                         onClick={handleAddItem} 
                         className="add-item-btn action-button"
-                        style={{ width: 'auto', height: 'auto', padding: '4px 12px', fontSize: '12px', borderRadius: '12px' }}
                     >
-                        <Plus size={12} style={{ marginRight: '4px' }} /> 添加信息
+                        <Plus size={12} className="icon-inline-left" /> 添加信息
                     </button>
                 </div>
-                
-                <style>{`
-                    .profile-item-row:hover .delete-item-btn {
-                        opacity: 1 !important;
-                    }
-                    /* Hide buttons during export */
-                    @media print {
-                        .delete-item-btn, .add-item-btn { display: none !important; }
-                    }
-                `}</style>
             </div>
 
             <div className="qr-code-wrapper">

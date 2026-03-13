@@ -5,15 +5,18 @@ import './styles/App.css';
 import { ProfileProvider } from './context/ProfileContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LocaleProvider } from './context/LocaleContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <LocaleProvider>
-      <ProfileProvider>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </ProfileProvider>
-    </LocaleProvider>
+    <ErrorBoundary>
+      <LocaleProvider>
+        <ProfileProvider>
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
+        </ProfileProvider>
+      </LocaleProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

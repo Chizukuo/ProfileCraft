@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useProfile } from '../../context/ProfileContext';
 import { ParagraphElement } from '../../types/data';
 import EditableText from '../ui/EditableText';
 import ActionButton from '../ui/ActionButton';
 import { X } from 'lucide-react';
+import { useDeleteHoverState } from '../../hooks';
 
 
 interface ParagraphBlockProps {
@@ -15,8 +16,7 @@ interface ParagraphBlockProps {
 
 const ParagraphBlock: React.FC<ParagraphBlockProps> = ({ element, cardIndex, elementIndex, onDelete }) => {
     const { updateProfileData } = useProfile();
-    const [isHoveringDelete, setIsHoveringDelete] = useState(false);
-    const [isContainerHovered, setIsContainerHovered] = useState(false);
+    const { isDeleteHovered, isContainerHovered, containerHoverHandlers, deleteHoverHandlers } = useDeleteHoverState();
     
     const handleUpdate = (field: keyof ParagraphElement, value: any) => {
         updateProfileData(prev => ({
@@ -38,9 +38,8 @@ const ParagraphBlock: React.FC<ParagraphBlockProps> = ({ element, cardIndex, ele
     
     return (
         <div 
-            className={`element-container ${isHoveringDelete ? 'is-deleting' : ''}`}
-            onMouseEnter={() => setIsContainerHovered(true)}
-            onMouseLeave={() => setIsContainerHovered(false)}
+            className={`element-container ${isDeleteHovered ? 'is-deleting' : ''}`}
+            {...containerHoverHandlers}
         >
              <EditableText
                 as="p"
@@ -54,10 +53,9 @@ const ParagraphBlock: React.FC<ParagraphBlockProps> = ({ element, cardIndex, ele
               icon={<X size={12} />} 
               title="删除此区块" 
               onClick={onDelete} 
-              variant="delete" 
-              className={isContainerHovered ? 'is-visible' : ''}
-              onMouseEnter={() => setIsHoveringDelete(true)}
-              onMouseLeave={() => setIsHoveringDelete(false)}
+                            variant="delete"
+                            className={`block-delete-btn ${isContainerHovered ? 'is-visible' : ''}`}
+                            {...deleteHoverHandlers}
             />
         </div>
     );

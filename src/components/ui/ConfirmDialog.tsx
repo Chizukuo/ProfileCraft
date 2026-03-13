@@ -33,12 +33,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title}>
-            <p style={{ 
-                color: isDangerous ? 'var(--delete-red)' : 'var(--ui-text-secondary)',
-                fontSize: '1rem',
-                lineHeight: '1.6',
-                margin: 0
-            }}>
+            <p className={`confirm-dialog-message ${isDangerous ? 'is-dangerous' : ''}`}>
                 {message}
             </p>
             <div className="modal-actions">
@@ -46,12 +41,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                     {cancelText}
                 </button>
                 <button 
-                    className="modal-button-primary" 
+                    className={`modal-button-primary ${isDangerous ? 'modal-button-danger' : ''}`}
                     onClick={handleConfirm}
-                    style={isDangerous ? {
-                        backgroundColor: 'var(--delete-red)',
-                        borderColor: 'var(--delete-red)'
-                    } : undefined}
                 >
                     {confirmText}
                 </button>

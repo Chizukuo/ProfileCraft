@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TagData, Styles } from '../../types/data';
 import ActionButton from './ActionButton';
 import { X } from 'lucide-react';
 import EditableText from './EditableText';
+import { useDeleteHoverState } from '../../hooks';
 
 interface TagProps {
     tagData: TagData;
@@ -16,8 +17,7 @@ interface TagProps {
 }
 
 const Tag: React.FC<TagProps> = ({ tagData, defaultStyles, onUpdate, onDelete, onStyleUpdate }) => {
-    const [isHoveringDelete, setIsHoveringDelete] = useState(false);
-    const [isWrapperHovered, setIsWrapperHovered] = useState(false);
+    const { isDeleteHovered, isContainerHovered, containerHoverHandlers, deleteHoverHandlers } = useDeleteHoverState();
     
     const handleTextUpdate = (html: string) => {
         onUpdate({ text: html });
@@ -35,9 +35,8 @@ const Tag: React.FC<TagProps> = ({ tagData, defaultStyles, onUpdate, onDelete, o
 
     return (
         <div 
-            className={`tag-wrapper ${isHoveringDelete ? 'is-deleting' : ''}`}
-            onMouseEnter={() => setIsWrapperHovered(true)}
-            onMouseLeave={() => setIsWrapperHovered(false)}
+            className={`tag-wrapper ${isDeleteHovered ? 'is-deleting' : ''}`}
+            {...containerHoverHandlers}
         >
             {/* 这里的 'span' 仅仅作为 EditableText 的容器，样式由 EditableText 内部处理 */}
             <span className={tagClass}>
@@ -56,10 +55,9 @@ const Tag: React.FC<TagProps> = ({ tagData, defaultStyles, onUpdate, onDelete, o
               icon={<X size={12} />} 
               title="删除标签" 
               onClick={onDelete} 
-              variant="delete" 
-              className={isWrapperHovered ? 'is-visible' : ''}
-              onMouseEnter={() => setIsHoveringDelete(true)}
-              onMouseLeave={() => setIsHoveringDelete(false)}
+                            variant="delete"
+                            className={`tag-delete-btn ${isContainerHovered ? 'is-visible' : ''}`}
+                            {...deleteHoverHandlers}
             />
         </div>
     );

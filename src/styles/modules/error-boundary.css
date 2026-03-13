@@ -1,0 +1,33 @@
+.error-boundary-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+    font-family: system-ui, sans-serif;
+}
+
+.error-boundary-title {
+    margin-bottom: 0.5rem;
+}
+
+.error-boundary-message {
+    color: #666;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+}
+
+.error-boundary-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-xs);
+    border: 1px solid currentColor;
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+}
+
+.error-boundary-btn-primary {
+    margin-right: 0.75rem;
+}

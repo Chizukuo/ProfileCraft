@@ -137,7 +137,6 @@ const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', clas
                 ref={textRef as any}
                 className={`${className || ''} ${isFocused ? 'is-focused' : ''}`.trim()}
                 style={computedStyles} // 直接应用计算好的样式
-                dangerouslySetInnerHTML={{ __html: html }}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 contentEditable={true}

@@ -22,7 +22,11 @@
   },
   "card": {
     "deleteCard": "このカードを削除",
-    "addNewBlock": "このカードに新しいブロックを追加"
+    "addNewBlock": "このカードに新しいブロックを追加",
+    "adjustWidth": "カード幅を調整",
+    "width1": "1列",
+    "width2": "2列",
+    "width3": "3列"
   },
   "modal": {
     "confirmReset": "リセット確認",

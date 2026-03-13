@@ -1,3 +1,7 @@
+@import './modules/app-shell.css';
+@import './modules/error-boundary.css';
+@import './modules/delete-controls.css';
+
 /* ===================================
    1. CSS 变量和设计系统
    =================================== */
@@ -311,6 +315,10 @@ main#profileCardContainer {
     margin-left: var(--space-xs);
 }
 
+.select-inline-offset {
+    margin-left: var(--space-xs);
+}
+
 .editor-toolbar select:focus,
 .sidebar-item select:focus {
     border-color: var(--theme-accent);
@@ -430,6 +438,32 @@ body[data-theme='dark'] .sidebar-item select {
     padding: 0 var(--space-l) var(--space-m) var(--space-l);
     display: flex;
     flex-direction: column;
+    height: 100%;
+}
+
+.card-inner-content {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.card-top-controls {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    min-height: 32px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+}
+
+.card-top-controls.is-visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .ui-card:hover {
@@ -438,7 +472,7 @@ body[data-theme='dark'] .sidebar-item select {
 }
 
 .section-title-container {
-    margin-top: var(--space-l);
+    margin-top: var(--space-s);
 }
 
 h2.section-title {
@@ -626,47 +660,6 @@ h2.section-title {
     transform: scale(1.1); 
 }
 
-/* 删除按钮 */
-.delete-action-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    background-color: var(--delete-red);
-    color: white;
-    border-radius: var(--radius-full);
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity var(--transition-base) ease-in-out, 
-                transform var(--transition-base) ease-in-out, 
-                box-shadow var(--transition-base) ease-in-out;
-}
-
-.delete-action-btn.is-visible {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.tag-wrapper .delete-action-btn {
-    top: -8px;
-    right: -8px;
-    width: 20px;
-    height: 20px;
-}
-
-.delete-action-btn:hover {
-    background-color: var(--delete-red-hover);
-    box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.5);
-    transform: scale(1.1);
-}
-
 /* 删除状态 */
 .is-deleting {
     background-color: rgba(239, 68, 68, 0.05) !important;
@@ -777,6 +770,13 @@ h2.section-title {
     width: 100px;
     height: 100px;
     flex-shrink: 0;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background-color: #eee;
+    border: 3px solid var(--theme-accent);
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .profile-info-text {
@@ -786,22 +786,76 @@ h2.section-title {
     max-width: 300px; 
 }
 
+.hidden-file-input {
+    display: none;
+}
+
+.profile-item-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    position: relative;
+}
+
+.profile-item-label {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.profile-item-colon {
+    margin-left: 2px;
+}
+
+.profile-item-value {
+    word-break: break-word;
+}
+
+.delete-item-btn {
+    position: absolute;
+    right: -28px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: 10;
+}
+
+.profile-item-row:hover .delete-item-btn {
+    opacity: 1;
+}
+
+.add-item-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.add-item-btn {
+    width: auto;
+    height: auto;
+    padding: 4px 12px;
+    font-size: 12px;
+    border-radius: 12px;
+}
+
+.icon-inline-left {
+    margin-right: 4px;
+}
+
 .qr-code-wrapper {
     grid-area: qrcode;
     justify-self: center;
     margin-top: var(--space-m);
-}
-
-/* 头像容器 */
-.avatar-container { 
-    border-radius: var(--radius-full); 
-    overflow: hidden; 
-    background-color: #eee; 
-    border: 3px solid var(--theme-accent); 
-    cursor: pointer; 
-    flex-shrink: 0; 
-    position: relative; 
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
 }
 
 .avatar-container img { 
@@ -821,15 +875,6 @@ h2.section-title {
     text-align: center; 
     font-size: 0.7rem; 
     padding: 4px 0; 
-}
-
-/* 二维码 */
-.qr-code-wrapper { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 5px; 
-    flex-shrink: 0; 
 }
 
 .qr-code-container { 
@@ -957,6 +1002,12 @@ h2.section-title {
     overflow-y: auto;
 }
 
+.modal-intro-text {
+    margin-bottom: var(--space-m);
+    color: var(--ui-text-secondary);
+    opacity: 0.8;
+}
+
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -993,6 +1044,22 @@ h2.section-title {
 .modal-button-primary:hover {
     opacity: 0.85;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button-danger {
+    background-color: var(--delete-red);
+    border-color: var(--delete-red);
+}
+
+.confirm-dialog-message {
+    color: var(--ui-text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.confirm-dialog-message.is-dangerous {
+    color: var(--delete-red);
 }
 
 /* 模板选择网格 */
@@ -1185,6 +1252,20 @@ h2.section-title {
     opacity: 0.5 !important;
 }
 
+.react-grid-item {
+    transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease;
+}
+
+.react-grid-item.react-draggable-dragging,
+.react-grid-item.resizing {
+    z-index: 40;
+}
+
+.react-grid-item.react-draggable-dragging .ui-card,
+.react-grid-item.resizing .ui-card {
+    box-shadow: var(--shadow-xl);
+}
+
 .react-resizable-handle {
     background-image: none !important;
     width: 20px !important;
@@ -1207,14 +1288,15 @@ h2.section-title {
 
 /* Drag Handle */
 .drag-handle {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    justify-self: center;
     cursor: grab;
-    padding: 8px;
-    opacity: 0;
-    transition: opacity var(--transition-base);
+    touch-action: none;
+    user-select: none;
+    padding: 4px 8px;
     z-index: 10;
     color: var(--ui-text-tertiary);
 }
@@ -1223,22 +1305,13 @@ h2.section-title {
     cursor: grabbing;
 }
 
-.ui-card:hover .drag-handle {
-    opacity: 1;
-}
-
 /* Width Control */
 .width-control-container {
-    position: absolute;
-    top: 12px;
-    left: 12px;
+    position: relative;
+    top: auto;
+    left: auto;
+    justify-self: start;
     z-index: 20;
-    opacity: 0;
-    transition: opacity var(--transition-base);
-}
-
-.ui-card:hover .width-control-container {
-    opacity: 1;
 }
 
 .width-control-btn {
@@ -1287,6 +1360,10 @@ h2.section-title {
     display: block;
 }
 
+.width-control-container.is-open .width-dropdown {
+    display: block;
+}
+
 .width-dropdown-item {
     display: block;
     width: 100%;
@@ -1303,4 +1380,24 @@ h2.section-title {
 .width-dropdown-item:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: var(--ui-text-primary);
+}
+
+.width-dropdown-item.is-active {
+    background-color: var(--hover-bg-color);
+    color: var(--theme-text-strong);
+    font-weight: 600;
+}
+
+@media (hover: none) {
+    .card-top-controls {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@media print {
+    .delete-item-btn,
+    .add-item-btn {
+        display: none !important;
+    }
 }

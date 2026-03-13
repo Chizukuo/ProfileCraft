@@ -7,11 +7,20 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom'],
-          layout: ['react-grid-layout', 'react-resizable'],
-          export: ['html2canvas', 'qrcode.react'],
-          icons: ['lucide-react']
+        manualChunks(id) {
+          if (id.includes('react-grid-layout') || id.includes('react-resizable')) {
+            return 'layout'
+          }
+          if (id.includes('html2canvas') || id.includes('qrcode.react')) {
+            return 'export'
+          }
+          if (id.includes('lucide-react')) {
+            return 'icons'
+          }
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react'
+          }
+          return undefined
         }
       }
     }

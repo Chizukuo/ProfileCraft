@@ -1,80 +1,98 @@
-# 🌈 芝士扩列条编辑器 (Profile Craft)
-### [English](./README.md) / [日本語](./document/README.ja-JP.md) / [한국어](./document/README.ko-KR.md)
+# ProfileCraft（芝士扩列条编辑器）
 
->开发者“小芝士”说：嘿！“芝士”的发音和“这是”一样，所以这个工具的名字，意思就是“这是一个扩列条编辑器！” 希望你喜欢这个由我带来的小工具。
+[English](../README.md) / [日本語](./README.ja-JP.md) / [한국어](./README.ko-KR.md)
 
-芝士扩列条编辑器是一个基于 React + TypeScript 开发的现代化扩列条编辑器。  
-它支持你自由编辑文本、主题色、上传头像和二维码，管理动态信息区块，并可导出为独立的 HTML 文件或高清 PNG 图片，是进行个性化展示和社交分享的利器。
+ProfileCraft 是一个基于 React + TypeScript 的浏览器端扩列条编辑器。
+它支持富文本编辑、卡片布局拖拽缩放、多语言与主题切换，并可一键导出为 HTML 或 PNG。
 
-## 👉 在线体验（[GitHub Pages 部署](https://chizukuo.github.io/ProfileCraft/)）
+## 在线体验
 
+- https://tools.chizunet.cc/
 
+## 功能特性
 
-## 📌 功能特点
-- 🖋️ **实时编辑与富文本**  
-  所见即所得，直接点击文本即可修改。  
-  支持 **加粗**、*斜体*、~~删除线~~、<u>下划线</u>等格式。
+- 富文本编辑（加粗、斜体、下划线、删除线）
+- 动态卡片与内容区块管理
+- 基于 react-grid-layout 的拖拽与缩放布局
+- 头像上传与二维码链接更新
+- 多语言界面（zh-CN、en-US、ja-JP、ko-KR）
+- 内置主题（Default、Cyberpunk）
+- localStorage 自动保存
+- 导出为独立 HTML 或 PNG 图片
 
-- 🎨 **自定义配色**  
-  使用颜色选择器修改主题色，自动调整关联颜色，保持整体风格统一。
+## 技术栈
 
-- 🖼️ **头像上传 & 二维码更新**  
-  上传自定义头像（本地 Base64 存储），修改链接，实时生成新二维码。
+- React 19
+- TypeScript
+- Vite
+- Context API
+- react-grid-layout
+- html2canvas
+- qrcode.react
+- lucide-react
 
-- 🗂️ **动态卡片与内容区块**  
-  添加卡片：从模板添加新卡片。  
-  添加区块：段落、标签组、推し信息等。  
-  删除卡片/区块/标签，悬浮时可删除。
+## 本地开发
 
-- 💾 **自动保存**  
-  自动保存到浏览器 [localStorage](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/localStorage)，刷新页面也不怕丢失。
+### 环境要求
 
-- 📤 **导出功能**  
-  支持导出为独立的 HTML 文件或高清 PNG 图片。  
-  可一键重置为初始模板。
+- Node.js 20+
+- npm 10+
 
-- 📱 **移动端优化**  
-  响应式设计，移动端自动收纳工具栏，体验流畅。
+### 安装依赖
 
----
+```bash
+npm install
+```
 
-## 🛠️ 如何使用
-- 🚀 **在线访问**  
-  👉 [https://chizukuo.github.io/ProfileCraft/](https://chizukuo.github.io/ProfileCraft/)
+### 启动开发环境
 
-- ✨ **编辑指南**  
-  - 点击文本即可编辑。  
-  - 选中文本设置格式。  
-  - 通过工具栏或侧边栏调整主题色。  
-  - 支持卡片和区块自由新增与删除。
+```bash
+npm run dev
+```
 
----
+### 打包生产版本
 
-## 📦 导出
-- 顶部工具栏可导出 HTML 或 PNG。  
-- 支持一键重置到初始模板。
+```bash
+npm run build
+```
 
----
+### 本地预览
 
-## ⚙️ 技术栈
+```bash
+npm run preview
+```
 
-- 框架：[React](https://reactjs.org/)
-- 语言：[TypeScript](https://www.typescriptlang.org/)
-- 构建工具：[Vite](https://vitejs.dev/)
-- 状态管理：[React Context API](https://reactjs.org/docs/context.html)
-- 样式：[CSS3](https://developer.mozilla.org/zh-CN/docs/Web/CSS) + [CSS Variables](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Using_CSS_custom_properties)
-- 图标：[Lucide React](https://lucide.dev/)
+### 代码检查
 
-### 依赖库
-- [html2canvas](https://github.com/niklasvh/html2canvas) — 用于导出 PNG 图片  
-- [qrcode.react](https://github.com/zpao/qrcode.react) — 生成二维码组件
+```bash
+npm run lint
+```
 
----
+## 目录结构
 
-## ⚠️ 注意事项
-- 数据存储于浏览器 [localStorage](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/localStorage)。  
-- 清除缓存会导致数据丢失，请注意备份。  
-- [html2canvas](https://github.com/niklasvh/html2canvas) 对复杂 CSS 效果支持有限。  
-- 导出 HTML 需联网加载字体资源。
+```text
+src/
+  components/      # 页面与业务组件
+  context/         # Profile / Locale / Theme 状态上下文
+  hooks/           # 复用逻辑（布局、节流、翻译等）
+  config/          # 语言与主题配置注册
+  utils/           # 导出、国际化、主题与颜色工具
+  styles/          # 全局样式与模块样式
+  types/           # TypeScript 类型定义
+public/
+  locales/         # 国际化文案文件
+  themes/          # 主题样式文件
+document/
+  README.*.md      # 多语言文档
+```
 
-祝您制作出独一无二的扩列条！ 🎉
+## 数据与导出说明
+
+- 编辑数据默认保存在浏览器 localStorage。
+- 清理浏览器存储会删除本地草稿。
+- PNG 导出依赖 html2canvas，复杂 CSS 效果可能存在还原差异。
+- 导出的 HTML 内嵌所需样式，若使用网络字体则需要联网加载。
+
+## 许可证
+
+MIT，详见 [LICENSE](../LICENSE)。

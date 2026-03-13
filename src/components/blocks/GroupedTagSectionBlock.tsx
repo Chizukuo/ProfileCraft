@@ -5,6 +5,7 @@ import EditableText from '../ui/EditableText';
 import ActionButton from '../ui/ActionButton';
 import { X, Plus } from 'lucide-react';
 import Tag from '../ui/Tag';
+import { useDeleteHoverState } from '../../hooks';
 
 interface GroupedTagSectionBlockProps {
     element: GroupedTagSectionElement;
@@ -17,8 +18,7 @@ const GroupedTagSectionBlock: React.FC<GroupedTagSectionBlockProps> = ({ element
     const { updateProfileData } = useProfile();
     const [newArcadeTag, setNewArcadeTag] = useState('');
     const [newMobileTag, setNewMobileTag] = useState('');
-    const [isHoveringDelete, setIsHoveringDelete] = useState(false);
-    const [isContainerHovered, setIsContainerHovered] = useState(false);
+    const { isDeleteHovered, isContainerHovered, containerHoverHandlers, deleteHoverHandlers } = useDeleteHoverState();
 
     const handleUpdateElement = (field: keyof GroupedTagSectionElement, value: any) => {
         updateProfileData(prev => ({
@@ -65,9 +65,8 @@ const GroupedTagSectionBlock: React.FC<GroupedTagSectionBlockProps> = ({ element
 
     return (
         <div 
-            className={`element-container ${isHoveringDelete ? 'is-deleting' : ''}`}
-            onMouseEnter={() => setIsContainerHovered(true)}
-            onMouseLeave={() => setIsContainerHovered(false)}
+            className={`element-container ${isDeleteHovered ? 'is-deleting' : ''}`}
+            {...containerHoverHandlers}
         >
             <EditableText
                 as="h3"
@@ -116,10 +115,9 @@ const GroupedTagSectionBlock: React.FC<GroupedTagSectionBlockProps> = ({ element
               icon={<X size={12} />} 
               title="删除此区块" 
               onClick={onDelete} 
-              variant="delete" 
-              className={isContainerHovered ? 'is-visible' : ''}
-              onMouseEnter={() => setIsHoveringDelete(true)}
-              onMouseLeave={() => setIsHoveringDelete(false)}
+                            variant="delete"
+                            className={`block-delete-btn ${isContainerHovered ? 'is-visible' : ''}`}
+                            {...deleteHoverHandlers}
             />
         </div>
     );

@@ -1,0 +1,57 @@
+/* 删除按钮：基础 */
+.action-button.delete-action-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background-color: var(--delete-red);
+    color: white;
+    border-radius: var(--radius-full);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+    transition: opacity var(--transition-base) ease-in-out,
+                transform var(--transition-base) ease-in-out,
+                box-shadow var(--transition-base) ease-in-out;
+}
+
+.action-button.delete-action-btn.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.action-button.delete-action-btn:hover {
+    background-color: var(--delete-red-hover);
+    box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.5);
+    transform: scale(1.1);
+}
+
+/* 删除按钮：场景化 */
+.card-delete-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+    justify-self: end;
+}
+
+.block-delete-btn {
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+}
+
+.tag-delete-btn {
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+}

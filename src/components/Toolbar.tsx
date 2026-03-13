@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useProfile } from '../context/ProfileContext.tsx';
 import { exportToHtml, exportToImage } from '../utils/exportUtils.ts';
 import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu } from 'lucide-react';
@@ -7,34 +7,7 @@ import Sidebar from './Sidebar.tsx';
 import { useTheme } from '../context/ThemeContext.tsx';
 import { useTranslation } from '../hooks/useTranslation.ts';
 import localesManifest from '../config/locales.json';
-
-/**
- * 限制函数调用频率的自定义 Hook
- * @param callback 需要限制频率的函数
- * @param delay 限制的延迟时间（毫秒）
- * @returns 经过限制的函数
- */
-const useThrottle = (callback: (...args: any[]) => void, delay: number) => {
-    const isThrottled = useRef(false);
-    const timeoutRef = useRef<number | null>(null);
-  
-    const throttledCallback = useCallback((...args: any[]) => {
-      if (isThrottled.current) return;
-      callback(...args);
-      isThrottled.current = true;
-      timeoutRef.current = window.setTimeout(() => {
-        isThrottled.current = false;
-      }, delay);
-    }, [callback, delay]);
-  
-    useEffect(() => {
-      return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      };
-    }, []);
-  
-    return throttledCallback;
-};
+import { useThrottle } from '../hooks/useThrottle';
 
 interface ToolbarProps {
   onAddCardClick: () => void;
@@ -151,7 +124,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
                 id="themeSwitcher"
                 value={theme}
                 onChange={e => setTheme(e.target.value)}
-                style={{ marginLeft: 4 }}
+                className="select-inline-offset"
                 aria-label={t('toolbar.selectTheme')}
                 title={resolvedTheme.description}
               >
@@ -166,7 +139,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
                 id="localeSwitcher"
                 value={locale}
                 onChange={e => setLocale(e.target.value as any)}
-                style={{ marginLeft: 4 }}
+                className="select-inline-offset"
                 aria-label={t('toolbar.selectLanguage')}
               >
                 {localeOptions.map(opt => (

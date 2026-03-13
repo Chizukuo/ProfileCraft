@@ -22,7 +22,11 @@
   },
   "card": {
     "deleteCard": "이 카드 삭제",
-    "addNewBlock": "이 카드에 새 블록 추가"
+    "addNewBlock": "이 카드에 새 블록 추가",
+    "adjustWidth": "카드 너비 조절",
+    "width1": "1열",
+    "width2": "2열",
+    "width3": "3열"
   },
   "modal": {
     "confirmReset": "재설정 확인",

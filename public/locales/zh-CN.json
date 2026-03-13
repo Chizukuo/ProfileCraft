@@ -22,7 +22,11 @@
   },
   "card": {
     "deleteCard": "删除此卡片",
-    "addNewBlock": "添加新区块到此卡片"
+    "addNewBlock": "添加新区块到此卡片",
+    "adjustWidth": "调整卡片宽度",
+    "width1": "1 列",
+    "width2": "2 列",
+    "width3": "3 列"
   },
   "modal": {
     "confirmReset": "确认重置",

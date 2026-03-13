@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onRe
               id="sidebarThemeSwitcher"
               value={theme}
               onChange={e => setTheme(e.target.value)}
-              style={{ marginLeft: 4 }}
+              className="select-inline-offset"
               aria-label={t('toolbar.selectTheme')}
               title={resolvedTheme.description}
             >
@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onRe
               id="sidebarLocaleSwitcher"
               value={locale}
               onChange={e => setLocale(e.target.value as any)}
-              style={{ marginLeft: 4 }}
+              className="select-inline-offset"
               aria-label={t('toolbar.selectLanguage')}
             >
               {Object.entries(locales).map(([key, value]) => (

@@ -59,7 +59,6 @@ const cleanupContentEditableElements = (root: ParentNode, resetInlineStyles: boo
         if (resetInlineStyles) {
             const htmlEl = el as HTMLElement;
             htmlEl.style.backgroundColor = 'transparent';
-            htmlEl.style.border = 'none';
             htmlEl.style.cursor = 'default';
             htmlEl.style.padding = '';
             htmlEl.style.margin = '';
@@ -210,15 +209,63 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         }
 
         /* 保持卡片在编辑器中的实际位置 */
-        .layout {
-            position: relative !important;
+        main#profileCardContainer {
             width: 100% !important;
+            max-width: 1080px !important;
+            margin: 0 auto !important;
+            padding: 48px 32px 32px 32px !important;
+            box-sizing: border-box !important;
+        }
+        .app-grid-shell {
+            width: 100% !important;
+        }
+        .layout {
             height: auto !important;
-            min-height: 0 !important;
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 32px 24px !important;
+            width: 100% !important;
         }
         .react-grid-item {
-            position: absolute !important;
-            /* transform, top, left, width, height 保持元素原有的内联样式，由 react-grid-layout 计算得出 */
+            position: relative !important;
+            transform: none !important;
+            top: auto !important;
+            left: auto !important;
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+        .profile-card-span { grid-column: span 1 !important; }
+        .about-me-card-span { grid-column: span 2 !important; }
+        .oshi-card-span,
+        .full-width-card-span { grid-column: span 3 !important; }
+
+        .card-top-controls {
+            display: none !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+        }
+
+        .section-title-container {
+            margin-top: 30px !important;
+        }
+
+        h2.section-title {
+            border-bottom: 1px solid var(--theme-divider, var(--ui-border-default, rgba(0, 0, 0, 0.18))) !important;
+            padding-bottom: var(--space-m) !important;
+        }
+
+        .page-footer {
+            display: block !important;
+            margin-top: 48px !important;
+            padding-bottom: 32px !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+
+        .sidebar-container,
+        .hamburger-menu {
+            display: none !important;
         }
         
         /* 静态元素样式 */

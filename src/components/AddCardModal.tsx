@@ -42,7 +42,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('modal.addCard')}>
-      <p style={{ marginBottom: '16px', color: 'var(--text-color)', opacity: 0.8 }}>
+      <p className="modal-intro-text">
         {t('modal.selectCardType')}
       </p>
       <div className="template-grid">

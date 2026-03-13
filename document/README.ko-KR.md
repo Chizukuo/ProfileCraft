@@ -1,83 +1,98 @@
-# 🌈 치즈 프로필 카드 에디터 (Profile Craft)
-### [English](./README.md) / [中文](./document/README.zh-CN.md) / [日本語](./document/README.ja-JP.md)
->개발자 "작은 치즈(小芝士, chizukuo)"가 전하는 인사말:  
-"치즈(芝士)"는 중국어로 "이것은(这是, zhè shì)"와 발음이 비슷해요.  
-그래서 이 툴의 이름은 "이것은 프로필 카드 에디터입니다!"라는 재치 있는 뜻을 담고 있어요. 재미있게 사용해 주세요!
+# ProfileCraft (치즈 프로필 카드 에디터)
 
-치즈 프로필 카드 에디터는 React + TypeScript 기반으로 제작된 최신 프로필 카드 에디터입니다.  
-텍스트 편집, 테마 색상 변경, 아바타 및 QR 코드 업로드, 동적 콘텐츠 블록 관리 기능을 지원하며, 완성된 카드는 독립 HTML 파일 또는 고화질 PNG 이미지로 내보내기 할 수 있습니다.  
-개성 넘치는 프로필 카드 제작과 SNS 공유에 최적화된 도구입니다.
+[English](../README.md) / [中文](./README.zh-CN.md) / [日本語](./README.ja-JP.md)
 
-## 👉 온라인에서 사용해보기 → [GitHub Pages 데모](https://chizukuo.github.io/ProfileCraft/)
+ProfileCraft는 React + TypeScript로 만든 브라우저 기반 프로필 카드 에디터입니다.
+리치 텍스트 편집, 카드 레이아웃 드래그/리사이즈, 다국어 및 테마 전환, HTML/PNG 내보내기를 제공합니다.
 
+## 데모
 
+- https://tools.chizunet.cc/
 
-## 📌 주요 기능
-- 🖋️ **실시간 리치 텍스트 편집**  
-  텍스트를 클릭하여 바로 수정 가능.  
-  **굵게**, *기울임꼴*, ~~취소선~~, <u>밑줄 등 서식 지원</u>.
+## 주요 기능
 
-- 🎨 **테마 색상 자유 설정**  
-  색상 선택기를 통해 테마 색상을 지정하면, 관련 색상도 자동으로 조정되어 통일감 있는 디자인 제공.
+- 리치 텍스트 편집(굵게, 기울임, 밑줄, 취소선)
+- 동적 카드/콘텐츠 블록 관리
+- react-grid-layout 기반 드래그 및 리사이즈
+- 아바타 업로드와 QR 코드 링크 갱신
+- 다국어 UI(zh-CN, en-US, ja-JP, ko-KR)
+- 기본 테마 제공(Default, Cyberpunk)
+- localStorage 자동 저장
+- 독립 HTML 또는 PNG 내보내기
 
-- 🖼️ **아바타 및 QR 코드 실시간 업데이트**  
-  원하는 아바타 이미지 업로드 (Base64 형식으로 브라우저에 저장).  
-  URL 입력 시 QR 코드가 즉시 업데이트.
+## 기술 스택
 
-- 🗂️ **동적 카드 및 콘텐츠 블록**  
-  템플릿에서 새로운 카드 추가.  
-  단락, 태그 그룹, 관심사 정보 등을 자유롭게 추가 가능.  
-  카드/블록/태그는 마우스 오버 시 삭제 버튼 노출.
+- React 19
+- TypeScript
+- Vite
+- Context API
+- react-grid-layout
+- html2canvas
+- qrcode.react
+- lucide-react
 
-- 💾 **자동 저장 기능**  
-  편집 내용은 브라우저의 [localStorage](https://developer.mozilla.org/ko/docs/Web/API/Window/localStorage)에 자동 저장됨. 새로고침 후에도 유지됨.
+## 로컬 개발
 
-- 📤 **다양한 내보내기 기능**  
-  완성된 카드를 HTML 또는 PNG 이미지로 내보내기 지원.  
-  원클릭 초기화 기능도 제공.
+### 요구 사항
 
-- 📱 **모바일 최적화**  
-  반응형 디자인 적용. 모바일에서는 툴바가 접혀서 깔끔한 사용 경험 제공.
+- Node.js 20+
+- npm 10+
 
----
+### 의존성 설치
 
-## 🛠️ 사용 방법
-- 🚀 **온라인 접속**  
-  👉 [https://chizukuo.github.io/ProfileCraft/](https://chizukuo.github.io/ProfileCraft/)
+```bash
+npm install
+```
 
-- ✨ **편집 가이드**  
-  - 텍스트 클릭 후 직접 수정.  
-  - 텍스트 드래그 후 서식 지정 가능.  
-  - 사이드바 또는 툴바에서 테마 색상 변경.  
-  - 카드/블록 자유롭게 추가 및 삭제 가능.
+### 개발 서버 실행
 
----
+```bash
+npm run dev
+```
 
-## 📦 내보내기
-- 상단 툴바에서 HTML 또는 PNG 형식으로 내보내기 가능.  
-- 원클릭으로 초기 템플릿으로 리셋 가능.
+### 프로덕션 빌드
 
----
+```bash
+npm run build
+```
 
-## ⚙️ 기술 스택
+### 빌드 결과 미리보기
 
-- 프레임워크: [React](https://reactjs.org/)  
-- 언어: [TypeScript](https://www.typescriptlang.org/)  
-- 빌드 도구: [Vite](https://vitejs.dev/)  
-- 상태 관리: [React Context API](https://reactjs.org/docs/context.html)  
-- 스타일링: [CSS3](https://developer.mozilla.org/ko/docs/Web/CSS) + [CSS Variables](https://developer.mozilla.org/ko/docs/Web/CSS/Using_CSS_custom_properties)  
-- 아이콘: [Lucide React](https://lucide.dev/)
+```bash
+npm run preview
+```
 
-### 주요 라이브러리
-- [html2canvas](https://github.com/niklasvh/html2canvas) — PNG 이미지 내보내기 지원  
-- [qrcode.react](https://github.com/zpao/qrcode.react) — QR 코드 생성 컴포넌트
+### 린트 실행
 
----
+```bash
+npm run lint
+```
 
-## ⚠️ 주의 사항
-- 데이터는 브라우저의 [localStorage](https://developer.mozilla.org/ko/docs/Web/API/Window/localStorage)에 저장됩니다.  
-- 캐시 삭제 시 데이터가 손실될 수 있으므로 필요시 백업 권장.  
-- [html2canvas](https://github.com/niklasvh/html2canvas)는 복잡한 CSS 스타일을 완벽하게 반영하지 못할 수 있습니다.  
-- HTML 내보내기 시 외부 폰트 로딩을 위해 인터넷 연결이 필요합니다.
+## 디렉터리 구조
 
-자신만의 특별한 프로필 카드를 제작해보세요! 🎉
+```text
+src/
+  components/      # 앱 화면, 카드, 모달, UI 컴포넌트
+  context/         # Profile / Locale / Theme 컨텍스트
+  hooks/           # 레이아웃, 스로틀, 번역 등 재사용 로직
+  config/          # 로케일/테마 설정
+  utils/           # 내보내기, i18n, 테마/색상 유틸리티
+  styles/          # 전역 및 모듈 CSS
+  types/           # TypeScript 타입 정의
+public/
+  locales/         # 번역 리소스
+  themes/          # 테마 CSS
+document/
+  README.*.md      # 다국어 문서
+```
+
+## 데이터 저장 및 내보내기 안내
+
+- 편집 데이터는 브라우저 localStorage에 저장됩니다.
+- 브라우저 저장소를 지우면 로컬 초안이 함께 삭제됩니다.
+- PNG 내보내기는 html2canvas를 사용하므로 복잡한 CSS 효과가 완벽히 재현되지 않을 수 있습니다.
+- HTML 내보내기 파일은 필요한 스타일을 포함하지만, 웹 폰트는 인터넷 연결이 필요할 수 있습니다.
+
+## 라이선스
+
+MIT, 자세한 내용은 [LICENSE](../LICENSE)를 참고하세요.

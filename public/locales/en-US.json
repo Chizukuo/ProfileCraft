@@ -22,7 +22,11 @@
   },
   "card": {
     "deleteCard": "Delete This Card",
-    "addNewBlock": "Add New Block to This Card"
+    "addNewBlock": "Add New Block to This Card",
+    "adjustWidth": "Adjust Card Width",
+    "width1": "1 Column",
+    "width2": "2 Columns",
+    "width3": "3 Columns"
   },
   "modal": {
     "confirmReset": "Confirm Reset",
