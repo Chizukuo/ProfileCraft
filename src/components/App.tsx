@@ -34,8 +34,8 @@ const _art = `
 `;
 console.log('%c' + _art, 'color:#FFC107;font-weight:bold;font-size:14px;font-family:"Courier New",monospace;white-space:pre;');
 console.log(
-  '%c\n        芝士扩列条编辑器 V2.4.0\n        构建时间: ' +
-    (import.meta.env.VITE_BUILD_TIME ?? new Date().toLocaleString()) +
+  '%c\n        芝士扩列条编辑器 V2.4.5\n        构建时间: ' +
+    (import.meta.env.VITE_BUILD_TIME ?? '未知构建时间') +
     '\n         chizukuo@icloud.com\n    ',
   'color:#B5651D;font-weight:bold;font-size:12px;font-family:"Courier New",monospace;white-space:pre;'
 );
