@@ -50,6 +50,32 @@ npm install
 npm run dev
 ```
 
+### Optional: Built-in Fallback AI API
+
+This project supports a fallback AI config via Vite env vars.
+
+1. Copy `.env.example` to `.env.local`
+2. Fill your fallback values:
+
+```bash
+VITE_AI_FALLBACK_API_KEY=your_key
+VITE_AI_FALLBACK_BASE_URL=https://api.siliconflow.cn/v1
+VITE_AI_FALLBACK_MODEL=Qwen/Qwen2.5-7B-Instruct
+```
+
+Notes:
+
+- User input in AI settings still takes priority over fallback values.
+- `VITE_*` variables are bundled into frontend output. Avoid long-lived production secrets; prefer a short-lived token or backend proxy.
+
+Gemini example:
+
+```bash
+VITE_AI_FALLBACK_API_KEY=your_google_api_key
+VITE_AI_FALLBACK_BASE_URL=https://generativelanguage.googleapis.com
+VITE_AI_FALLBACK_MODEL=gemini-2.0-flash
+```
+
 ### Build Production Bundle
 
 ```bash

@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useProfile } from '../context/ProfileContext.tsx';
 import { exportToHtml, exportToImage } from '../utils/exportUtils.ts';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu } from 'lucide-react';
+import { FileCode2, Image, PlusSquare, RotateCcw, Star, Menu, Sparkles } from 'lucide-react';
 import ConfirmDialog from '../components/ui/ConfirmDialog.tsx';
 import Sidebar from './Sidebar.tsx';
 import { useTheme } from '../context/ThemeContext.tsx';
 import { useTranslation } from '../hooks/useTranslation.ts';
 import localesManifest from '../config/locales.json';
 import { useThrottle } from '../hooks/useThrottle';
+import AIProfileBuilderModal from './AIProfileBuilderModal.tsx';
 
 interface ToolbarProps {
   onAddCardClick: () => void;
@@ -19,6 +20,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
   const { t, locale, setLocale } = useTranslation();
   const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isAiModalOpen, setAiModalOpen] = useState(false);
   const [displayColor, setDisplayColor] = useState(profileData?.userSettings.accentColor || '#FFC300');
 
   const accentColor = profileData?.userSettings.accentColor;
@@ -100,6 +102,14 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
               </button>
             </div>
             <div className="toolbar-group">
+              <button onClick={() => setAiModalOpen(true)} title={t('toolbar.aiGenerate')} aria-label={t('toolbar.aiGenerate')}>
+                <Sparkles size={16} />
+                <span className="toolbar-button-text">
+                  {t('toolbar.aiGenerate')}</span>
+                  <span className="feature-beta-badge">Beta</span>
+              </button>
+            </div>
+            <div className="toolbar-group">
               <button onClick={handleReset} title={t('toolbar.restoreDefault')} aria-label={t('toolbar.restoreDefault')}>
                 <RotateCcw size={16} />
                 <span className="toolbar-button-text">{t('toolbar.resetStyle')}</span>
@@ -170,6 +180,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
         onResetClick={handleReset}
         onExportHtmlClick={handleExportHtml}
         onExportImageClick={handleExportImage}
+        onAiBuilderClick={() => setAiModalOpen(true)}
         displayColor={displayColor}
         onColorChange={handleColorChange}
         isAccentColorEnabled={resolvedTheme.settings.isAccentColorEnabled}
@@ -183,6 +194,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ onAddCardClick }) => {
         message={t('modal.confirmResetMessage')}
         confirmText={t('modal.confirmResetButton')}
         isDangerous={true}
+      />
+
+      <AIProfileBuilderModal
+        isOpen={isAiModalOpen}
+        onClose={() => setAiModalOpen(false)}
       />
     </>
   );

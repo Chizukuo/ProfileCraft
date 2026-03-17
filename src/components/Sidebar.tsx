@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, X } from 'lucide-react';
+import { FileCode2, Image, PlusSquare, RotateCcw, Sparkles, Star, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { useLocale } from '../context/LocaleContext';
@@ -12,12 +12,13 @@ interface SidebarProps {
   onResetClick: () => void;
   onExportHtmlClick: () => void;
   onExportImageClick: () => void;
+  onAiBuilderClick: () => void;
   displayColor: string;
   onColorChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isAccentColorEnabled: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onResetClick, onExportHtmlClick, onExportImageClick, displayColor, onColorChange, isAccentColorEnabled }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onResetClick, onExportHtmlClick, onExportImageClick, onAiBuilderClick, displayColor, onColorChange, isAccentColorEnabled }) => {
   const { theme, setTheme, resolvedTheme, themeOptions } = useTheme();
   const { t } = useTranslation();
   const { locale, setLocale } = useLocale();
@@ -53,6 +54,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onAddCardClick, onRe
           <button onClick={() => handleButtonClick(onAddCardClick)} className="button-style sidebar-item-button">
             <PlusSquare size={20} />
             <span>{t('toolbar.addCard')}</span>
+          </button>
+          <button onClick={() => handleButtonClick(onAiBuilderClick)} className="button-style sidebar-item-button">
+            <Sparkles size={20} />
+            <span>{t('toolbar.aiGenerate')}</span>
           </button>
           <button onClick={() => handleButtonClick(onResetClick)} className="button-style sidebar-item-button">
             <RotateCcw size={20} />
