@@ -6,8 +6,9 @@ export const GRID_COLUMNS = 3;
 export const DEFAULT_CARD_HEIGHT = 10;
 
 export const getWidthFromLayoutSpan = (layoutSpan?: string): number => {
-  if (layoutSpan?.includes('span 2')) return 2;
-  if (layoutSpan?.includes('span 3')) return 3;
+  if (!layoutSpan) return 1;
+  if (layoutSpan.includes('span 3') || layoutSpan === 'oshi-card-span' || layoutSpan === 'full-width-card-span' || layoutSpan === 'FULL') return 3;
+  if (layoutSpan.includes('span 2') || layoutSpan === 'about-me-card-span' || layoutSpan === 'HALF') return 2;
   return 1;
 };
 
