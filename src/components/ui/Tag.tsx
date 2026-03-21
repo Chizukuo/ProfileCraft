@@ -47,7 +47,6 @@ const Tag: React.FC<TagProps> = ({ tagData, defaultStyles, onUpdate, onDelete, o
                   styles={effectiveStyles} // 传递当前样式以便工具栏显示
                   onUpdate={handleTextUpdate}
                   onStyleUpdate={handleStyleUpdate} // 传递样式更新的处理函数
-                  isClearable={false}
                 />
                 {/* --- FIX END --- */}
             </span>

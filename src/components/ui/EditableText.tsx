@@ -1,15 +1,14 @@
-import React, { useState, useRef, useEffect, useCallback, CSSProperties } from 'react';
+import React, { useState, useRef, useEffect, useCallback, CSSProperties, ElementType } from 'react';
 import { createPortal } from 'react-dom';
 import { Styles } from '../../types/data';
 import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
 
 interface EditableTextProps {
-    as?: keyof JSX.IntrinsicElements;
+    as?: ElementType;
     className?: string;
     html: string;
     styles?: Styles;
     onUpdate: (html: string) => void;
-    // onStyleUpdate 已不再需要，因为可编辑样式功能被移除
     onStyleUpdate?: (styles: Styles) => void;
 }
 

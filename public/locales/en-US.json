@@ -10,12 +10,17 @@
     "restoreDefault": "Restore Default Template",
     "exportHtml": "Export HTML",
     "exportImage": "Export Image",
+    "exportConfig": "Export Config",
+    "importConfig": "Import Config",
     "themeStyle": "Theme Style",
     "selectTheme": "Select Theme Style",
     "language": "Language",
     "selectLanguage": "Select Language",
     "github": "Github",
-    "starOnGithub": "Star on GitHub"
+    "starOnGithub": "Star on GitHub",
+    "exportShare": "Export & Share",
+    "appearance": "Appearance",
+    "exportSettings": "More Settings"
   },
   "sidebar": {
     "menu": "Menu",
@@ -49,6 +54,10 @@
     "exportHtmlError": "Failed to export HTML, please try again",
     "exportImageSuccess": "Image exported successfully!",
     "exportImageError": "Failed to export image, please check the console for more information.",
+    "exportConfigSuccess": "Configuration exported successfully!",
+    "exportConfigError": "Failed to export configuration, please check the console for more details.",
+    "importSuccess": "Configuration imported successfully!",
+    "importError": "Failed to import configuration, the file format might be incorrect.",
     "containerNotFound": "Content container to export not found"
   },
   "cardTypes": {

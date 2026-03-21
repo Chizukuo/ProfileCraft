@@ -13,12 +13,16 @@
 }
 
 .app-loading {
-    min-height: calc(100vh - 80px);
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    background-color: var(--theme-bg-page);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--ui-text-tertiary);
-    position: relative;
     overflow: hidden;
     padding: 24px;
     box-sizing: border-box;
@@ -188,7 +192,6 @@
 
 @media (max-width: 640px) {
     .app-loading {
-        min-height: calc(100vh - 80px);
         padding: 16px;
     }
 

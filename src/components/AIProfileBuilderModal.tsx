@@ -18,9 +18,10 @@ interface AIProfileBuilderModalProps {
 }
 
 const DEFAULT_CONFIG: AiConfig = {
+  provider: 'gemini',
   apiKey: '',
   baseUrl: '',
-  model: '',
+  model: 'gemini-3.1-flash-lite', // User requested optimized for gemini flash lite (3.1/2.5)
 };
 
 const QUICK_REPLY_KEYS = [
@@ -206,6 +207,18 @@ const AIProfileBuilderModal: React.FC<AIProfileBuilderModalProps> = ({ isOpen, o
           >
             <summary>{t('aiBuilder.advancedSettings')}</summary>
             <div className="ai-builder-advanced-content">
+              <label className="ai-builder-field ai-builder-field-full">
+                <span>API 供应商 / API Provider</span>
+                <select 
+                  value={config.provider || 'gemini'} 
+                  onChange={(e) => updateConfig({ provider: e.target.value as AiConfig['provider'] })}
+                >
+                  <option value="gemini">Google Gemini / Gemini 代理</option>
+                  <option value="openai">OpenAI 兼容 / OpenAI Compatible</option>
+                  <option value="anthropic">Anthropic (Claude)</option>
+                  <option value="custom">第三方中转 / Custom</option>
+                </select>
+              </label>
               <label className="ai-builder-field">
                 <span>{t('aiBuilder.apiKey')}</span>
                 <input
@@ -221,7 +234,7 @@ const AIProfileBuilderModal: React.FC<AIProfileBuilderModalProps> = ({ isOpen, o
                   type="text"
                   value={config.baseUrl}
                   onChange={(e) => updateConfig({ baseUrl: e.target.value })}
-                  placeholder="https://api.siliconflow.cn/v1"
+                  placeholder="留空使用默认 (e.g. https://api.siliconflow.cn/v1)"
                 />
               </label>
               <label className="ai-builder-field ai-builder-field-full">
@@ -230,7 +243,7 @@ const AIProfileBuilderModal: React.FC<AIProfileBuilderModalProps> = ({ isOpen, o
                   type="text"
                   value={config.model}
                   onChange={(e) => updateConfig({ model: e.target.value })}
-                  placeholder="Qwen/Qwen2.5-7B-Instruct"
+                  placeholder="gemini-3.1-flash-lite / Qwen2.5-7B-Instruct 等"
                 />
               </label>
             </div>
@@ -280,13 +293,24 @@ const AIProfileBuilderModal: React.FC<AIProfileBuilderModalProps> = ({ isOpen, o
               className={`ai-chat-message ${message.role === 'assistant' ? 'is-assistant' : 'is-user'}`}
             >
               <span className="ai-chat-role">{message.role === 'assistant' ? 'AI' : t('aiBuilder.you')}</span>
-              <p>{message.content}</p>
+              <div className="ai-chat-text">
+                {message.content.split('\n').map((line, i) => (
+                  <React.Fragment key={i}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
           ))}
           {isSubmitting && (
             <div className="ai-chat-message is-assistant is-pending">
               <span className="ai-chat-role">AI</span>
-              <p>{t('aiBuilder.thinking')}</p>
+              <div className="ai-chat-text ai-typing-indicator">
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
+              </div>
             </div>
           )}
         </div>
