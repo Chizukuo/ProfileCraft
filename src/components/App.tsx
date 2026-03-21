@@ -9,6 +9,8 @@ import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { ProfileData } from '../types/data';
+import { loadTranslations } from '../utils/i18n';
+import localesManifest from '../config/locales.json';
 
 import { useTheme } from '../context/ThemeContext';
 import { useGridLayout, useHeightSync, createDefaultLayout } from '../hooks';
@@ -69,18 +71,22 @@ function App() {
       setFontsLoaded(true);
     });
 
-    // 2. Eagerly prefetch heavy chunks during the loading screen for offline-like experience
+    // 2. Eagerly prefetch heavy chunks & all languages during the loading screen
+    const locales = Object.keys(localesManifest) as (keyof typeof localesManifest)[];
+    
     Promise.all([
       import('./AddCardModal'),
       import('./ui/ConfirmDialog'),
       import('./AIProfileBuilderModal'),
       import('../utils/exportUtils'),
-      import('../utils/importUtils')
+      import('../utils/importUtils'),
+      // Prefetch all language JSONs
+      ...locales.map(l => loadTranslations(l))
     ])
       .then(() => setChunksPrefetched(true))
       .catch((err) => {
-        console.warn('Prefetching some chunks failed, falling back to on-demand loading:', err);
-        setChunksPrefetched(true); // Continue anyway, it will lazy load later
+        console.warn('Prefetching some resources failed, falling back to on-demand loading:', err);
+        setChunksPrefetched(true); 
       });
   }, []);
 
