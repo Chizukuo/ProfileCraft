@@ -1,6 +1,7 @@
 @import './modules/app-shell.css';
 @import './modules/error-boundary.css';
 @import './modules/delete-controls.css';
+@import './modules/dock.css';
 
 /* ===================================
    1. CSS 变量和设计系统
@@ -67,7 +68,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--theme-bg-page);
     margin: 0;
-    padding-top: 80px;
+    padding-top: 0; /* Remove top offset for old toolbar */
+    padding-bottom: 140px; /* Space for the bottom dock */
     transition: background-color var(--transition-slow) ease-in-out;
 }
 
@@ -147,6 +149,7 @@ main#profileCardContainer {
 
 /* 头部样式 */
 .main-header-container {
+    margin-top: 2rem;
     margin-bottom: var(--space-xl);
     text-align: center;
 }
@@ -178,63 +181,117 @@ main#profileCardContainer {
    =================================== */
 .editor-toolbar.top-toolbar {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 95vw;
+    height: 48px;
     background-color: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-sm);
-    padding: 8px 24px;
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    box-shadow: 
+        0 10px 30px -10px rgba(0, 0, 0, 0.12),
+        0 1px 1px rgba(0, 0, 0, 0.05);
     z-index: 1002;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     box-sizing: border-box;
+    border-radius: 25px; /* Squircle fallback */
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body[data-theme='dark'] .editor-toolbar.top-toolbar {
+    background-color: rgba(28, 28, 30, 0.75);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .desktop-toolbar-content {
+        display: none;
+    }
+    .mobile-only {
+        display: flex;
+        width: 100%;
+        padding: 0 20px;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .mobile-app-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--theme-accent) 0%, #FF9500 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
+    }
+    .editor-toolbar.top-toolbar {
+        width: 92vw;
+        height: 52px;
+        border-radius: 22px;
+        top: 10px;
+        padding: 0;
+        background-color: rgba(255, 255, 255, 0.82);
+    }
 }
 
 .desktop-toolbar-content {
     display: flex;
-    gap: var(--space-l);
     align-items: center;
-    width: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    height: 100%;
 }
 
-.desktop-toolbar-content::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
-
-.toolbar-group {
+.toolbar-segment {
     display: flex;
-    gap: var(--space-s);
     align-items: center;
-    flex-shrink: 0;
+    gap: 8px;
+    padding: 0 16px;
+    height: 100%;
+    position: relative;
     white-space: nowrap;
 }
 
-.toolbar-group-right {
-    margin-left: auto; 
+/* 苹果风格极细分割线 */
+.toolbar-segment:not(:last-child)::after {
+    content: '';
+    height: 18px;
+    width: 0.5px;
+    background-color: rgba(0, 0, 0, 0.15);
+    margin-left: 8px;
+}
+
+body[data-theme='dark'] .toolbar-segment:not(:last-child)::after {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.editor-toolbar button,
+.editor-toolbar .toolbar-button-link,
+.editor-toolbar select {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
 }
 
 .editor-toolbar button,
 .editor-toolbar .toolbar-button-link {
-    padding: var(--space-s) 12px;
-    border-radius: var(--radius-s);
+    padding: 0 12px;
+    height: 32px;
+    border-radius: 10px;
     border: none;
     background-color: transparent;
-    color: var(--ui-text-secondary);
+    color: var(--ui-text-primary);
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color var(--transition-base) ease-in-out, 
-                color var(--transition-base);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex; 
     align-items: center;
-    gap: var(--space-s);
+    justify-content: center;
+    gap: 6px;
     text-decoration: none;
     white-space: nowrap;
     flex-shrink: 0;
@@ -284,39 +341,66 @@ main#profileCardContainer {
     flex-shrink: 0;
 }
 
-/* 主题选择下拉框 */
-.editor-toolbar select,
-.sidebar-item select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #fff;
-    color: var(--ui-text-primary);
-    border: 1px solid var(--ui-border-default);
-    border-radius: var(--radius-s);
-    padding: 6px 32px 6px 12px;
-    font-size: 0.95rem;
-    font-family: inherit;
-    outline: none;
-    transition: border-color var(--transition-base), 
-                box-shadow var(--transition-base);
-    box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    min-width: 110px;
-    max-width: 150px;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%2386868b" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 8.293a1 1 0 011.414 0L10 9.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 18px 18px;
-    flex-shrink: 0;
-}
-
 .editor-toolbar select {
-    margin-left: var(--space-xs);
+    appearance: none;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 0 28px 0 12px;
+    height: 32px;
+    font-size: 0.85rem;
+    color: var(--ui-text-secondary);
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%2386868b" height="16" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 8.293a1 1 0 011.414 0L10 9.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: all 0.2s;
 }
 
-.select-inline-offset {
-    margin-left: var(--space-xs);
+.editor-toolbar select:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme='dark'] .editor-toolbar select {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.toolbar-item-with-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ui-text-tertiary);
+}
+
+.toolbar-item-with-label input[type="color"] {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    background: transparent;
+    overflow: hidden;
+}
+
+.toolbar-segmentinfo {
+    display: flex;
+    gap: 4px;
+    padding-left: 8px;
+}
+
+.toolbar-segmentinfo button,
+.toolbar-segmentinfo a {
+    padding: 0 4px !important;
+    color: var(--ui-text-tertiary);
+}
+
+.toolbar-segmentinfo button:hover,
+.toolbar-segmentinfo a:hover {
+    color: var(--ui-text-primary);
+    background-color: transparent !important;
 }
 
 .editor-toolbar select:focus,
@@ -1364,12 +1448,37 @@ h2.section-title {
     margin-bottom: 4px;
 }
 
-.ai-chat-message p {
+.ai-chat-message p,
+.ai-chat-message .ai-chat-text {
     margin: 0;
     color: var(--ui-text-primary);
     line-height: 1.45;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.ai-typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 2px;
+}
+
+.ai-typing-indicator .dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--ui-text-tertiary);
+    border-radius: 50%;
+    animation: typingDot 1.4s infinite both;
+}
+
+.ai-typing-indicator .dot:nth-child(1) { animation-delay: 0s; }
+.ai-typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingDot {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-4px); opacity: 1; }
 }
 
 .ai-builder-input-row textarea {
@@ -1487,18 +1596,23 @@ h2.section-title {
     position: absolute;
     top: 0;
     right: 0;
-    width: 280px;
+    width: 300px;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.08);
     transform: translateX(100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     will-change: transform;
+}
+
+body[data-theme='dark'] .sidebar-menu {
+    background-color: rgba(28, 28, 30, 0.85);
+    border-left-color: rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-container.is-open .sidebar-menu {
@@ -1626,6 +1740,70 @@ h2.section-title {
     bottom: 5px !important;
     right: 5px !important;
     cursor: se-resize !important;
+}
+
+/* macOS/iOS-style Menu (Popover) */
+.popover-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.popover-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 200px;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-radius: 12px; /* Apple Menu Corner */
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 2000;
+    transform-origin: top right;
+    animation: appleMenuIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body[data-theme='dark'] .popover-menu {
+    background-color: rgba(44, 44, 46, 0.82);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.popover-item {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ui-text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.15s;
+}
+
+.popover-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme='dark'] .popover-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes appleMenuIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .react-resizable-handle::after {

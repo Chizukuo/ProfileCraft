@@ -10,12 +10,15 @@
     "restoreDefault": "デフォルトテンプレートに戻す",
     "exportHtml": "HTMLエクスポート",
     "exportImage": "画像エクスポート",
+    "exportConfig": "設定エクスポート",
+    "importConfig": "設定インポート",
     "themeStyle": "テーマスタイル",
     "selectTheme": "テーマスタイルを選択",
     "language": "言語",
     "selectLanguage": "言語を選択",
     "github": "Github",
-    "starOnGithub": "GitHubでスター"
+    "starOnGithub": "GitHubでスターを付ける",
+    "exportShare": "書き出しと共有"
   },
   "sidebar": {
     "menu": "メニュー",
@@ -49,6 +52,10 @@
     "exportHtmlError": "HTMLのエクスポートに失敗しました。もう一度お試しください",
     "exportImageSuccess": "画像のエクスポートに成功しました！",
     "exportImageError": "画像のエクスポートに失敗しました。詳細はコンソールをご確認ください。",
+    "exportConfigSuccess": "設定のエクスポートに成功しました！",
+    "exportConfigError": "設定のエクスポートに失敗しました。詳細はコンソールをご確認ください。",
+    "importSuccess": "設定のインポートに成功しました！",
+    "importError": "インポートに失敗しました。ファイル形式が正しくない可能性があります。",
     "containerNotFound": "エクスポートするコンテンツコンテナが見つかりません"
   },
   "cardTypes": {

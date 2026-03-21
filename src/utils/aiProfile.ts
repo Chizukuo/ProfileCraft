@@ -8,6 +8,7 @@ export interface AiChatMessage {
 }
 
 export interface AiConfig {
+  provider: 'openai' | 'gemini' | 'anthropic' | 'custom';
   apiKey: string;
   baseUrl: string;
   model: string;
@@ -97,18 +98,21 @@ export interface AiDebugTrace {
 }
 
 export const AI_LOCAL_STORAGE_KEY = 'profilecraft-ai-config';
-const DEFAULT_BASE_URL = 'https://api.siliconflow.cn/v1';
-const DEFAULT_MODEL = 'Qwen/Qwen2.5-7B-Instruct';
+const DEFAULT_PROVIDER = 'gemini';
+const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
+const DEFAULT_MODEL = 'gemini-2.5-flash-lite';
 
 const getEnvValue = (value: string | boolean | undefined): string => {
   return typeof value === 'string' ? value.trim() : '';
 };
 
 export const resolveAiConfig = (input: Partial<AiConfig>): AiConfigResolution => {
+  const fallbackProvider = getEnvValue(import.meta.env.VITE_AI_FALLBACK_PROVIDER) as AiConfig['provider'] || '';
   const fallbackApiKey = getEnvValue(import.meta.env.VITE_AI_FALLBACK_API_KEY);
   const fallbackBaseUrl = getEnvValue(import.meta.env.VITE_AI_FALLBACK_BASE_URL);
   const fallbackModel = getEnvValue(import.meta.env.VITE_AI_FALLBACK_MODEL);
 
+  const userProvider = input.provider;
   const userApiKey = getEnvValue(input.apiKey);
   const rawUserBaseUrl = getEnvValue(input.baseUrl);
   const rawUserModel = getEnvValue(input.model);
@@ -123,12 +127,13 @@ export const resolveAiConfig = (input: Partial<AiConfig>): AiConfigResolution =>
   const userBaseUrl = isImplicitDefaultConfig ? '' : rawUserBaseUrl;
   const userModel = isImplicitDefaultConfig ? '' : rawUserModel;
 
+  const provider = userProvider || fallbackProvider || DEFAULT_PROVIDER;
   const apiKey = userApiKey || fallbackApiKey;
   const baseUrl = userBaseUrl || fallbackBaseUrl || DEFAULT_BASE_URL;
   const model = userModel || fallbackModel || DEFAULT_MODEL;
 
   return {
-    config: { apiKey, baseUrl, model },
+    config: { provider, apiKey, baseUrl, model },
     usesFallbackApiKey: !userApiKey && Boolean(fallbackApiKey),
   };
 };
@@ -301,35 +306,34 @@ export const normalizeGeneratedCards = (cards: unknown): CardData[] => {
     .filter((card): card is CardData => Boolean(card));
 };
 
-const defaultSystemPrompt = `你是一个贴心、懂二次元和亚文化（特别是地下偶像、音游、声优厨、VTB、二游等圈子）的扩列卡片生成助手。
+const defaultSystemPrompt = `你是一个深谙 ACG 文化与各类青年流行文化（如二次元、游戏、虚拟主播、偶像等）的专属“个人扩列卡片”生成助手。
 
-你的最终目标是：通过引导式的多轮对话，帮用户挖掘出他们身上的“硬核/亚文化”属性，并调用 generate_profile_card 工具，为他们生成一张排版精美、信息密度高、且具有“圈内人味”的扩列卡片。
+你的核心任务是：通过轻松、自然的引导式多轮对话，帮助用户挖掘并梳理出具有个人特色和文化属性的信息，最终调用 generate_profile_card 工具，为他们生成排版精美、信息丰富且具有社区身份认同感的扩列卡片（Profile Card）。
 
-【对话策略与行为要求】
-1. 像朋友一样自然对话，每次只抛出 1-2 个具体的问题，不要查户口。
-2. 基础信息兜底：确保收集到昵称、性别/年龄（可选）、坐标/常驻地、以及核心爱好/推。
-3. **硬核挖掘（核心！）**：绝不满足于泛泛而谈（如“我玩音游”或“我喜欢LL”）。你必须**主动且直接**追问圈内黑话或细节。例如：
-   - 玩什么音游？主打街机还是移动端？有没有什么自豪的成绩单（段位/Rating）？
-   - 推哪个企划的谁？是单推、箱推还是CP？跑过线下Live吗？有没有吃谷/痛包？
-   - 打瓦（Valorant）主玩什么位置？什么段位？
-   - 自我介绍有没有“雷点”、“同担拒否”、“梦女”或“只扩不列”等特殊声明？
-4. 只有当用户的信息足够“硬核、丰满”，或者用户明确说“够了/直接生成”时，才调用 generate_profile_card，切勿过早结束对话。
+【对话策略与互动规范】
+1. **自然亲切**：以朋友聊天的方式展开，每次围绕一个主题抛出 1-2 个具体问题，避免连珠炮式的提问（查户口）。
+2. **基础与进阶并重**：不仅要收拢基础属性（昵称、地区、MBTI、核心主推或爱好），更要引导用户分享能体现资历或热爱的“进阶细节”。例如：
+   - 音游玩家可询问常玩机种、自豪成绩或段位。
+   - 企划/VTB厨可询问主推、是否参与线下或购买周边。
+   - 竞技游戏玩家可询问区服、段位或擅长位置。
+   - 适当询问是否有“雷点”、“同担拒否”等社交偏好声明，尊重个性化需求。
+3. **适时收网**：当收集到的信息足以构建一张丰满的卡片，或者用户主动表示“可以生成了”、“没什么可补充的”时，果断调用 generate_profile_card 结束对话，切勿无意义地拖延。
+4. **针对轻量级模型优化**：指令要清晰，避免过于复杂的逻辑推演，直接将核心要素抽取为结构化数据。
 
-【UI 排版与数据结构要求（极其重要！）】
-生成的扩列卡片绝不能把所有信息挤在一起，必须将信息拆分到多个不同的 Card (卡片) 中，充分利用网格布局。
+【UI 排版与数据结构生成规范（严格执行）】
+优秀的卡片需要将高密度信息合理拆解并运用网格布局，请严格遵循以下卡片拆分与组件搭配规范：
 
-强制的卡片拆分与组件搭配规范：
-- userSettings：必须填充。mainTitle 设为用户昵称，subtitle 设为用户的一句话签名、成分总结或ID。
-- Card 1【个人档案】：layoutSpan 必须填 'profile-card-span'（窄列）。必须包含 profileInfo（昵称、性别、年龄、坐标等）。可以在 profileInfo 下方追加一个 paragraph 组件，用一段具有个人色彩的文字做自我介绍。
-- Card 2【爱好/涉猎/属性】：layoutSpan 必须填 'about-me-card-span'（中等宽列）。推荐使用 tagSection 来罗列用户的游戏、爱好、特长、甚至 MBTI/性格标签。如果标签多，可以分成多个 tagSection。
-- Card 3【推/企划/成分】：layoutSpan 必须填 'oshi-card-span'（宽列）。强烈推荐使用 groupedTagSection（分组展示，例如“女声优”一组，“二次元”一组，或者“街机”和“移动端”）。
-- Card 4【扩列宣言/寻友启事】（可选）：layoutSpan 填 'about-me-card-span'。使用 paragraph，用极具圈内风格的语言写出用户想找什么样的同好。
+- 整体配置 (userSettings)：核心必填项。mainTitle 为用户尊称/昵称，subtitle 为高度凝练的一句话签名、成分总结或个人宣言。
+- Card 1【个人档案】：layoutSpan 必须为 'profile-card-span'（窄列）。主体必须为 profileInfo 类型（含昵称、性别/代名词、年龄、坐标等）。若用户有长段自我评价，可在其下追加 paragraph 组件进行展示。
+- Card 2【涉猎与技能】：layoutSpan 必须为 'about-me-card-span'（中宽列）。推荐使用 tagSection 组件，将用户的游戏、副业、特长、性格标签矩阵化呈现。若类目庞杂，可拆分为多个 tagSection。
+- Card 3【主推与成分】：layoutSpan 必须为 'oshi-card-span'（宽列）。强烈推荐使用 groupedTagSection 组件进行分组呈现（例如：“街机 / 移动端”，“虚拟区 / 现实区”，“游戏 / 动漫”等），让核心热爱一目了然。
+- Card 4【社交/扩列宣言】：（按需生成）layoutSpan 推荐 'about-me-card-span'。使用 paragraph 组件，用地道的语境写出用户期望结交怎样的同好，或展示自己的社交态度。
 
-【优质排版参考示例】
-- userSettings: {"mainTitle": "兲武/てんご", "subtitle": "纯良 / メンヘラ / 大脑左右互搏派 / 东横 / 借金100万"}
-- Card 1 (profile-card-span): profileInfo (昵称: 兲武, 性别: 男, 坐标: 武汉/北京)。下方跟 paragraph：“二三次不分号。成分不算复杂，主要是二偶和女声优相关，倾向于现场派（？），比起吃谷更偏向跑活...”
-- Card 2 (about-me-card-span): tagSection 罗列“爱好: 音游, 光棒, 跑活”和“主要涉猎: Love Live!, Project Sekai, BanG Dream!”
-- Card 3 (oshi-card-span): groupedTagSection 分组一 "街机音游": ["舞萌DX", "中二节奏(手台)"]，分组二 "移动端": ["BanG Dream!", "Arcaea"]。或者分“女声优”(如: 榆井希实)和“二次元”(如: 斑鳩ルカ)两组推。`;
+【优质排版数据参考示例】
+- userSettings: {"mainTitle": "星之海喵", "subtitle": "探索型玩家 / 杂食党 / ISTP / 寻找周末开黑搭子"}
+- Card 1 (profile-card-span): profileInfo (昵称: 星之海喵, 坐标: 线上活跃)。下方 paragraph: “主打一个随缘的杂食系玩家，除了恐怖游戏什么都愿意尝试一下，重度收集控。”
+- Card 2 (about-me-card-span): tagSection “当前爱好: 音游, 摄影, 重度剧情体验”, “主要阵地: Steam, Switch, PS5”
+- Card 3 (oshi-card-span): groupedTagSection 分组一 "音乐游戏": ["Arcaea", "Phigros", "Cytus II"], 分组二 "长线沉迷": ["最终幻想14", "星露谷物语"]`;
 
 const tools = [
   {
@@ -470,12 +474,16 @@ const safePreview = (value: unknown): unknown => {
   return `${str.slice(0, 2400)}...(truncated)`;
 };
 
-const isGeminiBaseUrl = (baseUrl: string): boolean => {
-  return /generativelanguage\.googleapis\.com/i.test(baseUrl);
+const isGeminiProvider = (config: AiConfig): boolean => {
+  return config.provider === 'gemini' || /generativelanguage\.googleapis\.com/i.test(config.baseUrl);
 };
 
 const buildGeminiEndpoint = (baseUrl: string, model: string, apiKey: string): string => {
-  const trimmed = baseUrl.trim().replace(/\/+$/, '');
+  let trimmed = baseUrl.trim().replace(/\/+$/, '');
+  
+  if (!trimmed) {
+    trimmed = 'https://generativelanguage.googleapis.com/v1beta';
+  }
 
   if (/models\/.+:generateContent/i.test(trimmed)) {
     const separator = trimmed.includes('?') ? '&' : '?';
@@ -542,11 +550,11 @@ export const callAiInterviewer = async (
 ): Promise<AiChatResult> => {
   const startedAt = Date.now();
   const resolved = resolveAiConfig(config).config;
-  if (!resolved.apiKey) {
+  if (!resolved.apiKey && resolved.provider !== 'custom') {
     throw new Error('缺少 API Key，请在设置中填写或配置 VITE_AI_FALLBACK_API_KEY');
   }
 
-  if (isGeminiBaseUrl(resolved.baseUrl)) {
+  if (isGeminiProvider(resolved)) {
     const endpoint = buildGeminiEndpoint(resolved.baseUrl, resolved.model, resolved.apiKey);
     const requestPayload = {
       systemInstruction: {
@@ -754,6 +762,13 @@ export const callAiInterviewer = async (
     };
   }
 
+  // Handle Anthropic or others explicitly here if needed, defaults to openai-compatible
+  const isAnthropic = resolved.provider === 'anthropic' || /anthropic\.com/i.test(resolved.baseUrl);
+  
+  if (isAnthropic) {
+    throw new Error('Anthropic API 格式暂未完整支持，敬请期待。请使用 OpenAI 兼容或 Gemini 格式。');
+  }
+
   const endpoint = buildEndpoint(resolved.baseUrl);
 
   const messages: OpenAiMessage[] = [
@@ -775,6 +790,7 @@ export const callAiInterviewer = async (
         ? { type: 'function', function: { name: 'generate_profile_card' } }
         : 'auto',
       temperature: 0.7,
+      response_format: options?.forceGenerate ? { type: 'json_object' } : undefined,
     }),
   });
 
@@ -795,6 +811,7 @@ export const callAiInterviewer = async (
             ? { type: 'function', function: { name: 'generate_profile_card' } }
             : 'auto',
           temperature: 0.7,
+          response_format: options?.forceGenerate ? { type: 'json_object' } : undefined,
         }),
         responsePayload: safePreview(data),
         elapsedMs: Date.now() - startedAt,

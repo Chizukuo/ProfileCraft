@@ -10,12 +10,17 @@
     "restoreDefault": "恢复默认模板",
     "exportHtml": "导出 HTML",
     "exportImage": "导出图片",
+    "exportConfig": "导出配置",
+    "importConfig": "导入配置",
     "themeStyle": "主题风格",
     "selectTheme": "选择主题风格",
     "language": "语言",
     "selectLanguage": "选择语言",
     "github": "Github",
-    "starOnGithub": "在 GitHub 上点个 Star"
+    "starOnGithub": "在 GitHub 上点个 Star",
+    "exportShare": "导出与分享",
+    "appearance": "外观定制",
+    "exportSettings": "更多配置"
   },
   "sidebar": {
     "menu": "菜单",
@@ -49,6 +54,10 @@
     "exportHtmlError": "导出 HTML 失败，请重试",
     "exportImageSuccess": "图片导出成功！",
     "exportImageError": "导出图片失败，请查看控制台获取更多信息。",
+    "exportConfigSuccess": "配置信息导出成功！",
+    "exportConfigError": "导出配置失败，请查看控制台获取更多信息。",
+    "importSuccess": "配置导入成功！",
+    "importError": "导入失败，文件格式可能不正确。",
     "containerNotFound": "未找到要导出的内容容器"
   },
   "cardTypes": {

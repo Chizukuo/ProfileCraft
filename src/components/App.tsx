@@ -1,22 +1,24 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import { useProfile } from '../context/ProfileContext';
-import Toolbar from './Toolbar';
+import Navigation from './Navigation';
 import ProfileHeader from './ProfileHeader';
 import Card from './Card';
-import AddCardModal from './AddCardModal';
 import { applyThemeColors, resetThemeColors } from '../utils/colorUtils';
 import EditableText from './ui/EditableText';
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { ProfileData } from '../types/data';
+
 import { useTheme } from '../context/ThemeContext';
-import { useGridLayout, useHeightSync, createDefaultLayout, getLayoutSpanFromWidth } from '../hooks';
+import { useGridLayout, useHeightSync, createDefaultLayout } from '../hooks';
 import LoadingScreen from './ui/LoadingScreen';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
-const MIN_LOADING_VISIBLE_MS = 700;
-const LOADING_FADE_OUT_MS = 280;
+const MIN_LOADING_VISIBLE_MS = 400;
+const LOADING_FADE_OUT_MS = 300;
+
+const AddCardModal = React.lazy(() => import('./AddCardModal'));
 
 // 模块级别只执行一次，不受 StrictMode 双调用影响
 const _art = `
@@ -56,8 +58,30 @@ function App() {
   const [isLoadingScreenExiting, setIsLoadingScreenExiting] = useState(false);
   const [loadingStartAt] = useState(() => performance.now());
 
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [chunksPrefetched, setChunksPrefetched] = useState(false);
+
   useEffect(() => {
     setMounted(true);
+    
+    // 1. Wait for web fonts
+    document.fonts.ready.then(() => {
+      setFontsLoaded(true);
+    });
+
+    // 2. Eagerly prefetch heavy chunks during the loading screen for offline-like experience
+    Promise.all([
+      import('./AddCardModal'),
+      import('./ui/ConfirmDialog'),
+      import('./AIProfileBuilderModal'),
+      import('../utils/exportUtils'),
+      import('../utils/importUtils')
+    ])
+      .then(() => setChunksPrefetched(true))
+      .catch((err) => {
+        console.warn('Prefetching some chunks failed, falling back to on-demand loading:', err);
+        setChunksPrefetched(true); // Continue anyway, it will lazy load later
+      });
   }, []);
 
   // ---- 强调色应用 ----
@@ -72,32 +96,7 @@ function App() {
 
   // ---- 布局 & 高度同步（提取到独立 hooks）----
   const { layouts, handleLayoutChange } = useGridLayout({ profileData, updateProfileData });
-  const { handleHeightChange } = useHeightSync({ profileData, updateProfileData });
-
-  // ---- 数据迁移：确保所有卡片含 layout 字段，并保持 layoutSpan 与 layout.w 同步 ----
-  useEffect(() => {
-    if (!profileData) return;
-    let updatesNeeded = false;
-    const newCards = profileData.cards.map((card, index) => {
-      const newCard = { ...card };
-      if (!newCard.layout) {
-        updatesNeeded = true;
-        newCard.layout = { ...createDefaultLayout(newCard.id, index, newCard.layoutSpan), y: Infinity };
-      }
-      if (newCard.layout) {
-        const expectedSpan = getLayoutSpanFromWidth(newCard.layout.w, newCard.layoutSpan);
-        if (newCard.layoutSpan !== expectedSpan) {
-          updatesNeeded = true;
-          newCard.layoutSpan = expectedSpan;
-        }
-      }
-      return newCard;
-    });
-
-    if (updatesNeeded) {
-      updateProfileData((prev: ProfileData) => ({ ...prev, cards: newCards }));
-    }
-  }, [profileData, updateProfileData]);
+  const { handleHeightChange } = useHeightSync({ profileData, isLoaded, updateProfileData });
 
   // ---- footer 更新 ----
   const handleFooterUpdate = useCallback((html: string) => {
@@ -107,7 +106,7 @@ function App() {
     }));
   }, [updateProfileData]);
 
-  const appReady = isLoaded && Boolean(profileData);
+  const appReady = isLoaded && Boolean(profileData) && fontsLoaded && chunksPrefetched;
 
   useEffect(() => {
     if (!appReady) {
@@ -133,14 +132,14 @@ function App() {
     };
   }, [appReady, loadingStartAt]);
 
-  if (!appReady || showLoadingScreen) {
+  if (!appReady || showLoadingScreen || !profileData) {
     return <LoadingScreen isExiting={isLoadingScreenExiting} />;
   }
+
 
   return (
     <>
       <SeoContent />
-      <Toolbar onAddCardClick={() => setAddCardModalOpen(true)} />
       <main id="profileCardContainer" className="py-10 px-4 md:px-6 lg:px-8 min-h-screen flex flex-col items-center">
         <ProfileHeader />
         <div className="app-grid-shell">
@@ -190,10 +189,15 @@ function App() {
           />
         </footer>
       </main>
-      <AddCardModal
-        isOpen={isAddCardModalOpen}
-        onClose={() => setAddCardModalOpen(false)}
-      />
+      <Navigation onAddCardClick={() => setAddCardModalOpen(true)} />
+      <Suspense fallback={null}>
+        {isAddCardModalOpen && (
+          <AddCardModal
+            isOpen={isAddCardModalOpen}
+            onClose={() => setAddCardModalOpen(false)}
+          />
+        )}
+      </Suspense>
     </>
   );
 }

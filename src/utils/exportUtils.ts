@@ -1,6 +1,6 @@
 import html2canvas from 'html2canvas';
 import { ProfileData } from '../types/data';
-import { loadTranslations, createT } from './i18n.ts';
+import { loadTranslations, createT } from './i18n';
 import { Locale } from '../context/LocaleContext';
 import { getThemeCssPath, type ThemeKey } from './themeUtils';
 
@@ -498,11 +498,41 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
 };
 
 /**
+ * 导出为配置文件 JSON
+ * @param profileData 用户的个人资料数据
+ * @param locale 当前语言
+ */
+export const exportConfig = async (profileData: ProfileData | null, locale: Locale) => {
+    const t = await getTranslationFunction(locale);
+    if (!profileData) {
+        showNotification(t('notification.exportConfigError') || 'Export failed', 'error');
+        return;
+    }
+
+    try {
+        const stateJson = JSON.stringify(profileData, null, 2);
+        const blob = new Blob([stateJson], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = `profilecraft-config_${new Date().toISOString().slice(0, 10)}.json`;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        showNotification(t('notification.exportConfigSuccess') || 'Configuration exported successfully', 'success');
+    } catch (error) {
+        console.error('Failed to export configuration:', error);
+        showNotification(t('notification.exportConfigError') || 'Export failed', 'error');
+    }
+};
+
+/**
  * 显示通知消息
  * @param message 通知消息内容
  * @param type 通知类型：success 或 error
  */
-const showNotification = (message: string, type: 'success' | 'error') => {
+export const showNotification = (message: string, type: 'success' | 'error') => {
     if (!document.getElementById('profilecraft-export-notification-animation')) {
         const animationStyle = document.createElement('style');
         animationStyle.id = 'profilecraft-export-notification-animation';
