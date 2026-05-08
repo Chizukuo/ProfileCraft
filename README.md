@@ -19,6 +19,10 @@ It is designed for creating "扩列条" style cards quickly, with rich text edit
 - Built-in themes (Default, Cyberpunk)
 - Auto-save to localStorage
 - Export as standalone HTML or PNG
+- Import/export data as JSON for backup and sharing
+- AI-powered profile generation (OpenAI, Gemini, Anthropic, and custom providers)
+- Floating dock navigation for quick access
+- DOMPurify for secure HTML rendering
 
 ## Tech Stack
 
@@ -30,6 +34,7 @@ It is designed for creating "扩列条" style cards quickly, with rich text edit
 - html2canvas
 - qrcode.react
 - lucide-react
+- DOMPurify
 
 ## Quick Start
 
@@ -52,16 +57,19 @@ npm run dev
 
 ### Optional: Built-in Fallback AI API
 
-This project supports a fallback AI config via Vite env vars.
+This project supports a fallback AI config via Vite env vars for AI-powered profile generation.
 
 1. Copy `.env.example` to `.env.local`
 2. Fill your fallback values:
 
 ```bash
+VITE_AI_FALLBACK_PROVIDER=gemini
 VITE_AI_FALLBACK_API_KEY=your_key
 VITE_AI_FALLBACK_BASE_URL=https://api.siliconflow.cn/v1
 VITE_AI_FALLBACK_MODEL=Qwen/Qwen2.5-7B-Instruct
 ```
+
+Supported providers: `openai`, `gemini`, `anthropic`, `custom`
 
 Notes:
 
@@ -71,6 +79,7 @@ Notes:
 Gemini example:
 
 ```bash
+VITE_AI_FALLBACK_PROVIDER=gemini
 VITE_AI_FALLBACK_API_KEY=your_google_api_key
 VITE_AI_FALLBACK_BASE_URL=https://generativelanguage.googleapis.com
 VITE_AI_FALLBACK_MODEL=gemini-2.0-flash
