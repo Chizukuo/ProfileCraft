@@ -1,22 +1,23 @@
 import React, { useState, useCallback, useEffect, useRef, Suspense } from 'react';
-import { useProfile } from '../context/ProfileContext';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, Sparkles, Download, Upload, Share2, Palette, Paintbrush, Languages, Settings, Share, Settings2 } from 'lucide-react';
+import { useProfileDataCtx, useProfileActions } from '../context/ProfileContext';
+import { FileCode2, Image, PlusSquare, RotateCcw, Star, Sparkles, Download, Upload, Palette, Languages, Settings, Share, Settings2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import localesManifest from '../config/locales.json';
 import { useThrottle } from '../hooks/useThrottle';
-import ExportMenu from './ui/ExportMenu';
 import { useExportActions } from '../hooks/useExportActions';
+import type { Locale } from '../context/LocaleContext';
 
 const ConfirmDialog = React.lazy(() => import('./ui/ConfirmDialog'));
-const AIProfileBuilderModal = React.lazy(() => import('./AIProfileBuilderModal'));
+const AIChatPanel = React.lazy(() => import('./AIChatPanel'));
 
 interface NavigationProps {
   onAddCardClick: () => void;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
-  const { profileData, updateProfileData, resetProfileData } = useProfile();
+  const { profileData } = useProfileDataCtx();
+  const { updateProfileData, resetProfileData } = useProfileActions();
   const { theme, setTheme, resolvedTheme, themeOptions } = useTheme();
   const { t, locale, setLocale } = useTranslation();
   
@@ -25,7 +26,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
   const [isExportMenuOpen, setExportMenuOpen] = useState(false);
   const [isAppearanceOpen, setAppearanceOpen] = useState(false);
   
-  const [displayColor, setDisplayColor] = useState(profileData?.userSettings.accentColor || '#FFC300');
+  const [displayColor, setDisplayColor] = useState(profileData?.userSettings?.accentColor || '#FFC300');
 
   const appearanceRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
@@ -38,7 +39,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
     updateProfileData
   });
 
-  const accentColor = profileData?.userSettings.accentColor;
+  const accentColor = profileData?.userSettings?.accentColor;
   useEffect(() => {
     if (accentColor) {
       setDisplayColor(accentColor);
@@ -128,13 +129,15 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
 
           {/* Section 2: Appearance (Zero Learning Cost) */}
           <div className="dock-popover-wrapper" ref={appearanceRef}>
-            <button 
+            <button
               className={`dock-btn dock-btn-highlight ${isAppearanceOpen ? 'active' : ''}`}
               onClick={() => {
                 setAppearanceOpen(!isAppearanceOpen);
                 setExportMenuOpen(false);
               }}
               title={t('toolbar.appearance')}
+              aria-expanded={isAppearanceOpen}
+              aria-haspopup="true"
             >
               <Palette size={22} strokeWidth={2.5} />
               <span className="dock-btn-label">{t('toolbar.appearance')}</span>
@@ -183,13 +186,15 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
 
           {/* Section 3: Export & Settings */}
           <div className="dock-popover-wrapper" ref={exportRef}>
-            <button 
+            <button
               className={`dock-btn ${isExportMenuOpen ? 'active' : ''}`}
               onClick={() => {
                 setExportMenuOpen(!isExportMenuOpen);
                 setAppearanceOpen(false);
               }}
               title={t('toolbar.exportSettings')}
+              aria-expanded={isExportMenuOpen}
+              aria-haspopup="true"
             >
               <Settings size={22} strokeWidth={2.5} />
               <span className="dock-btn-label">{t('toolbar.exportSettings')}</span>
@@ -202,22 +207,22 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
                 <div className="pref-group-title">
                   <Share size={14} className="pref-icon-inline" /> {t('toolbar.exportShare')}
                 </div>
-                <div className="pref-row pref-action" onClick={exportActions.handleExportHtml}>
+                <button type="button" className="pref-row pref-action" onClick={exportActions.handleExportHtml}>
                   <FileCode2 size={16} className="pref-icon" />
                   <span>{t('toolbar.exportHtml')}</span>
-                </div>
-                <div className="pref-row pref-action" onClick={exportActions.handleExportImage}>
+                </button>
+                <button type="button" className="pref-row pref-action" onClick={exportActions.handleExportImage}>
                   <Image size={16} className="pref-icon" />
                   <span>{t('toolbar.exportImage')}</span>
-                </div>
-                <div className="pref-row pref-action" onClick={exportActions.handleExportConfig}>
+                </button>
+                <button type="button" className="pref-row pref-action" onClick={exportActions.handleExportConfig}>
                   <Download size={16} className="pref-icon" />
                   <span>{t('toolbar.exportConfig')}</span>
-                </div>
-                <div className="pref-row pref-action" onClick={exportActions.handleImportConfigClick}>
+                </button>
+                <button type="button" className="pref-row pref-action" onClick={exportActions.handleImportConfigClick}>
                   <Upload size={16} className="pref-icon" />
                   <span>{t('toolbar.importConfig')}</span>
-                </div>
+                </button>
 
                 <div className="pref-divider"></div>
 
@@ -230,7 +235,10 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
                   <span>{t('toolbar.language')}</span>
                   <select
                     value={locale}
-                    onChange={e => setLocale(e.target.value as any)}
+                    onChange={e => {
+                      const val = e.target.value;
+                      if (val in localesManifest) setLocale(val as Locale);
+                    }}
                     className="pref-select"
                   >
                     {localeOptions.map(opt => (
@@ -239,10 +247,10 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
                   </select>
                 </div>
 
-                <div className="pref-row pref-action" onClick={() => { setResetModalOpen(true); setExportMenuOpen(false); }}>
+                <button type="button" className="pref-row pref-action" onClick={() => { setResetModalOpen(true); setExportMenuOpen(false); }}>
                   <RotateCcw size={16} className="pref-icon text-red" />
                   <span className="text-red">{t('toolbar.restoreDefault')}</span>
-                </div>
+                </button>
               </div>
             )}
           </div>
@@ -259,7 +267,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
           >
             <div className="star-pulse-bg"></div>
             <Star size={24} className="star-icon bouncy" />
-            <span className="dock-btn-label">Star us</span>
+            <span className="dock-btn-label">{t('toolbar.starUs')}</span>
           </a>
 
         </div>
@@ -279,7 +287,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
         )}
 
         {isAiModalOpen && (
-          <AIProfileBuilderModal
+          <AIChatPanel
             isOpen={isAiModalOpen}
             onClose={() => setAiModalOpen(false)}
           />

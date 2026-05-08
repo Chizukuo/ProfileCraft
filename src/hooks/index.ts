@@ -3,6 +3,7 @@ export { useTranslation } from './useTranslation';
 export { useThrottle } from './useThrottle';
 export { useHeightSync } from './useHeightSync';
 export { useDeleteHoverState } from './useDeleteHoverState';
+export { useExportActions } from './useExportActions';
 export {
   useGridLayout,
   createDefaultLayout,

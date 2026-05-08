@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useProfile } from '../../context/ProfileContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import { ProfileInfoElement, ProfileItem } from '../../types/data';
 import EditableText from '../ui/EditableText';
 import QRCodeDisplay from '../QRCodeDisplay';
@@ -13,7 +14,12 @@ interface ProfileInfoBlockProps {
 
 const ProfileInfoBlock: React.FC<ProfileInfoBlockProps> = ({ element, cardIndex, elementIndex }) => {
     const { profileData, updateProfileData } = useProfile();
+    const { t } = useTranslation();
     const avatarInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        document.documentElement.style.setProperty('--avatar-click-text', `'${t('common.clickToChange')}'`);
+    }, [t]);
 
     // Migration effect: Convert old fields to items array if items is missing
     useEffect(() => {

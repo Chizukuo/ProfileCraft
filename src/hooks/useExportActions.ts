@@ -1,10 +1,12 @@
 import React, { useCallback, useRef } from 'react';
 import { ProfileData } from '../types/data';
+import type { ThemeKey } from '../utils/themeUtils';
+import type { Locale } from '../context/LocaleContext';
 
 interface UseExportActionsProps {
   profileData: ProfileData | null;
-  theme: string;
-  locale: string;
+  theme: ThemeKey;
+  locale: Locale;
   updateProfileData: (updater: (prev: ProfileData) => ProfileData) => void;
 }
 
@@ -19,7 +21,7 @@ export const useExportActions = ({
   const handleExportHtml = useCallback(async () => {
     if (profileData) {
       const { exportToHtml } = await import('../utils/exportUtils');
-      exportToHtml(profileData, theme as any, locale as any);
+      exportToHtml(profileData, theme, locale);
     }
   }, [profileData, theme, locale]);
 
@@ -27,14 +29,14 @@ export const useExportActions = ({
     const container = document.getElementById('profileCardContainer');
     if (container && profileData) {
       const { exportToImage } = await import('../utils/exportUtils');
-      exportToImage(container, profileData, locale as any, theme as any);
+      exportToImage(container, profileData, locale, theme);
     }
   }, [profileData, locale, theme]);
 
   const handleExportConfig = useCallback(async () => {
     if (profileData) {
       const { exportConfig } = await import('../utils/exportUtils');
-      exportConfig(profileData, locale as any);
+      exportConfig(profileData, locale);
     }
   }, [profileData, locale]);
 
@@ -46,7 +48,7 @@ export const useExportActions = ({
     const file = e.target.files?.[0];
     if (file) {
       const { importConfig } = await import('../utils/importUtils');
-      importConfig(file, locale as any, (data) => updateProfileData(() => data));
+      importConfig(file, locale, (data) => updateProfileData(() => data));
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

@@ -80,5 +80,5 @@ export const useHeightSync = ({ profileData, isLoaded, updateProfileData }: UseH
     }
   }, [contentHeights, profileData, updateProfileData, isLoaded]);
 
-  return { contentHeights, handleHeightChange };
+  return { handleHeightChange };
 };

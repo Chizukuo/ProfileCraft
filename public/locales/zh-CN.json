@@ -18,13 +18,10 @@
     "selectLanguage": "选择语言",
     "github": "Github",
     "starOnGithub": "在 GitHub 上点个 Star",
+    "starUs": "点个 Star",
     "exportShare": "导出与分享",
     "appearance": "外观定制",
     "exportSettings": "更多配置"
-  },
-  "sidebar": {
-    "menu": "菜单",
-    "close": "关闭"
   },
   "card": {
     "deleteCard": "删除此卡片",
@@ -108,6 +105,11 @@
     "quickReply2": "先从我常玩的游戏聊起",
     "quickReply3": "我想重点展示我的推",
     "quickReply4": "先帮我直接生成初稿",
+    "quickStart1": "快速生成一张扩列卡",
+    "quickStart2": "从我常玩的游戏聊起",
+    "quickStart3": "重点展示我的推",
+    "quickStart4": "先说昵称和 MBTI",
+    "apiKeyRequired": "请先在右上角设置中配置 API Key",
     "apiKey": "API Key",
     "apiKeyPlaceholder": "输入你的 API Key",
     "baseUrl": "Base URL",
@@ -124,6 +126,11 @@
     "applySuccess": "我已经整理好了，已将卡片应用到编辑器中。",
     "appliedCards": "已应用 {count} 张 AI 生成卡片。",
     "emptyCardsError": "AI 没有返回可用卡片，请再补充一点信息后重试。",
-    "unknownError": "生成失败，请检查网络、API Key 或模型名称。"
+    "unknownError": "生成失败，请检查网络、API Key 或模型名称。",
+    "NETWORK_ERROR": "网络请求失败，请检查网络连接。",
+    "PARSE_ERROR": "服务返回了无法解析的响应（非 JSON），请检查 Base URL 是否正确。",
+    "API_ERROR": "API 请求失败：{message}",
+    "EMPTY_RESPONSE": "AI 返回为空，请重试。",
+    "MALFORMED_CALL": "AI 函数调用格式异常，请重试或切换模型。"
   }
 }

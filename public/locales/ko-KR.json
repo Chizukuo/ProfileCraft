@@ -18,11 +18,10 @@
     "selectLanguage": "언어 선택",
     "github": "Github",
     "starOnGithub": "GitHub에서 스타하기",
-    "exportShare": "내보내기 및 공유"
-  },
-  "sidebar": {
-    "menu": "메뉴",
-    "close": "닫기"
+    "starUs": "스타",
+    "exportShare": "내보내기 및 공유",
+    "appearance": "외관",
+    "exportSettings": "내보내기 및 설정"
   },
   "card": {
     "deleteCard": "이 카드 삭제",
@@ -106,6 +105,11 @@
     "quickReply2": "자주 하는 게임부터 이야기할게요",
     "quickReply3": "최애를 중심으로 보여주고 싶어요",
     "quickReply4": "일단 초안을 바로 만들어줘",
+    "quickStart1": "프로필 카드 빠르게 만들기",
+    "quickStart2": "자주 하는 게임부터 시작",
+    "quickStart3": "최애를 중심으로 보여주기",
+    "quickStart4": "닉네임과 MBTI부터 시작",
+    "apiKeyRequired": "우측 상단 설정에서 API Key를 설정해 주세요",
     "apiKey": "API Key",
     "apiKeyPlaceholder": "API Key 입력",
     "baseUrl": "Base URL",
@@ -122,7 +126,12 @@
     "applySuccess": "완료되었습니다. 생성된 카드를 에디터에 적용했어요.",
     "appliedCards": "AI 생성 카드 {count}개를 적용했습니다.",
     "emptyCardsError": "사용 가능한 카드가 반환되지 않았습니다. 정보를 조금 더 입력한 뒤 다시 시도해 주세요.",
-    "unknownError": "생성에 실패했습니다. 네트워크, API Key 또는 모델명을 확인해 주세요."
+    "unknownError": "생성에 실패했습니다. 네트워크, API Key 또는 모델명을 확인해 주세요.",
+    "NETWORK_ERROR": "네트워크 요청에 실패했습니다. 연결을 확인해 주세요.",
+    "PARSE_ERROR": "서버가 파싱할 수 없는 응답(비JSON)을 반환했습니다. Base URL을 확인해 주세요.",
+    "API_ERROR": "API 요청 실패: {message}",
+    "EMPTY_RESPONSE": "AI가 빈 응답을 반환했습니다. 다시 시도해 주세요.",
+    "MALFORMED_CALL": "AI 함수 호출 형식에 오류가 있습니다. 다시 시도하거나 모델을 변경해 주세요."
   }
 }
 

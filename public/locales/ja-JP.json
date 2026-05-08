@@ -18,11 +18,10 @@
     "selectLanguage": "言語を選択",
     "github": "Github",
     "starOnGithub": "GitHubでスターを付ける",
-    "exportShare": "書き出しと共有"
-  },
-  "sidebar": {
-    "menu": "メニュー",
-    "close": "閉じる"
+    "starUs": "スターを付ける",
+    "exportShare": "書き出しと共有",
+    "appearance": "外観",
+    "exportSettings": "エクスポートと設定"
   },
   "card": {
     "deleteCard": "このカードを削除",
@@ -106,6 +105,11 @@
     "quickReply2": "よく遊ぶゲームから話したい",
     "quickReply3": "推しを重点的に載せたい",
     "quickReply4": "まず初稿を生成して",
+    "quickStart1": "プロフィールカードをサクッと生成",
+    "quickStart2": "よく遊ぶゲームから始める",
+    "quickStart3": "推しを重点的に見せる",
+    "quickStart4": "ニックネームと MBTI から始める",
+    "apiKeyRequired": "右上の設定で API Key を設定してください",
     "apiKey": "API Key",
     "apiKeyPlaceholder": "API Key を入力",
     "baseUrl": "Base URL",
@@ -122,7 +126,12 @@
     "applySuccess": "生成完了。カードをエディターに適用しました。",
     "appliedCards": "AI 生成カード {count} 枚を適用しました。",
     "emptyCardsError": "利用可能なカードが返されませんでした。少し情報を追加して再試行してください。",
-    "unknownError": "生成に失敗しました。ネットワーク、API Key、モデル名を確認してください。"
+    "unknownError": "生成に失敗しました。ネットワーク、API Key、モデル名を確認してください。",
+    "NETWORK_ERROR": "ネットワークリクエストに失敗しました。接続を確認してください。",
+    "PARSE_ERROR": "サーバーが解析不能なレスポンス（非JSON）を返しました。Base URL を確認してください。",
+    "API_ERROR": "API リクエスト失敗：{message}",
+    "EMPTY_RESPONSE": "AI からの応答が空です。再試行してください。",
+    "MALFORMED_CALL": "AI の関数呼び出し形式にエラーがあります。再試行するかモデルを切り替えてください。"
   }
 }
 

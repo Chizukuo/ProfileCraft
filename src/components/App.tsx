@@ -77,7 +77,7 @@ function App() {
     Promise.all([
       import('./AddCardModal'),
       import('./ui/ConfirmDialog'),
-      import('./AIProfileBuilderModal'),
+      import('./AIChatPanel'),
       import('../utils/exportUtils'),
       import('../utils/importUtils'),
       // Prefetch all language JSONs

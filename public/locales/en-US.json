@@ -18,13 +18,10 @@
     "selectLanguage": "Select Language",
     "github": "Github",
     "starOnGithub": "Star on GitHub",
+    "starUs": "Star us",
     "exportShare": "Export & Share",
     "appearance": "Appearance",
     "exportSettings": "More Settings"
-  },
-  "sidebar": {
-    "menu": "Menu",
-    "close": "Close"
   },
   "card": {
     "deleteCard": "Delete This Card",
@@ -108,6 +105,11 @@
     "quickReply2": "Start from the games I play most",
     "quickReply3": "I want to highlight my oshis",
     "quickReply4": "Generate a first draft now",
+    "quickStart1": "Generate a profile card quickly",
+    "quickStart2": "Start from my favorite games",
+    "quickStart3": "Highlight my oshis",
+    "quickStart4": "Start with nickname & MBTI",
+    "apiKeyRequired": "Please configure your API Key in the settings (top right)",
     "apiKey": "API Key",
     "apiKeyPlaceholder": "Enter your API key",
     "baseUrl": "Base URL",
@@ -124,7 +126,12 @@
     "applySuccess": "Done. I applied the generated cards to your editor.",
     "appliedCards": "Applied {count} AI-generated cards.",
     "emptyCardsError": "AI did not return usable cards. Add a bit more info and try again.",
-    "unknownError": "Generation failed. Please check network, API key, or model name."
+    "unknownError": "Generation failed. Please check network, API key, or model name.",
+    "NETWORK_ERROR": "Network request failed. Please check your connection.",
+    "PARSE_ERROR": "Server returned an unparseable response (non-JSON). Check your Base URL.",
+    "API_ERROR": "API request failed: {message}",
+    "EMPTY_RESPONSE": "AI returned an empty response. Please retry.",
+    "MALFORMED_CALL": "AI function call format error. Please retry or switch models."
   }
 }
 
