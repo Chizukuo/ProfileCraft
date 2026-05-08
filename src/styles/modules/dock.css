@@ -434,3 +434,27 @@ body[data-theme='dark'] .star-pulse-bg {
         max-width: 360px;
     }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .floating-dock {
+        transition: none;
+    }
+    .dock-btn {
+        transition: none;
+    }
+    .dock-btn:hover {
+        transform: none;
+    }
+    .dock-btn:active {
+        transform: none;
+    }
+    .dock-preferences-menu {
+        animation: none;
+    }
+    .star-pulse-bg {
+        animation: none;
+    }
+    .star-icon.bouncy {
+        animation: none;
+    }
+}

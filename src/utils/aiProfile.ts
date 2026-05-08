@@ -252,7 +252,7 @@ const normalizeElement = (element: unknown): CardElement | null => {
   if (type === 'tagSection') {
     return {
       type,
-      subheading: getSafeString(raw.subheading, '标签'),
+      subheading: getSafeString(raw.subheading, '标签'), // AI prompt 生态专用，不走 i18n
       subheadingStyles: defaultStyles(raw.subheadingStyles as Styles),
       tags: normalizeTags(raw.tags),
       tagStyles: defaultStyles((raw.tagStyles as Styles) || { fontWeight: '500', fontSize: '13' }),
@@ -261,9 +261,9 @@ const normalizeElement = (element: unknown): CardElement | null => {
   }
 
   if (type === 'groupedTagSection') {
-    let arcadeLabel = getSafeString(raw.arcadeLabel, '分组1:');
+    let arcadeLabel = getSafeString(raw.arcadeLabel, '分组1:'); // AI prompt 生态专用，不走 i18n
     let arcadeTags = normalizeTags(raw.arcade);
-    let mobileLabel = getSafeString(raw.mobileLabel, '分组2:');
+    let mobileLabel = getSafeString(raw.mobileLabel, '分组2:'); // AI prompt 生态专用，不走 i18n
     let mobileTags = normalizeTags(raw.mobile);
 
     if (Array.isArray(raw.groups) && raw.groups.length > 0) {
@@ -281,7 +281,7 @@ const normalizeElement = (element: unknown): CardElement | null => {
 
     return {
       type,
-      subheading: getSafeString(raw.subheading, '分组标签'),
+      subheading: getSafeString(raw.subheading, '分组标签'), // AI prompt 生态专用，不走 i18n
       subheadingStyles: defaultStyles(raw.subheadingStyles as Styles),
       arcadeLabel,
       arcadeLabelStyles: defaultStyles(raw.arcadeLabelStyles as Styles),
@@ -297,7 +297,7 @@ const normalizeElement = (element: unknown): CardElement | null => {
   if (type === 'tagSectionTwo') {
     return {
       type,
-      subheading: getSafeString(raw.subheading, '我的推'),
+      subheading: getSafeString(raw.subheading, '我的推'), // AI prompt 生态专用，不走 i18n
       subheadingStyles: defaultStyles(raw.subheadingStyles as Styles),
       oshis: normalizeTags(raw.oshis),
       meta: normalizeTags(raw.meta),
@@ -311,7 +311,7 @@ const normalizeElement = (element: unknown): CardElement | null => {
 const fallbackCardElements = (): CardElement[] => [
   {
     type: 'paragraph',
-    text: '这里是 AI 生成的内容，你可以继续编辑。',
+    text: '这里是 AI 生成的内容，你可以继续编辑。', // AI prompt 生态专用，不走 i18n
     styles: defaultStyles(),
   },
 ];

@@ -51,6 +51,15 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem(AI_LOCAL_STORAGE_KEY);
       if (saved) {
@@ -62,14 +71,6 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    if (messages.length > 0) return;
-    setMessages([{
-      role: 'assistant',
-      content: t('aiBuilder.welcomeQuestion'),
-    }]);
-  }, [isOpen, messages.length, t]);
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -173,7 +174,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
     setError('');
     setAppliedCount(0);
     setInput('');
-    setMessages([{ role: 'assistant', content: t('aiBuilder.welcomeQuestion') }]);
+    setMessages([]);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -272,12 +273,12 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
 
         {/* Chat Area */}
         <div ref={listRef} className="ai-panel-chat" aria-live="polite">
-          {messages.length === 1 && messages[0].role === 'assistant' && !isSubmitting && (
+          {messages.length === 0 && !isSubmitting && (
             <div className="ai-welcome-card">
               <div className="ai-welcome-icon">
                 <Sparkles size={32} />
               </div>
-              <p className="ai-welcome-text">{messages[0].content}</p>
+              <p className="ai-welcome-text">{t('aiBuilder.welcomeQuestion')}</p>
               <div className="ai-welcome-actions">
                 {QUICK_STARTS.map(qs => {
                   const Icon = qs.icon;
@@ -309,10 +310,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {messages.map((msg, i) => {
-            const isWelcome = messages.length === 1 && i === 0 && msg.role === 'assistant';
-            if (isWelcome) return null;
-            return (
+          {messages.map((msg, i) => (
               <div key={`${msg.role}-${i}`} className={`ai-msg ${msg.role === 'user' ? 'ai-msg-user' : 'ai-msg-assistant'}`}>
                 <div className="ai-msg-bubble">
                   {msg.content.split('\n').map((line, li) => (
@@ -323,8 +321,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
                   ))}
                 </div>
               </div>
-            );
-          })}
+          ))}
 
           {isSubmitting && (
             <div className="ai-msg ai-msg-assistant">

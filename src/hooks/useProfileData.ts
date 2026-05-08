@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ProfileData } from '../types/data';
 import { getDefaultProfileData } from '../utils/data';
-import { createDefaultLayout, getLayoutSpanFromWidth } from './useGridLayout';
+import { createDefaultLayout, getLayoutSpanFromWidth } from '../utils/gridLayout';
 
 const DATA_KEY = 'kuolieProfileData';
 const SAVE_DEBOUNCE_MS = 500;

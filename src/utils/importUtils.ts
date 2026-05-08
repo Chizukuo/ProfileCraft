@@ -4,20 +4,54 @@ import { showNotification } from './exportUtils';
 import { loadTranslations, createT } from './i18n';
 import { Locale } from '../context/LocaleContext';
 
+// Tintro 第三方配置格式的类型定义
+interface TintroPersonalInfo {
+    nickname?: string;
+    bio?: string;
+    headerColor?: string;
+    [key: string]: unknown;
+}
+
+interface TintroCard {
+    id?: string | number;
+    type?: 'single' | 'dual';
+    title?: string;
+    content?: string;
+    color?: string;
+    textColor?: string;
+    textAlign?: 'default' | 'left' | 'center';
+    [key: string]: unknown;
+}
+
+interface TintroGlobalCardStyles {
+    fontFamily?: string;
+    textAlign?: 'left' | 'center';
+    textColor?: string;
+    layoutOrder?: 'normal' | 'reversed';
+    [key: string]: unknown;
+}
+
+interface TintroConfig {
+    personalInfo?: TintroPersonalInfo;
+    cards?: TintroCard[];
+    globalCardStyles?: TintroGlobalCardStyles;
+    [key: string]: unknown;
+}
+
 // 简单判断是否是 Tintro 格式
-const isTintroConfig = (data: any): boolean => {
-    return data && data.personalInfo && Array.isArray(data.cards) && data.globalCardStyles;
+const isTintroConfig = (data: Record<string, unknown>): data is TintroConfig => {
+    return Boolean(data && data.personalInfo && Array.isArray(data.cards) && data.globalCardStyles);
 };
 
 // 简单判断是否是 ProfileCraft 格式
-const isProfileCraftConfig = (data: any): boolean => {
-    return data && data.userSettings && Array.isArray(data.cards);
+const isProfileCraftConfig = (data: Record<string, unknown>): boolean => {
+    return Boolean(data && data.userSettings && Array.isArray(data.cards));
 };
 
-export const parseTintroToProfileData = (tintroData: any): ProfileData => {
+export const parseTintroToProfileData = (tintroData: TintroConfig): ProfileData => {
     const defaultData = getDefaultProfileData();
-    const globalFontFamily = tintroData.globalCardStyles?.fontFamily && tintroData.globalCardStyles.fontFamily !== 'sans' 
-        ? tintroData.globalCardStyles.fontFamily 
+    const globalFontFamily = tintroData.globalCardStyles?.fontFamily && tintroData.globalCardStyles.fontFamily !== 'sans'
+        ? tintroData.globalCardStyles.fontFamily
         : undefined;
 
     const mainTitleStyles = { ...defaultData.userSettings.mainTitleStyles };
@@ -41,26 +75,26 @@ export const parseTintroToProfileData = (tintroData: any): ProfileData => {
     let tintroCards = tintroData.cards || [];
     const layoutOrder = tintroData.globalCardStyles?.layoutOrder || 'normal';
     if (layoutOrder === 'reversed') {
-        const dualCards = tintroCards.filter((c: any) => c.type === 'dual');
-        const singleCards = tintroCards.filter((c: any) => c.type !== 'dual');
+        const dualCards = tintroCards.filter((c) => c.type === 'dual');
+        const singleCards = tintroCards.filter((c) => c.type !== 'dual');
         tintroCards = [...dualCards, ...singleCards];
     }
 
-    const cards: CardData[] = tintroCards.map((tintroCard: any, index: number) => {
+    const cards: CardData[] = tintroCards.map((tintroCard, index) => {
         let layoutSpan = 'profile-card-span';
         let w = 1;
-        
+
         if (tintroCard.type === 'dual') {
             layoutSpan = 'about-me-card-span';
             w = 2;
         }
 
         const elements: CardElement[] = [];
-        
+
         if (tintroCard.content) {
             // Tintro 中的换行用 \n 表示，我们转换成 HTML 的 <br>
             const formattedText = tintroCard.content.replace(/\n/g, '<br>');
-            
+
             elements.push({
                 type: 'paragraph',
                 text: formattedText,
@@ -68,7 +102,6 @@ export const parseTintroToProfileData = (tintroData: any): ProfileData => {
                     textAlign: tintroCard.textAlign !== 'default' ? tintroCard.textAlign : (tintroData.globalCardStyles?.textAlign || 'left'),
                     color: tintroCard.textColor || tintroData.globalCardStyles?.textColor || undefined,
                     fontFamily: globalFontFamily,
-                    // Tintro 的文字颜色如果需要支持，可以提取，但优先适配 ProfileCraft 主题
                 }
             });
         }
@@ -104,10 +137,10 @@ export const importConfig = async (file: File, locale: Locale, onSuccess: (data:
     reader.onload = (e) => {
         try {
             const result = e.target?.result as string;
-            const parsedData = JSON.parse(result);
+            const parsedData = JSON.parse(result) as Record<string, unknown>;
 
             if (isProfileCraftConfig(parsedData)) {
-                onSuccess(parsedData as ProfileData);
+                onSuccess(parsedData as unknown as ProfileData);
                 showNotification(t('notification.importSuccess') || 'Import successful!', 'success');
             } else if (isTintroConfig(parsedData)) {
                 const convertedData = parseTintroToProfileData(parsedData);
