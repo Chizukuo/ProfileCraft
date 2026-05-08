@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect, useCallback, CSSProperties } from 'react';
+import React, { useState, useRef, useEffect, useCallback, CSSProperties, ElementType } from 'react';
 import { createPortal } from 'react-dom';
+import DOMPurify from 'dompurify';
 import { Styles } from '../../types/data';
 import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
 
 interface EditableTextProps {
-    as?: keyof JSX.IntrinsicElements;
+    as?: ElementType;
     className?: string;
     html: string;
     styles?: Styles;
     onUpdate: (html: string) => void;
-    // onStyleUpdate 已不再需要，因为可编辑样式功能被移除
     onStyleUpdate?: (styles: Styles) => void;
 }
 
@@ -50,7 +50,7 @@ const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', clas
     // 当外部 html prop 更改时同步 DOM（仅在未聚焦时以避免覆盖用户输入）
     useEffect(() => {
         if (textRef.current && html !== textRef.current.innerHTML && !isFocused) {
-            textRef.current.innerHTML = html;
+            textRef.current.innerHTML = DOMPurify.sanitize(html, { ADD_TAGS: ['br'] });
         }
     }, [html, isFocused]);
 
