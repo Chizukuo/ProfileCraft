@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使用指南 | 芝士扩列条编辑器 ProfileCraft</title>
+<meta name="description" content="ProfileCraft 扩列条编辑器使用指南：1 分钟上手、卡片与区块、头像与二维码、图片墙、外观定制、预览与导出、撤销、AI 生成、数据备份与常见问题。">
+<link rel="icon" href="../favicon.ico">
+<link rel="alternate" hreflang="en" href="en.html">
+<style>
+:root {
+  --bg: #FFFDF5;
+  --surface: #FFFFFF;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --border: #ece6d6;
+  --accent: #FFC300;
+  --accent-soft: #FFF5CC;
+  --strong: #8B4513;
+  --code-bg: #f6f1e3;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #18181b;
+    --surface: #232327;
+    --text: #f2f2f4;
+    --muted: #a1a1aa;
+    --border: #34343a;
+    --accent-soft: #3a3214;
+    --strong: #ffd666;
+    --code-bg: #2c2c31;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--strong); }
+.layout {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 48px;
+}
+header.hero {
+  grid-column: 1 / -1;
+  padding: 48px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.hero h1 { margin: 0; font-size: 2rem; line-height: 1.3; }
+.hero p { margin: 4px 0 16px; color: var(--muted); }
+.hero-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 16px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 999px;
+  font-weight: 600; font-size: 0.9rem; text-decoration: none;
+  border: 1px solid var(--border); color: var(--text); background: var(--surface);
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #1d1d1f; }
+nav.toc { position: sticky; top: 16px; align-self: start; padding-top: 24px; font-size: 0.9rem; }
+nav.toc strong { display: block; color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em; margin-bottom: 8px; }
+nav.toc ol { list-style: none; padding: 0; margin: 0; }
+nav.toc a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--text); text-decoration: none; }
+nav.toc a:hover { background: var(--accent-soft); }
+main { min-width: 0; padding-top: 16px; }
+section { padding: 24px 0 8px; border-bottom: 1px dashed var(--border); }
+section:last-child { border-bottom: none; }
+h2 { font-size: 1.4rem; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+h2 .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #1d1d1f; font-size: 0.85rem; flex-shrink: 0;
+}
+h3 { font-size: 1.05rem; margin: 22px 0 6px; }
+p, li { max-width: 72ch; }
+figure { margin: 16px 0 20px; }
+figure img {
+  display: block; max-width: 100%; height: auto;
+  border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+figure.diagram img { border: none; box-shadow: none; border-radius: 18px; width: 100%; max-width: 640px; }
+.legend { list-style: none; counter-reset: mk; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; color: var(--text); font-size: 0.88rem; }
+.legend li { counter-increment: mk; display: flex; gap: 8px; align-items: flex-start; }
+.legend li::before { content: counter(mk); flex: none; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%; background: #8B4513; color: #fff; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; }
+figure.diagram figcaption strong { color: var(--text); font-size: 0.9rem; }
+@media (prefers-color-scheme: dark) { .legend li::before { background: #FFC300; color: #1d1d1f; } }
+figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; padding: 0; list-style: none; counter-reset: step; }
+.steps li {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px; counter-increment: step; box-shadow: var(--shadow);
+}
+.steps li::before { content: counter(step); display: block; font-weight: 800; color: var(--strong); font-size: 1.4rem; line-height: 1; margin-bottom: 6px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92rem; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--accent-soft); font-weight: 700; }
+tr:last-child td { border-bottom: none; }
+.table-wrap { overflow-x: auto; }
+kbd, .ui {
+  display: inline-block; padding: 0 7px; border-radius: 6px; font: inherit; font-size: 0.85em;
+  background: var(--code-bg); border: 1px solid var(--border); white-space: nowrap;
+}
+.ui { font-weight: 600; }
+.tip, .warn {
+  border-radius: 12px; padding: 12px 16px; margin: 14px 0; font-size: 0.93rem;
+  background: var(--accent-soft); border-left: 4px solid var(--accent);
+}
+.warn { background: rgba(239, 68, 68, 0.08); border-left-color: #ef4444; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin: 10px 0; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin: 8px 0 0; }
+footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 0.85rem; padding-top: 24px; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; gap: 0; }
+  nav.toc { position: static; padding: 16px 0; }
+  nav.toc ol { display: flex; flex-wrap: wrap; gap: 4px; }
+  nav.toc a { background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; font-size: 0.82rem; }
+  .hero h1 { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <header class="hero">
+    <div>
+      <h1>芝士扩列条编辑器 · 使用指南</h1>
+      <p>1 分钟上手，所有操作都遵循同一套规则。</p>
+    </div>
+    <div class="hero-actions">
+      <a class="btn primary" href="../index.html">打开编辑器 →</a>
+      <a class="btn" href="en.html" hreflang="en">English</a>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="目录">
+    <strong>目录</strong>
+    <ol>
+      <li><a href="#quick-start">1 分钟上手</a></li>
+      <li><a href="#rules">统一操作规则</a></li>
+      <li><a href="#cards">卡片</a></li>
+      <li><a href="#blocks">区块与标签</a></li>
+      <li><a href="#images">头像、二维码、图片墙</a></li>
+      <li><a href="#appearance">外观定制</a></li>
+      <li><a href="#preview">预览与导出</a></li>
+      <li><a href="#undo">撤销</a></li>
+      <li><a href="#ai">AI 一键生成</a></li>
+      <li><a href="#data">数据与备份</a></li>
+      <li><a href="#shortcuts">快捷键</a></li>
+      <li><a href="#faq">常见问题</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="quick-start">
+      <h2><span class="num">1</span>1 分钟上手</h2>
+      <ol class="steps">
+        <li><strong>改内容</strong><br>点页面上任何文字直接改；点头像、二维码换成你自己的。</li>
+        <li><strong>挑样式</strong><br>点底部的 <span class="ui">外观定制</span>，选一个「一键风格」，再按喜好微调。</li>
+        <li><strong>导出分享</strong><br>点 <span class="ui">预览</span> 确认效果，然后 <span class="ui">导出图片</span> 发到群里或社交平台。</li>
+      </ol>
+      <figure class="diagram">
+        <img src="img/d-layout.svg" width="640" height="440" alt="页面结构示意" loading="lazy">
+        <figcaption><strong>页面结构示意</strong><ol class="legend"><li>名字和简介</li><li>卡片：页面由一张张卡片组成</li><li>区块：卡片里的一块内容（段落、标签……）</li><li>底部工具栏：添加卡片 · AI 一键生成 · 外观定制 · 预览 · 更多配置</li></ol></figcaption>
+      </figure>
+      <div class="tip">所有内容自动保存在你自己的浏览器里，不需要注册，也不会上传到服务器。</div>
+    </section>
+
+    <section id="rules">
+      <h2><span class="num">2</span>统一操作规则</h2>
+      <p>编辑器里的每样东西都按下面几条规则操作，学会一次就能用遍全站：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>想做什么</th><th>怎么做</th></tr></thead>
+        <tbody>
+          <tr><td>改文字</td><td>直接点文字。选中一段文字会出现 <b>加粗 / 斜体 / 下划线 / 删除线</b> 工具条。</td></tr>
+          <tr><td>换图片</td><td>直接点图片（头像、二维码、图片墙里的图）。</td></tr>
+          <tr><td>设置某张卡片或某个区块</td><td>鼠标移上去（手机上点一下），右上角出现 <span class="ui">⚙</span>：宽度、颜色、位置等都在里面。</td></tr>
+          <tr><td>删除</td><td>同一位置的 <span class="ui">×</span>。标签、图片、信息项的 × 在它们自己的右上角。</td></tr>
+          <tr><td>添加</td><td>所有添加按钮都是虚线框的 <span class="ui">+ 添加…</span>。</td></tr>
+          <tr><td>调整顺序</td><td>卡片和区块：<span class="ui">⚙</span> 里的「上移 / 下移」。电脑上也可以拖动卡片顶部的 <span class="ui">⠿</span>。</td></tr>
+          <tr><td>删错了</td><td>删除不会弹确认框，底部会出现 <span class="ui">撤销</span>，或按 <kbd>Ctrl</kbd>+<kbd>Z</kbd>（Mac：<kbd>⌘</kbd>+<kbd>Z</kbd>）。</td></tr>
+          <tr><td>改整体样式</td><td>底部 <span class="ui">外观定制</span>。只改一张卡片：那张卡片的 <span class="ui">⚙</span>。</td></tr>
+          <tr><td>看最终效果</td><td>底部 <span class="ui">预览</span>，所有编辑按钮都会隐藏；按 <kbd>Esc</kbd> 退出。</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <figure class="diagram">
+        <img src="img/d-controls.svg" width="640" height="360" alt="一张卡片上的所有控件" loading="lazy">
+        <figcaption><strong>一张卡片上的所有控件</strong><ol class="legend"><li>拖动把手（仅电脑）</li><li>⚙ 卡片设置</li><li>× 删除卡片</li><li>区块自己的 ⚙ 和 ×（鼠标移到区块上出现）</li><li>标签、图片、信息项的小 ×</li><li>+ 添加标签</li><li>+ 添加区块</li></ol></figcaption>
+      </figure>
+    </section>
+
+    <section id="cards">
+      <h2><span class="num">3</span>卡片</h2>
+      <h3>添加卡片</h3>
+      <p>点底部 <span class="ui">添加卡片</span>，按用途选一个模板。新卡片会出现在最下面：</p>
+      <ul>
+        <li><b>常规卡片</b>（1 列宽）、<b>关于我</b>（2 列宽）、<b>我的推</b>（通栏）。</li>
+        <li><b>扩列诉求</b>：写你想找什么样的朋友。</li>
+        <li><b>雷点 / 边界</b>：提前写清楚雷点和社交偏好。</li>
+        <li><b>推图 / 图片墙</b>：放多张图片。</li>
+        <li><b>个人信息</b>：头像 + 信息列表 + 二维码三个区块，可以分别删除或调整。</li>
+      </ul>
+      <h3>卡片设置</h3>
+      <p>卡片右上角 <span class="ui">⚙</span> 里可以改：宽度（1 / 2 / 3 列）、这张卡片的背景色、居左或居中、是否显示标题、上移 / 下移。</p>
+      <figure class="diagram">
+        <img src="img/d-widths.svg" width="640" height="300" alt="卡片宽度与手机排列" loading="lazy">
+        <figcaption><strong>卡片宽度与手机排列</strong><ol class="legend"><li>电脑上是 3 列网格，卡片可以占 1 / 2 / 3 列（在 ⚙ 里改）</li><li>手机上自动排成一列，电脑上的排版不受影响</li><li>手机上用 ⚙ 里的「上移 / 下移」调整顺序</li></ol></figcaption>
+      </figure>
+    </section>
+
+    <section id="blocks">
+      <h2><span class="num">4</span>区块与标签</h2>
+      <p>每张卡片由若干「区块」组成，可以自由组合、上下调整。点卡片底部的 <span class="ui">+ 添加区块</span>，面板按 <b>文字 / 个人信息 / 标签 / 图片</b> 分组，每个选项的缩略图就是插入后的样子：</p>
+      <figure class="diagram">
+        <img src="img/d-blocks.svg" width="640" height="396" alt="十种区块" loading="lazy">
+        <figcaption><strong>十种区块</strong><ol class="legend"><li>标题：一行大字，比如昵称（⚙ 调大小）</li><li>段落：自由文字</li><li>分割线：实线、虚线或留白</li><li>头像：⚙ 调大小、圆形 / 圆角方形</li><li>信息列表：「昵称: …」「MBTI: …」这样的行</li><li>二维码：链接生成或上传图片</li><li>标签：小标题 + 一组标签</li><li>我的推：推 + 虚线的「and more…」</li><li>分组标签：两组带组名的标签</li><li>图片墙：多张图片（刚插入时只有一个添加框）</li></ol></figcaption>
+      </figure>
+      <h3>标签</h3>
+      <ul>
+        <li>点 <span class="ui">+ 添加标签</span>，输入后按 <kbd>Enter</kbd>。输入框会保持打开，可以连续添加；按 <kbd>Esc</kbd> 或点别处结束。</li>
+        <li>用拼音、日文输入法时，按回车确认候选词不会误添加。</li>
+        <li>点标签文字可以直接改；鼠标移到标签上，右上角的小 × 删除。</li>
+      </ul>
+    </section>
+
+    <section id="images">
+      <h2><span class="num">5</span>头像、二维码、图片墙</h2>
+      <h3>头像、信息、二维码都是独立区块</h3>
+      <p>「个人信息」卡片由 <b>头像</b>、<b>信息列表</b>、<b>二维码</b> 三个区块组成，每个都能单独删除、移动或设置。想要一张只有头像和昵称的卡片？删掉信息列表和二维码，再加一个 <b>标题</b> 区块即可。</p>
+      <ul>
+        <li><b>换头像</b>：点头像选择图片，会自动裁成正方形并压缩。所有头像区块显示的是同一张头像。</li>
+        <li><b>二维码用链接生成</b>：在二维码下方的输入框粘贴 QQ 名片、B 站主页等链接。</li>
+        <li><b>二维码用图片</b>：微信二维码等无法用链接生成的，直接点二维码上传图片。想换回链接：二维码区块的 <span class="ui">⚙</span> → 二维码来源 → 链接生成。</li>
+        <li><b>不要二维码 / 头像</b>：点该区块右上角的 <span class="ui">×</span> 删除（可以撤销）。以后想加回来：<span class="ui">+ 添加区块 → 个人信息 → 二维码</span>。</li>
+      </ul>
+      <figure class="diagram">
+        <img src="img/d-media.svg" width="640" height="270" alt="头像与二维码区块" loading="lazy">
+        <figcaption><strong>头像与二维码区块</strong><ol class="legend"><li>点头像或二维码，直接换成自己的图片</li><li>用不到的区块点 × 删除（可撤销）</li><li>用链接生成二维码时，在这里粘贴链接</li><li>自由组合：比如只留头像，再加一个标题</li></ol></figcaption>
+      </figure>
+      <h3>图片墙（推图）</h3>
+      <ul>
+        <li><span class="ui">+ 添加图片</span> 可以一次选多张。</li>
+        <li>点某张图片可以替换它；鼠标移上去会出现 <span class="ui">‹ ›</span> 调顺序、<span class="ui">T</span> 加图片说明、<span class="ui">×</span> 删除。</li>
+        <li>区块的 <span class="ui">⚙</span> 里可以设置每行几张（1–4），以及「方形裁切」：图片比例不一时开启，排列更整齐。</li>
+      </ul>
+      <figure class="diagram">
+        <img src="img/d-gallery.svg" width="640" height="250" alt="图片墙" loading="lazy">
+        <figcaption><strong>图片墙</strong><ol class="legend"><li>点图片替换；移上去出现 ‹ › 调顺序、T 加说明、× 删除</li><li>+ 添加图片（可以一次选多张）</li><li>区块 ⚙：每行几张、方形裁切</li></ol></figcaption>
+      </figure>
+    </section>
+
+    <section id="appearance">
+      <h2><span class="num">6</span>外观定制</h2>
+      <p>点底部 <span class="ui">外观定制</span> 打开侧边面板，所有改动实时生效：</p>
+      <figure class="diagram">
+        <img src="img/d-appearance.svg" width="640" height="330" alt="外观定制能调什么" loading="lazy">
+        <figcaption><strong>外观定制能调什么</strong><ol class="legend"><li>页面背景：纯色、渐变或图片</li><li>卡片底色与不透明度（调低就是毛玻璃）</li><li>卡片之间的间距</li><li>卡片内边距</li><li>圆角</li></ol></figcaption>
+      </figure>
+      <ul>
+        <li><b>一键风格</b>：经典、玻璃、极简、手账、夜间。先选一个最接近的，再微调。</li>
+        <li><b>主题与强调色</b>：强调色会影响标签、分割线等的颜色。赛博朋克主题使用固定配色。</li>
+        <li><b>页面背景</b>：跟随主题、纯色、渐变，或上传背景图。背景图可以选择铺满、完整或平铺，再加一层蒙版让文字更清楚。</li>
+        <li><b>卡片</b>：底色、不透明度（调低就是毛玻璃效果）、圆角、阴影、边框、文字颜色。</li>
+        <li><b>间距与文字</b>：卡片之间的间距、卡片内边距、行高、字号缩放、字体（包括几种中文艺术字体）。</li>
+        <li><b>显示内容</b>：副标题、页脚可以关掉。头像和二维码是区块，不需要就直接删除。</li>
+      </ul>
+      <div class="tip">背景较深时，标题和文字会自动变成浅色。给单张卡片设置深色底色时，那张卡片的文字也会自动变浅。</div>
+    </section>
+
+    <section id="preview">
+      <h2><span class="num">7</span>预览与导出</h2>
+      <p>点底部 <span class="ui">预览</span>：所有编辑按钮、输入框、添加按钮都会隐藏，看到的就是导出的样子。预览时底部会显示快捷导出按钮。</p>
+      <figure class="diagram">
+        <img src="img/d-preview.svg" width="640" height="220" alt="从编辑到导出" loading="lazy">
+        <figcaption><strong>从编辑到导出</strong><ol class="legend"><li>编辑时：显示各种按钮</li><li>预览：所有编辑按钮隐藏，和导出效果一致</li><li>导出图片（PNG）</li><li>导出 HTML 网页</li><li>导出配置（JSON 备份）</li></ol></figcaption>
+      </figure>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>导出方式</th><th>适合</th></tr></thead>
+        <tbody>
+          <tr><td><b>导出图片</b>（PNG）</td><td>发 QQ 群、朋友圈、小红书。固定按电脑三列排版，3 倍清晰度。</td></tr>
+          <tr><td><b>导出 HTML</b></td><td>一个独立网页文件，可以挂到自己的网站，或直接用手机浏览器打开（在手机上会自动变成单列）。</td></tr>
+          <tr><td><b>导出配置</b>（JSON）</td><td>备份，或换设备继续编辑。用 <span class="ui">导入配置</span> 恢复。</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>导出、导入、语言切换都在底部的 <span class="ui">更多配置</span> 里。</p>
+    </section>
+
+    <section id="undo">
+      <h2><span class="num">8</span>撤销</h2>
+      <p>删除卡片、区块、标签、图片、信息项，以及导入配置、AI 生成、恢复默认之后，底部都会出现撤销提示：</p>
+      <figure class="diagram">
+        <img src="img/d-undo.svg" width="640" height="200" alt="删除与撤销" loading="lazy">
+        <figcaption><strong>删除与撤销</strong><ol class="legend"><li>删除：点小 ×，不弹确认框</li><li>底部出现撤销提示，或按 Ctrl+Z（Mac：⌘+Z）</li><li>内容原样恢复</li></ol></figcaption>
+      </figure>
+      <p>正在输入文字时，<kbd>Ctrl</kbd>+<kbd>Z</kbd> 撤销的是你刚打的字，和平时打字一样。</p>
+    </section>
+
+    <section id="ai">
+      <h2><span class="num">9</span>AI 一键生成</h2>
+      <p>点底部 <span class="ui">AI 一键生成</span>，像聊天一样回答几个问题，AI 会帮你整理成卡片。</p>
+      <h3>准备 API Key</h3>
+      <ul>
+        <li><b>推荐免费的 Google Gemini</b>：打开 <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>，登录后点「Create API key」，复制粘贴到 AI 面板里的输入框即可。</li>
+        <li>也可以用 OpenAI、Anthropic 或兼容 OpenAI 格式的其他接口：点面板里的 <span class="ui">使用 OpenAI / Anthropic / 其他接口</span>（或右上角设置）。自定义接口需要允许浏览器跨域访问（CORS）。</li>
+        <li>Key 只保存在你的浏览器里，请求直接发给服务商，不经过本站服务器。</li>
+      </ul>
+      <div class="warn">使用 Gemini 免费额度时，对话内容可能被 Google 用于改进产品。请不要在对话里提供真实姓名、手机号、住址等隐私信息，AI 也不会把这些写进卡片。</div>
+      <h3>聊天与生成</h3>
+      <ul>
+        <li>AI 每次只问一两个问题，不想回答的直接说跳过就行。它只会用你说过的信息，不会编造年龄、性别等内容。</li>
+        <li>聊到差不多时点 <span class="ui">直接生成</span>。旁边可以选择 <b>替换全部</b>（用生成结果替换现有卡片和标题）或 <b>追加到末尾</b>（保留现有卡片，把新卡片加在后面）。</li>
+        <li>不满意可以点面板里的 <span class="ui">撤销这次生成</span>，或用底部的撤销提示 / <kbd>Ctrl</kbd>+<kbd>Z</kbd>。</li>
+        <li>不小心关掉面板也没关系，在当前标签页里重新打开，聊天记录还在。</li>
+      </ul>
+    </section>
+
+    <section id="data">
+      <h2><span class="num">10</span>数据与备份</h2>
+      <ul>
+        <li>内容自动保存在当前浏览器（每次修改后约 0.5 秒）。<b>换浏览器、换设备，或清理浏览器数据后就看不到了</b>，记得定期用 <span class="ui">导出配置</span> 备份。</li>
+        <li><span class="ui">导入配置</span> 支持本站导出的 JSON，也支持 Tintro（瀑布流自介生成器）导出的配置。</li>
+        <li>浏览器存储空间有限，大约 5MB。图片会自动压缩，但如果放了特别多图片，页面顶部可能会出现「存储空间不足」的红色提示。这时请删掉一些图片，或先点提示里的 <span class="ui">下载备份</span>。</li>
+        <li>想从头开始：<span class="ui">更多配置 → 恢复默认模板</span>，同样可以撤销。</li>
+      </ul>
+      <div class="warn">如果页面打不开、一直报错，出错页面上有「下载数据备份」和「清空本地数据」两个按钮：先备份，再清空即可恢复使用。</div>
+    </section>
+
+    <section id="shortcuts">
+      <h2><span class="num">11</span>快捷键</h2>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>按键</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Z</kbd></td><td>撤销删除等操作（输入文字时撤销输入）</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>关闭弹窗、设置面板、外观面板；退出预览</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>添加标签（可连续添加）</td></tr>
+          <tr><td><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>选中文字后加粗 / 斜体 / 下划线</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2><span class="num">12</span>常见问题</h2>
+      <details>
+        <summary>手机上怎么调整卡片顺序？</summary>
+        <p>点一下卡片，右上角会出现 ⚙，在里面点「上移 / 下移」。手机上不能拖动卡片，这是为了不打乱电脑版的排版。</p>
+      </details>
+      <details>
+        <summary>导出的图片里头像是空白的？</summary>
+        <p>默认头像存放在第三方服务器上，浏览器不允许把它画进图片里。换成你自己上传的头像就正常了。</p>
+      </details>
+      <details>
+        <summary>换了字体但看起来没变化？</summary>
+        <p>中文艺术字体需要联网加载，第一次使用会慢几秒。如果网络限制了字体服务，就会显示系统默认字体。</p>
+      </details>
+      <details>
+        <summary>赛博朋克主题下卡片颜色设置不生效？</summary>
+        <p>赛博朋克主题有固定的卡片样式。想完全自定义卡片颜色，请切回「默认」主题。</p>
+      </details>
+      <details>
+        <summary>别人能看到我编辑的内容吗？</summary>
+        <p>不能。内容只保存在你自己的浏览器里，只有你导出并发出去的图片或网页才会被别人看到。</p>
+      </details>
+      <details>
+        <summary>只想要头像（或只要标题），不要信息和二维码？</summary>
+        <p>它们都是独立区块：鼠标移到信息列表、二维码上，点右上角 × 删除即可；需要标题就 <span class="ui">+ 添加区块 → 标题</span>。</p>
+      </details>
+      <details>
+        <summary>怎么把卡片标题去掉？</summary>
+        <p>卡片右上角 ⚙ → 关闭「显示标题」。</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    还有问题？到 <a href="https://github.com/Chizukuo/ProfileCraft/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a> 反馈 · <a href="../index.html">返回编辑器</a>
+  </footer>
+</div>
+</body>
+</html>

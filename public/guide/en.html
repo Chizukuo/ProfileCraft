@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Guide | ProfileCraft</title>
+<meta name="description" content="ProfileCraft user guide: getting started, cards and blocks, avatar and QR code, image wall, appearance, preview and export, undo, AI generation, backups and FAQ.">
+<link rel="icon" href="../favicon.ico">
+<link rel="alternate" hreflang="zh-CN" href="index.html">
+<style>
+:root {
+  --bg: #FFFDF5;
+  --surface: #FFFFFF;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --border: #ece6d6;
+  --accent: #FFC300;
+  --accent-soft: #FFF5CC;
+  --strong: #8B4513;
+  --code-bg: #f6f1e3;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #18181b;
+    --surface: #232327;
+    --text: #f2f2f4;
+    --muted: #a1a1aa;
+    --border: #34343a;
+    --accent-soft: #3a3214;
+    --strong: #ffd666;
+    --code-bg: #2c2c31;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--strong); }
+.layout {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 48px;
+}
+header.hero {
+  grid-column: 1 / -1;
+  padding: 48px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.hero h1 { margin: 0; font-size: 2rem; line-height: 1.3; }
+.hero p { margin: 4px 0 16px; color: var(--muted); }
+.hero-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 16px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 999px;
+  font-weight: 600; font-size: 0.9rem; text-decoration: none;
+  border: 1px solid var(--border); color: var(--text); background: var(--surface);
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #1d1d1f; }
+nav.toc { position: sticky; top: 16px; align-self: start; padding-top: 24px; font-size: 0.9rem; }
+nav.toc strong { display: block; color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em; margin-bottom: 8px; }
+nav.toc ol { list-style: none; padding: 0; margin: 0; }
+nav.toc a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--text); text-decoration: none; }
+nav.toc a:hover { background: var(--accent-soft); }
+main { min-width: 0; padding-top: 16px; }
+section { padding: 24px 0 8px; border-bottom: 1px dashed var(--border); }
+section:last-child { border-bottom: none; }
+h2 { font-size: 1.4rem; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+h2 .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #1d1d1f; font-size: 0.85rem; flex-shrink: 0;
+}
+h3 { font-size: 1.05rem; margin: 22px 0 6px; }
+p, li { max-width: 72ch; }
+figure { margin: 16px 0 20px; }
+figure img {
+  display: block; max-width: 100%; height: auto;
+  border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+figure.diagram img { border: none; box-shadow: none; border-radius: 18px; width: 100%; max-width: 640px; }
+.legend { list-style: none; counter-reset: mk; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; color: var(--text); font-size: 0.88rem; }
+.legend li { counter-increment: mk; display: flex; gap: 8px; align-items: flex-start; }
+.legend li::before { content: counter(mk); flex: none; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%; background: #8B4513; color: #fff; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; }
+figure.diagram figcaption strong { color: var(--text); font-size: 0.9rem; }
+@media (prefers-color-scheme: dark) { .legend li::before { background: #FFC300; color: #1d1d1f; } }
+figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; padding: 0; list-style: none; counter-reset: step; }
+.steps li {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px; counter-increment: step; box-shadow: var(--shadow);
+}
+.steps li::before { content: counter(step); display: block; font-weight: 800; color: var(--strong); font-size: 1.4rem; line-height: 1; margin-bottom: 6px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92rem; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--accent-soft); font-weight: 700; }
+tr:last-child td { border-bottom: none; }
+.table-wrap { overflow-x: auto; }
+kbd, .ui {
+  display: inline-block; padding: 0 7px; border-radius: 6px; font: inherit; font-size: 0.85em;
+  background: var(--code-bg); border: 1px solid var(--border); white-space: nowrap;
+}
+.ui { font-weight: 600; }
+.tip, .warn {
+  border-radius: 12px; padding: 12px 16px; margin: 14px 0; font-size: 0.93rem;
+  background: var(--accent-soft); border-left: 4px solid var(--accent);
+}
+.warn { background: rgba(239, 68, 68, 0.08); border-left-color: #ef4444; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin: 10px 0; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin: 8px 0 0; }
+footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 0.85rem; padding-top: 24px; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; gap: 0; }
+  nav.toc { position: static; padding: 16px 0; }
+  nav.toc ol { display: flex; flex-wrap: wrap; gap: 4px; }
+  nav.toc a { background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; font-size: 0.82rem; }
+  .hero h1 { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <header class="hero">
+    <div>
+      <h1>ProfileCraft · User Guide</h1>
+      <p>Learn the basics in a minute. Everything follows the same few rules.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="btn primary" href="../index.html">Open the editor →</a>
+      <a class="btn" href="index.html" hreflang="zh-CN">中文</a>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <strong>CONTENTS</strong>
+    <ol>
+      <li><a href="#quick-start">Quick start</a></li>
+      <li><a href="#rules">The rules</a></li>
+      <li><a href="#cards">Cards</a></li>
+      <li><a href="#blocks">Blocks &amp; tags</a></li>
+      <li><a href="#images">Avatar, QR code, images</a></li>
+      <li><a href="#appearance">Appearance</a></li>
+      <li><a href="#preview">Preview &amp; export</a></li>
+      <li><a href="#undo">Undo</a></li>
+      <li><a href="#ai">AI generation</a></li>
+      <li><a href="#data">Data &amp; backups</a></li>
+      <li><a href="#shortcuts">Shortcuts</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section id="quick-start">
+      <h2><span class="num">1</span>Quick start</h2>
+      <ol class="steps">
+        <li><strong>Edit</strong><br>Click any text to change it. Click the avatar or QR code to use your own.</li>
+        <li><strong>Style</strong><br>Open <span class="ui">Customize</span> at the bottom, pick a quick style, then fine-tune.</li>
+        <li><strong>Share</strong><br>Click <span class="ui">Preview</span> to check the result, then <span class="ui">Export Image</span>.</li>
+      </ol>
+      <figure class="diagram">
+        <img src="img/d-layout.svg" width="640" height="440" alt="Page layout" loading="lazy">
+        <figcaption><strong>Page layout</strong><ol class="legend"><li>Name and bio</li><li>Cards: the page is made of cards</li><li>Blocks: pieces of content inside a card (paragraph, tags…)</li><li>Bottom toolbar: Add Card · AI Generate · Customize · Preview · More Settings</li></ol></figcaption>
+      </figure>
+      <div class="tip">Everything is saved automatically in your own browser. No account, nothing uploaded.</div>
+    </section>
+
+    <section id="rules">
+      <h2><span class="num">2</span>The rules</h2>
+      <p>Everything in the editor works the same way. Learn these once and you know the whole tool:</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>To…</th><th>Do this</th></tr></thead>
+        <tbody>
+          <tr><td>Edit text</td><td>Click the text. Selecting text shows a <b>bold / italic / underline / strikethrough</b> bar.</td></tr>
+          <tr><td>Change an image</td><td>Click the image (avatar, QR code, any picture in an image wall).</td></tr>
+          <tr><td>Change settings for a card or block</td><td>Hover it (tap it on a phone). A <span class="ui">⚙</span> appears in the top-right corner with width, color, position and more.</td></tr>
+          <tr><td>Delete</td><td>The <span class="ui">×</span> next to the ⚙. Tags, images and info rows have their own small × in their corner.</td></tr>
+          <tr><td>Add</td><td>Every add button is a dashed <span class="ui">+ Add…</span> button.</td></tr>
+          <tr><td>Reorder</td><td>Cards and blocks: <span class="ui">⚙</span> → Move up / Move down. On a computer you can also drag a card by its <span class="ui">⠿</span> handle.</td></tr>
+          <tr><td>Undo a mistake</td><td>Deleting never asks for confirmation. Click <span class="ui">Undo</span> at the bottom or press <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>⌘</kbd>+<kbd>Z</kbd> on Mac).</td></tr>
+          <tr><td>Change the overall look</td><td><span class="ui">Customize</span> at the bottom. For a single card, use that card's <span class="ui">⚙</span>.</td></tr>
+          <tr><td>See the final result</td><td><span class="ui">Preview</span> hides every editing control. Press <kbd>Esc</kbd> to leave.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <figure class="diagram">
+        <img src="img/d-controls.svg" width="640" height="360" alt="Every control on a card" loading="lazy">
+        <figcaption><strong>Every control on a card</strong><ol class="legend"><li>Drag handle (desktop only)</li><li>⚙ card settings</li><li>× delete card</li><li>A block’s own ⚙ and × (appear when you hover the block)</li><li>Small × on tags, images and info rows</li><li>+ Add tag</li><li>+ Add block</li></ol></figcaption>
+      </figure>
+    </section>
+
+    <section id="cards">
+      <h2><span class="num">3</span>Cards</h2>
+      <h3>Adding a card</h3>
+      <p>Click <span class="ui">Add Card</span> and pick a template. New cards appear at the bottom.</p>
+      <ul>
+        <li><b>Basic card</b> (1 column), <b>About me</b> (2 columns), <b>My faves</b> (full width).</li>
+        <li><b>Looking for</b>: the kind of friends you want to meet.</li>
+        <li><b>Boundaries</b>: dealbreakers and social preferences.</li>
+        <li><b>Image wall</b>: several pictures in a grid.</li>
+        <li><b>Profile info</b>: three blocks (avatar, info list, QR code) that you can delete or adjust individually.</li>
+      </ul>
+      <h3>Card settings</h3>
+      <p>A card’s <span class="ui">⚙</span> holds its width (1 / 2 / 3 columns), its own background color, left or center alignment, whether to show the title, and Move up / Move down.</p>
+      <figure class="diagram">
+        <img src="img/d-widths.svg" width="640" height="300" alt="Card widths and phone layout" loading="lazy">
+        <figcaption><strong>Card widths and phone layout</strong><ol class="legend"><li>On desktop, cards sit in a 3-column grid and span 1, 2 or 3 columns (set in ⚙)</li><li>On phones they stack into one column; the desktop layout is untouched</li><li>On phones, reorder with Move up / Move down in ⚙</li></ol></figcaption>
+      </figure>
+    </section>
+
+    <section id="blocks">
+      <h2><span class="num">4</span>Blocks &amp; tags</h2>
+      <p>Each card is made of blocks that you can combine and reorder freely. Click <span class="ui">+ Add block</span> at the bottom of a card. The panel groups them into <b>Text / Profile / Tags / Images</b>, and each thumbnail shows exactly what gets inserted:</p>
+      <figure class="diagram">
+        <img src="img/d-blocks.svg" width="640" height="396" alt="The ten block types" loading="lazy">
+        <figcaption><strong>The ten block types</strong><ol class="legend"><li>Heading: one line of large text, e.g. your name (size in ⚙)</li><li>Paragraph: free text</li><li>Divider: solid, dashed or blank space</li><li>Avatar: size and circle / rounded shape in ⚙</li><li>Info list: rows like “Name: …”, “MBTI: …”</li><li>QR code: from a link or an uploaded image</li><li>Tags: heading plus tags</li><li>My faves: faves plus a dashed “and more…”</li><li>Grouped tags: two named tag groups</li><li>Image wall: several pictures (starts with just an add box)</li></ol></figcaption>
+      </figure>
+      <h3>Tags</h3>
+      <ul>
+        <li>Click <span class="ui">+ Add tag</span>, type, press <kbd>Enter</kbd>. The box stays open so you can add several in a row. Press <kbd>Esc</kbd> or click elsewhere to finish.</li>
+        <li>Pressing Enter to confirm a Chinese or Japanese input-method candidate will not add a half-typed tag.</li>
+        <li>Click a tag to edit it. Hover it and use the small × to delete it.</li>
+      </ul>
+    </section>
+
+    <section id="images">
+      <h2><span class="num">5</span>Avatar, QR code, image wall</h2>
+      <h3>Avatar, info list and QR code are separate blocks</h3>
+      <p>The “Profile info” card is made of three blocks: <b>Avatar</b>, <b>Info list</b> and <b>QR code</b>. Each can be deleted, moved or adjusted on its own. Want a card with only your avatar and name? Delete the info list and QR code, then add a <b>Heading</b> block.</p>
+      <ul>
+        <li><b>Change the avatar</b>: click it and pick an image. It is cropped to a square and compressed. Every avatar block shows the same avatar.</li>
+        <li><b>QR code from a link</b>: paste a link (QQ card, profile page…) into the box under the QR code.</li>
+        <li><b>QR code from an image</b>: for codes you can’t generate from a link (e.g. WeChat), click the QR code and upload your saved image. To switch back: the QR block’s <span class="ui">⚙</span> → QR code → From link.</li>
+        <li><b>Don’t want the QR code / avatar</b>: click the <span class="ui">×</span> in that block’s corner (undoable). To bring it back later: <span class="ui">+ Add block → Profile → QR code</span>.</li>
+      </ul>
+      <figure class="diagram">
+        <img src="img/d-media.svg" width="640" height="270" alt="Avatar and QR code blocks" loading="lazy">
+        <figcaption><strong>Avatar and QR code blocks</strong><ol class="legend"><li>Click the avatar or QR code to use your own image</li><li>Delete blocks you don’t need with × (undoable)</li><li>When generating the QR code from a link, paste it here</li><li>Combine freely, e.g. keep just the avatar and add a heading</li></ol></figcaption>
+      </figure>
+      <h3>Image wall</h3>
+      <ul>
+        <li><span class="ui">+ Add images</span> accepts several files at once.</li>
+        <li>Click a picture to replace it. Hover it for <span class="ui">‹ ›</span> (reorder), <span class="ui">T</span> (caption) and <span class="ui">×</span> (delete).</li>
+        <li>The block's <span class="ui">⚙</span> sets images per row (1–4) and <b>Square crop</b>, which keeps mixed aspect ratios tidy.</li>
+      </ul>
+      <figure class="diagram">
+        <img src="img/d-gallery.svg" width="640" height="250" alt="Image wall" loading="lazy">
+        <figcaption><strong>Image wall</strong><ol class="legend"><li>Click a picture to replace it; hover for ‹ › reorder, T caption, × delete</li><li>+ Add images (select several at once)</li><li>Block ⚙: images per row, square crop</li></ol></figcaption>
+      </figure>
+    </section>
+
+    <section id="appearance">
+      <h2><span class="num">6</span>Appearance</h2>
+      <p><span class="ui">Customize</span> opens a side panel. Every change shows up live.</p>
+      <figure class="diagram">
+        <img src="img/d-appearance.svg" width="640" height="330" alt="What Customize controls" loading="lazy">
+        <figcaption><strong>What Customize controls</strong><ol class="legend"><li>Page background: solid, gradient or image</li><li>Card color and opacity (lower it for frosted glass)</li><li>Gap between cards</li><li>Card padding</li><li>Corner radius</li></ol></figcaption>
+      </figure>
+      <ul>
+        <li><b>Quick styles</b>: Classic, Glass, Minimal, Journal, Night. Start from the closest one.</li>
+        <li><b>Theme &amp; accent</b>: the accent color tints tags and dividers. The Cyberpunk theme uses a fixed palette.</li>
+        <li><b>Page background</b>: theme default, solid color, gradient, or your own image (cover / contain / tile, with an optional overlay for readability).</li>
+        <li><b>Cards</b>: color, opacity (lower it for a frosted-glass look), corner radius, shadow, border, text color.</li>
+        <li><b>Spacing &amp; text</b>: gaps between cards, card padding, line height, font size and font family.</li>
+        <li><b>Show on page</b>: turn the subtitle or footer off. The avatar and QR code are blocks; just delete them if you don’t need them.</li>
+      </ul>
+      <div class="tip">On a dark background, the title and footer text automatically switch to a light color. A card you give a dark color gets light text too.</div>
+    </section>
+
+    <section id="preview">
+      <h2><span class="num">7</span>Preview &amp; export</h2>
+      <p><span class="ui">Preview</span> hides every editing button, input and add button, so what you see is what gets exported. While previewing, the bottom bar offers quick exports.</p>
+      <figure class="diagram">
+        <img src="img/d-preview.svg" width="640" height="220" alt="From editing to export" loading="lazy">
+        <figcaption><strong>From editing to export</strong><ol class="legend"><li>Editing: buttons everywhere</li><li>Preview: every editing control hidden, same as the export</li><li>Export Image (PNG)</li><li>Export HTML page</li><li>Export Config (JSON backup)</li></ol></figcaption>
+      </figure>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Export</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td><b>Export Image</b> (PNG)</td><td>Posting to chats and social media. Always uses the 3-column desktop layout at 3× resolution.</td></tr>
+          <tr><td><b>Export HTML</b></td><td>A standalone web page you can host anywhere or open on a phone (it switches to one column on small screens).</td></tr>
+          <tr><td><b>Export Config</b> (JSON)</td><td>Backups and moving to another device. Restore it with <span class="ui">Import Config</span>.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Export, import and language are all under <span class="ui">More Settings</span> at the bottom.</p>
+    </section>
+
+    <section id="undo">
+      <h2><span class="num">8</span>Undo</h2>
+      <p>After deleting a card, block, tag, image or info row, and after importing, applying AI results or restoring the default, an undo prompt appears at the bottom:</p>
+      <figure class="diagram">
+        <img src="img/d-undo.svg" width="640" height="200" alt="Delete and undo" loading="lazy">
+        <figcaption><strong>Delete and undo</strong><ol class="legend"><li>Delete: click the small ×, no confirmation</li><li>An undo prompt appears; or press Ctrl+Z (⌘+Z on Mac)</li><li>Restored exactly as it was</li></ol></figcaption>
+      </figure>
+      <p>While you're typing, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes your typing, as usual.</p>
+    </section>
+
+    <section id="ai">
+      <h2><span class="num">9</span>AI generation</h2>
+      <p><span class="ui">AI Generate</span> asks you a few questions, chat-style, and builds the cards for you.</p>
+      <h3>Getting an API key</h3>
+      <ul>
+        <li><b>Recommended: Google Gemini (free).</b> Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>, sign in, click “Create API key”, and paste it into the box in the AI panel.</li>
+        <li>OpenAI, Anthropic or any OpenAI-compatible endpoint also work: click <span class="ui">Use OpenAI / Anthropic / another endpoint</span> in the panel (or the settings at its top-right). Custom endpoints must allow browser requests (CORS).</li>
+        <li>Your key is stored only in your browser. Requests go straight to the provider, never through this site.</li>
+      </ul>
+      <div class="warn">On Gemini’s free tier, Google may use conversations to improve its products. Don’t share your real name, phone number, address or other private details; the AI won’t put them on your card either.</div>
+      <h3>Chatting and generating</h3>
+      <ul>
+        <li>The AI asks one or two questions at a time; just say “skip” to anything you’d rather not answer. It only uses what you told it and won’t invent your age, gender and so on.</li>
+        <li>When you’re ready, click <span class="ui">Generate Now</span>. Next to it, choose <b>Replace all</b> (replace your cards and title) or <b>Add to end</b> (keep your cards and add the new ones after them).</li>
+        <li>Not happy? Click <span class="ui">Undo this generation</span> in the panel, or use the undo prompt / <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
+        <li>Closed the panel by accident? Reopen it in the same tab and the conversation is still there.</li>
+      </ul>
+    </section>
+
+    <section id="data">
+      <h2><span class="num">10</span>Data &amp; backups</h2>
+      <ul>
+        <li>Your work is saved in this browser about half a second after each change. <b>It won't follow you to another browser or device, and clearing browser data erases it.</b> Use <span class="ui">Export Config</span> regularly as a backup.</li>
+        <li><span class="ui">Import Config</span> accepts files exported here and configurations from Tintro.</li>
+        <li>Browser storage is limited to roughly 5 MB. Images are compressed, but if you add a lot of them a red "storage is full" bar may appear at the top. Remove some images, or use <span class="ui">Download backup</span> in that bar first.</li>
+        <li>To start over: <span class="ui">More Settings → Restore Default Template</span>. It can be undone too.</li>
+      </ul>
+      <div class="warn">If the page keeps showing an error, the error screen has "Download backup" and "Reset data" buttons. Back up first, then reset.</div>
+    </section>
+
+    <section id="shortcuts">
+      <h2><span class="num">11</span>Shortcuts</h2>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Keys</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Z</kbd></td><td>Undo deletions and other changes (undoes typing while you're in a text field)</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Close dialogs, settings and the Customize panel; leave preview</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>Add a tag (keeps the box open for the next one)</td></tr>
+          <tr><td><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Bold / italic / underline the selected text</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2><span class="num">12</span>FAQ</h2>
+      <details>
+        <summary>How do I reorder cards on my phone?</summary>
+        <p>Tap the card, then use Move up / Move down in its ⚙. Dragging is turned off on phones so it can't mess up the desktop layout.</p>
+      </details>
+      <details>
+        <summary>The avatar is blank in the exported image.</summary>
+        <p>The default avatar is hosted on a third-party server that doesn't allow browsers to copy it into an image. Upload your own avatar and it will export fine.</p>
+      </details>
+      <details>
+        <summary>I picked a font but nothing changed.</summary>
+        <p>Decorative Chinese fonts load from the internet and can take a few seconds the first time. If your network blocks the font service, the system font is used instead.</p>
+      </details>
+      <details>
+        <summary>Card colors don't work in the Cyberpunk theme.</summary>
+        <p>Cyberpunk has a fixed card style. Switch back to the Default theme for full control over card colors.</p>
+      </details>
+      <details>
+        <summary>Can other people see what I'm editing?</summary>
+        <p>No. Your content stays in your own browser. Only images or pages you export and share are visible to others.</p>
+      </details>
+      <details>
+        <summary>I only want an avatar (or only a heading), without the info list and QR code.</summary>
+        <p>They are separate blocks: hover the info list or QR code and click × in its corner. For a heading, use <span class="ui">+ Add block → Heading</span>.</p>
+      </details>
+      <details>
+        <summary>How do I remove a card's title?</summary>
+        <p>Open the card's ⚙ and turn off "Show title".</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    Still stuck? Open an issue on <a href="https://github.com/Chizukuo/ProfileCraft/issues" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="../index.html">Back to the editor</a>
+  </footer>
+</div>
+</body>
+</html>
