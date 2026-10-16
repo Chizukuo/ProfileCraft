@@ -1,0 +1,533 @@
+/* ===================================
+   统一的编辑器控件（components/ui/EditorControls.tsx）
+   规则：卡片和区块右上角是同一组按钮（⚙ 设置 / × 删除），悬停出现，
+   触屏上点一下卡片或区块（获得焦点）出现；标签 / 图片 / 信息项的删除是同款小按钮。
+   这些控件都带 .editor-only，预览与导出时隐藏。
+   =================================== */
+
+/* ---- 图标按钮 ---- */
+.pc-tool-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--ui-border-default);
+    background: var(--toolbar-bg);
+    color: var(--ui-text-tertiary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.pc-tool-btn.is-sm {
+    width: 20px;
+    height: 20px;
+}
+
+.pc-tool-btn:hover:not(:disabled) {
+    color: var(--ui-text-primary);
+    border-color: var(--theme-accent);
+    transform: scale(1.06);
+}
+
+.pc-tool-btn.is-active {
+    color: var(--theme-text-strong);
+    border-color: var(--theme-accent);
+    background: var(--hover-bg-color);
+}
+
+.pc-tool-btn.is-danger:hover:not(:disabled) {
+    background: var(--delete-red);
+    border-color: var(--delete-red);
+    color: #fff;
+}
+
+.pc-tool-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.pc-tool-btn:focus-visible {
+    outline: 2px solid var(--theme-accent);
+    outline-offset: 2px;
+}
+
+/* ---- 卡片 / 区块的控件组 ---- */
+.pc-hover-scope {
+    position: relative;
+}
+
+.pc-hover-scope:focus,
+.ui-card:focus {
+    outline: none;
+}
+
+.pc-controls {
+    position: absolute;
+    /* 浮在区块右上角外侧，避免挡住第一行文字 */
+    top: -12px;
+    right: -6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 15;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+}
+
+.pc-controls.is-inline {
+    position: static;
+    justify-self: end;
+}
+
+.pc-hover-scope:hover > .pc-controls,
+.pc-hover-scope:focus-within > .pc-controls,
+.pc-controls:has(.pc-popover-anchor.is-open) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 卡片顶部一行：左空 / 中间拖动把手 / 右侧控件 */
+.card-top-controls {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    min-height: 32px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.card-top-controls .pc-controls {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.ui-card:hover .card-top-controls,
+.ui-card:focus-within .card-top-controls,
+.card-top-controls:has(.pc-popover-anchor.is-open) {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    /* 触屏：卡片控件常显（很淡），区块控件在点中后出现 */
+    .card-top-controls {
+        opacity: 0.85;
+    }
+}
+
+/* 将要删除的对象红色描边提示 */
+.pc-hover-scope:has(> .pc-controls .pc-tool-btn.is-danger:hover),
+.ui-card:has(> .card-inner-content > .card-top-controls .pc-tool-btn.is-danger:hover) {
+    box-shadow: inset 0 0 0 1px var(--delete-red);
+    background-color: rgba(239, 68, 68, 0.04);
+}
+
+.pc-hover-scope:has(> .pc-controls .pc-tool-btn.is-danger:hover) {
+    border-radius: var(--radius-s);
+}
+
+/* ---- 条目级（标签、信息项、图片、头像、二维码） ---- */
+.pc-item {
+    position: relative;
+}
+
+.pc-item-delete {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
+}
+
+.pc-item:hover > .pc-item-delete,
+.pc-item:focus-within > .pc-item-delete {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (hover: none) {
+    .pc-hover-scope:focus-within .pc-item-delete {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+.pc-item:has(> .pc-item-delete.is-danger:hover) > .tag,
+.pc-item:has(> .pc-item-delete.is-danger:hover) > .oshi-tag,
+.pc-item:has(> .pc-item-delete.is-danger:hover) > .oshi-meta-tag {
+    box-shadow: inset 0 0 0 1px var(--delete-red);
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.profile-item-row > .pc-item-delete {
+    top: 50%;
+    right: -26px;
+    transform: translateY(-50%);
+}
+
+.gallery-item-actions {
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 3px;
+}
+
+/* ---- 弹出设置面板 ---- */
+.pc-popover-anchor {
+    position: relative;
+}
+
+.pc-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 280px;
+    max-width: calc(100vw - 32px);
+    padding: 12px;
+    background: var(--toolbar-bg);
+    color: var(--ui-text-primary);
+    border: 1px solid var(--ui-border-default);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+    z-index: 60;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.82rem;
+    animation: appleMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pc-popover-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--ui-border-default);
+}
+
+.pc-setting-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pc-setting-row:has(.pc-switch) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pc-setting-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ui-text-tertiary);
+}
+
+.pc-popover-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: none;
+    padding: 6px 0 0;
+    border-top: 1px solid var(--ui-border-default);
+    color: var(--theme-text-strong);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.pc-popover-link:hover {
+    text-decoration: underline;
+}
+
+/* ---- 分段选择 / 开关 / 色块（弹出面板与外观抽屉共用） ---- */
+.pc-segmented {
+    display: flex;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme-scheme='dark'] .pc-segmented {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pc-segmented button {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 6px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ui-text-secondary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.pc-segmented button.is-active {
+    background: var(--toolbar-bg);
+    color: var(--ui-text-primary);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.pc-segmented button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.pc-segmented button:not(:disabled):not(.is-active):hover {
+    color: var(--ui-text-primary);
+}
+
+.pc-switch {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.pc-switch input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.pc-switch-track {
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.18);
+    position: relative;
+    transition: background-color var(--transition-base);
+}
+
+.pc-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform var(--transition-base);
+}
+
+.pc-switch input:checked + .pc-switch-track {
+    background: var(--theme-accent);
+}
+
+.pc-switch input:checked + .pc-switch-track::after {
+    transform: translateX(16px);
+}
+
+.pc-switch input:focus-visible + .pc-switch-track {
+    outline: 2px solid var(--theme-accent);
+    outline-offset: 2px;
+}
+
+.pc-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pc-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ui-text-tertiary);
+    background: var(--ui-bg-card);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast);
+}
+
+.pc-swatch:hover {
+    transform: scale(1.12);
+}
+
+.pc-swatch.is-active {
+    box-shadow: 0 0 0 2px var(--toolbar-bg), 0 0 0 4px var(--theme-accent);
+}
+
+.pc-swatch.is-custom {
+    background: conic-gradient(#ff5c5c, #ffd65c, #6cff7a, #5ce1ff, #8b5cff, #ff5cd6, #ff5c5c);
+    overflow: hidden;
+}
+
+.pc-swatch.is-custom input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+/* ---- 添加按钮：统一虚线样式 ---- */
+.pc-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px dashed var(--ui-border-default);
+    background: transparent;
+    color: var(--pc-card-text, var(--ui-text-tertiary));
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: border-color var(--transition-base), color var(--transition-base), background-color var(--transition-base);
+    opacity: 0.85;
+}
+
+.pc-add-btn:hover:not(:disabled) {
+    border-color: var(--theme-accent);
+    color: var(--theme-text-strong);
+    background: var(--hover-bg-color);
+    opacity: 1;
+}
+
+.pc-add-btn:disabled {
+    cursor: default;
+}
+
+.pc-add-btn.is-chip {
+    padding: 0.3rem 0.7rem;
+    margin: 0.25rem;
+    border-radius: var(--radius-s);
+}
+
+.pc-add-btn.is-block {
+    width: 100%;
+    padding: 12px;
+    margin-top: var(--space-m);
+    border-radius: var(--radius-m);
+    font-size: 0.85rem;
+}
+
+.pc-add-btn.is-tile {
+    flex-direction: column;
+    gap: 6px;
+    min-height: 96px;
+    aspect-ratio: 1;
+    border-width: 1.5px;
+    border-radius: calc(var(--pc-card-radius, var(--radius-l)) * 0.6);
+}
+
+.pc-inline-adder {
+    display: inline-flex;
+    margin: 0.25rem;
+}
+
+.pc-inline-adder input {
+    width: 9em;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--theme-accent);
+    background: var(--toolbar-bg);
+    color: var(--ui-text-primary);
+    font: inherit;
+    font-size: 0.8rem;
+    outline: none;
+    box-shadow: 0 0 0 3px var(--hover-bg-color);
+}
+
+/* ---- 头像 / 二维码区块 ---- */
+.qr-replace {
+    border-radius: var(--radius-m);
+    overflow: hidden;
+}
+
+.qr-code-link-input {
+    color: var(--ui-text-primary);
+    background: var(--toolbar-bg);
+}
+
+/* 模板选项是 <button>，重置默认按钮样式 */
+button.template-option {
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    width: 100%;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+}
+
+.modal-body .template-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.template-option .template-name {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.template-option .template-description {
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+/* ---- 模板缩略图（TemplateThumb.tsx），与使用指南示意图同一套图形语言 ---- */
+.template-thumb {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-s);
+    background: var(--theme-bg-page);
+}
+
+/* 区块缩略图会整体放大，线条保持细线 */
+.template-thumb * { vector-effect: non-scaling-stroke; }
+
+.tt-slot { fill: var(--theme-accent); fill-opacity: 0.07; }
+.tt-card { fill: var(--ui-bg-card); stroke: var(--ui-border-default); stroke-width: 1; }
+.tt-card-fill { fill: var(--ui-bg-card); }
+.tt-line { fill: var(--ui-text-tertiary); fill-opacity: 0.3; }
+.tt-head { fill: var(--ui-text-tertiary); fill-opacity: 0.75; }
+.tt-pill { fill: var(--theme-tag-bg); }
+.tt-pill2 { fill: var(--theme-tag-bg-alt); }
+.tt-dash { fill: none; stroke: var(--theme-accent); stroke-width: 1; stroke-dasharray: 3 2; }
+.tt-dash-line { fill: var(--theme-accent); fill-opacity: 0.6; }
+.tt-plus { fill: none; stroke: var(--ui-text-tertiary); stroke-width: 1; stroke-linecap: round; }
+.template-group + .template-group { margin-top: 14px; }
+.template-group-title { margin: 0 0 8px; font-size: 0.8rem; font-weight: 700; color: var(--ui-text-tertiary); letter-spacing: 0.04em; }
+.tt-avatar { fill: #D6E6FF; stroke: var(--theme-accent); stroke-width: 1.5; }
+.tt-img1 { fill: #D6E6FF; }
+.tt-img2 { fill: #FFD3E0; }
+.tt-img3 { fill: #CFF0DD; }
+.tt-imgfg { fill: #fff; fill-opacity: 0.75; }
+
+.template-option:hover .tt-card {
+    stroke: var(--theme-accent);
+}

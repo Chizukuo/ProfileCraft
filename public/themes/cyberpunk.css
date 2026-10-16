@@ -266,7 +266,7 @@ html[data-theme='cyberpunk'] .hamburger-menu button,
 html[data-theme='cyberpunk'] .sidebar-item-button,
 html[data-theme='cyberpunk'] .modal-button-primary,
 html[data-theme='cyberpunk'] .modal-button-secondary,
-html[data-theme='cyberpunk'] .action-button-text-with-icon {
+html[data-theme='cyberpunk'] .pc-add-btn {
     border-radius: 0;
     clip-path: var(--cp-button-clip);
     text-transform: uppercase;
@@ -441,17 +441,17 @@ html[data-theme='cyberpunk'] .tag-wrapper:hover .oshi-meta-tag {
     box-shadow: 0 0 18px rgba(0, 240, 255, 0.16);
 }
 
-html[data-theme='cyberpunk'] .add-tag-input,
+html[data-theme='cyberpunk'] .pc-inline-adder input,
 html[data-theme='cyberpunk'] .qr-code-link-input,
 html[data-theme='cyberpunk'] .rich-text-toolbar .toolbar-input,
-html[data-theme='cyberpunk'] .width-dropdown {
+html[data-theme='cyberpunk'] .pc-popover {
     background: rgba(5, 10, 18, 0.92);
     color: var(--ui-text-primary);
     border: 1px solid rgba(0, 240, 255, 0.24);
     box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.08);
 }
 
-html[data-theme='cyberpunk'] .add-tag-input:focus,
+html[data-theme='cyberpunk'] .pc-inline-adder input:focus,
 html[data-theme='cyberpunk'] .qr-code-link-input:focus,
 html[data-theme='cyberpunk'] .rich-text-toolbar .toolbar-input:focus {
     outline: none;
@@ -482,20 +482,19 @@ html[data-theme='cyberpunk'] .toolbar-separator {
     background-color: rgba(0, 240, 255, 0.2);
 }
 
-html[data-theme='cyberpunk'] .action-button {
+html[data-theme='cyberpunk'] .pc-tool-btn {
     background: rgba(6, 10, 18, 0.78);
     color: var(--ui-text-secondary);
     border: 1px solid rgba(0, 240, 255, 0.22);
     box-shadow: inset 0 0 0 1px rgba(0, 240, 255, 0.06);
 }
 
-html[data-theme='cyberpunk'] .action-button:hover,
-html[data-theme='cyberpunk'] .width-control-btn:hover {
+html[data-theme='cyberpunk'] .pc-tool-btn:hover:not(.is-danger) {
     background: rgba(0, 240, 255, 0.12);
     color: var(--cp-cyan);
 }
 
-html[data-theme='cyberpunk'] .action-button-text-with-icon,
+html[data-theme='cyberpunk'] .pc-add-btn,
 html[data-theme='cyberpunk'] .sidebar-item-button,
 html[data-theme='cyberpunk'] .modal-button-secondary {
     background: rgba(0, 240, 255, 0.08);
@@ -503,7 +502,7 @@ html[data-theme='cyberpunk'] .modal-button-secondary {
     color: var(--cp-cyan);
 }
 
-html[data-theme='cyberpunk'] .action-button-text-with-icon:hover,
+html[data-theme='cyberpunk'] .pc-add-btn:hover,
 html[data-theme='cyberpunk'] .sidebar-item-button:hover,
 html[data-theme='cyberpunk'] .modal-button-secondary:hover {
     background: rgba(0, 240, 255, 0.14);
@@ -561,10 +560,6 @@ html[data-theme='cyberpunk'] .qr-code-container {
     clip-path: var(--cp-card-clip);
 }
 
-html[data-theme='cyberpunk'] .profile-section-layout {
-    align-items: start;
-}
-
 html[data-theme='cyberpunk'] .profile-info-text {
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.06);
 }
@@ -616,24 +611,13 @@ html[data-theme='cyberpunk'] .sidebar-item {
     background: rgba(255, 255, 255, 0.01);
 }
 
-html[data-theme='cyberpunk'] .delete-action-btn,
-html[data-theme='cyberpunk'] .delete-item-btn,
-html[data-theme='cyberpunk'] .delete-element-btn {
-    color: var(--cp-danger);
-}
-
-html[data-theme='cyberpunk'] .delete-action-btn {
-    background: rgba(255, 53, 94, 0.92);
-    box-shadow: 0 0 14px rgba(255, 53, 94, 0.18);
-}
-
-html[data-theme='cyberpunk'] .delete-action-btn:hover {
+html[data-theme='cyberpunk'] .pc-tool-btn.is-danger:hover {
     background: #ff355e;
     box-shadow: 0 0 18px rgba(255, 53, 94, 0.34);
 }
 
-html[data-theme='cyberpunk'] .is-deleting,
-html[data-theme='cyberpunk'] .tag-wrapper.is-deleting > span {
+html[data-theme='cyberpunk'] .pc-hover-scope:has(> .pc-controls .is-danger:hover),
+html[data-theme='cyberpunk'] .ui-card:has(> .card-inner-content > .card-top-controls .is-danger:hover) {
     background-color: rgba(255, 53, 94, 0.06) !important;
     box-shadow: inset 0 0 0 1px rgba(255, 53, 94, 0.52), 0 0 20px rgba(255, 53, 94, 0.08) !important;
 }
@@ -651,22 +635,22 @@ html[data-theme='cyberpunk'] .react-resizable-handle::after {
 }
 
 html[data-theme='cyberpunk'] .drag-handle,
-html[data-theme='cyberpunk'] .width-control-btn {
+html[data-theme='cyberpunk'] .pc-tool-btn {
     color: var(--ui-text-tertiary);
 }
 
 html[data-theme='cyberpunk'] .ui-card:hover .drag-handle,
-html[data-theme='cyberpunk'] .ui-card:hover .width-control-container {
+html[data-theme='cyberpunk'] .ui-card:hover .pc-controls {
     color: var(--cp-cyan);
 }
 
-html[data-theme='cyberpunk'] .width-dropdown {
+html[data-theme='cyberpunk'] .pc-popover {
     border-radius: 0;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 18px rgba(0, 240, 255, 0.12);
 }
 
-html[data-theme='cyberpunk'] .width-dropdown button,
-html[data-theme='cyberpunk'] .width-dropdown .button-style {
+html[data-theme='cyberpunk'] .pc-popover button,
+html[data-theme='cyberpunk'] .pc-popover .button-style {
     color: var(--ui-text-secondary);
 }
 

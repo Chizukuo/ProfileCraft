@@ -1,10 +1,8 @@
-import { ProfileData, CardTemplate, ElementTemplate } from '../types/data';
-// We are now using a URL for the default avatar, so the local import is removed.
+import { ProfileData, CardTemplate, ElementTemplate, CardElement } from '../types/data';
 
 export const getDefaultProfileData = (): ProfileData => ({
     userSettings: {
         accentColor: '#FFC300',
-        // UPDATED: Using the provided image URL for the default avatar.
         avatarSrc: 'https://q.qlogo.cn/g?b=qq&nk=2723258712&s=160',
         qrCodeLink: 'https://qm.qq.com/q/fVHvvY6jGo',
         mainTitle: '小芝士',
@@ -22,7 +20,19 @@ export const getDefaultProfileData = (): ProfileData => ({
             layoutSpan: 'profile-card-span',
             layout: { i: `card_${Date.now()}_1`, x: 0, y: 0, w: 1, h: 10 },
             elements: [
-                { type: 'profileInfo', nickname: '小芝士', gender: '男', age: 'XX', location: '武汉', mbti: 'INTP-T', textStyles: { fontWeight: '400', fontSize: '15', fontFamily: '' } }
+                { type: 'avatar', size: 'md', shape: 'circle' },
+                {
+                    type: 'infoList',
+                    items: [
+                        { label: '昵称', value: '小芝士' },
+                        { label: '性别', value: '男' },
+                        { label: '年龄', value: 'XX' },
+                        { label: '常驻', value: '武汉' },
+                        { label: 'MBTI', value: 'INTP-T' },
+                    ],
+                    textStyles: { fontWeight: '400', fontSize: '15', fontFamily: '' }
+                },
+                { type: 'qrCode' }
             ]
         },
         {
@@ -72,96 +82,103 @@ export const getDefaultProfileData = (): ProfileData => ({
 });
 
 // --- TEMPLATES ---
+// 模板文案走 i18n（templates.*），插入时按当前语言生成
+
+const TITLE_STYLES = { fontWeight: '600', fontSize: '22', fontFamily: '' };
+const TEXT_STYLES = { fontWeight: '400', fontSize: '15', fontFamily: '' };
+const SUBHEADING_STYLES = { fontWeight: '600', fontSize: '18', fontFamily: '' };
+const TAG_STYLES = { fontWeight: '500', fontSize: '13', fontFamily: '' };
+const LABEL_STYLES = { fontWeight: 'bold', fontSize: '15', fontFamily: '' };
+
+const paragraph = (text: string): CardElement => ({ type: 'paragraph', text, styles: { ...TEXT_STYLES } });
+
+// 顺序即“添加区块”面板里的顺序，按 group 分组显示
+export const ELEMENT_TEMPLATES: ElementTemplate[] = [
+    { id: 'heading', group: 'text', build: (t) => ({ type: 'heading', text: t('templates.headingText'), size: 'md', styles: { fontWeight: '700', fontFamily: '' } }) },
+    { id: 'paragraph', group: 'text', build: (t) => paragraph(t('templates.paragraphText')) },
+    { id: 'divider', group: 'text', build: () => ({ type: 'divider', variant: 'line' }) },
+    { id: 'avatar', group: 'profile', build: () => ({ type: 'avatar', size: 'md', shape: 'circle' }) },
+    {
+        id: 'infoList', group: 'profile',
+        build: (t) => ({
+            type: 'infoList',
+            items: [
+                { label: t('templates.labelNickname'), value: t('templates.valueNickname') },
+                { label: t('templates.labelGender'), value: t('templates.valueSecret') },
+                { label: t('templates.labelLocation'), value: t('templates.valueLocation') },
+                { label: 'MBTI', value: 'INFP' },
+            ],
+            textStyles: { ...TEXT_STYLES },
+        }),
+    },
+    { id: 'qrCode', group: 'profile', build: () => ({ type: 'qrCode' }) },
+    {
+        id: 'tagSection', group: 'tags',
+        build: (t) => ({
+            type: 'tagSection',
+            subheading: t('templates.tagHeading'),
+            subheadingStyles: { ...SUBHEADING_STYLES },
+            tags: [{ text: t('templates.tag1') }, { text: t('templates.tag2') }],
+            tagStyles: { ...TAG_STYLES },
+        }),
+    },
+    {
+        id: 'oshiSection', group: 'tags',
+        build: (t) => ({
+            type: 'tagSectionTwo',
+            subheading: t('templates.oshiHeading'),
+            subheadingStyles: { ...SUBHEADING_STYLES },
+            oshis: [{ text: t('templates.oshiName'), type: 'oshi-tag' }],
+            meta: [{ text: 'and more...', type: 'oshi-meta-tag' }],
+        }),
+    },
+    {
+        id: 'groupedTagSection', group: 'tags',
+        build: (t) => ({
+            type: 'groupedTagSection',
+            subheading: t('templates.groupedHeading'),
+            subheadingStyles: { ...SUBHEADING_STYLES },
+            arcadeLabel: t('templates.group1'),
+            arcadeLabelStyles: { ...LABEL_STYLES },
+            arcade: [{ text: t('templates.tag1') }],
+            mobileLabel: t('templates.group2'),
+            mobileLabelStyles: { ...LABEL_STYLES },
+            mobile: [{ text: t('templates.tag2') }],
+            tagStyles: { ...TAG_STYLES },
+        }),
+    },
+    { id: 'imageGallery', group: 'media', build: () => ({ type: 'imageGallery', images: [], columns: 3 }) },
+];
+
+const elementTemplate = (id: string) => ELEMENT_TEMPLATES.find((tpl) => tpl.id === id)!;
 
 export const CARD_TEMPLATES: CardTemplate[] = [
     {
-        name: '常规卡片',
-        description: '一个标准的单栏卡片，适合各种内容。',
-        data: {
-            title: '新卡片标题',
-            titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
-            layoutSpan: 'profile-card-span',
-            layout: { i: '', x: 0, y: Infinity, w: 1, h: 10 },
-            elements: [
-                { type: 'paragraph', text: '新段落内容...', styles: { fontWeight: '400', fontSize: '15', fontFamily: '' } }
-            ]
-        }
+        id: 'profileCard',
+        build: (t) => ({ width: 1, title: t('templates.newCardTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'profile-card-span', elements: [paragraph(t('templates.paragraphText'))] }),
     },
     {
-        name: '双栏卡片',
-        description: '一个更宽的双栏卡片，用于详细介绍。',
-        data: {
-            title: '关于我',
-            titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
-            layoutSpan: 'about-me-card-span',
-            layout: { i: '', x: 0, y: Infinity, w: 2, h: 10 },
-            elements: [
-                { type: 'paragraph', text: '在这里写下更多关于你的介绍。', styles: { fontWeight: '400', fontSize: '15', fontFamily: '' } }
-            ]
-        }
+        id: 'aboutMeCard',
+        build: (t) => ({ width: 2, title: t('templates.aboutMeTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'about-me-card-span', elements: [paragraph(t('templates.aboutMeText'))] }),
     },
     {
-        name: '三栏卡片',
-        description: '一个通栏卡片，最适合展示你的热爱。',
-        data: {
-            title: '我的最爱',
-            titleStyles: { fontWeight: '600', fontSize: '22', fontFamily: '' },
-            layoutSpan: 'oshi-card-span',
-            layout: { i: '', x: 0, y: Infinity, w: 3, h: 10 },
-            elements: [
-                 {
-                    type: 'tagSectionTwo',
-                    subheading: 'Subheading', subheadingStyles: { fontWeight: '600', fontSize: '18', fontFamily: '' },
-                    oshis: [{ text: 'Oshi Name', type: 'oshi-tag' }],
-                    meta: [{ text: 'Meta info', type: 'oshi-meta-tag' }]
-                }
-            ]
-        }
-    }
-];
-
-export const ELEMENT_TEMPLATES: ElementTemplate[] = [
-    {
-        name: '段落',
-        description: '一个简单的文本区块。',
-        data: {
-            type: 'paragraph',
-            text: '在这里编辑你的文本...',
-            styles: { fontWeight: '400', fontSize: '15', fontFamily: '' }
-        }
+        id: 'oshiCard',
+        build: (t) => ({ width: 3, title: t('templates.oshiTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'oshi-card-span', elements: [elementTemplate('oshiSection').build(t)] }),
     },
     {
-        name: '标签区块',
-        description: '用于展示一系列相关的标签。',
-        data: {
-            type: 'tagSection',
-            subheading: '标签组标题',
-            subheadingStyles: { fontWeight: '600', fontSize: '18', fontFamily: '' },
-            tags: [{ text: '标签1' }, { text: '标签2' }],
-            tagStyles: { fontWeight: '500', fontSize: '13', fontFamily: '' }
-        }
+        id: 'wishCard',
+        build: (t) => ({ width: 2, title: t('templates.wishTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'about-me-card-span', elements: [paragraph(t('templates.wishText'))] }),
     },
     {
-        name: '标签区块2',
-        description: '模板上面的推区块',
-        data: {
-            type: 'tagSectionTwo',
-            subheading: '输入标题', subheadingStyles: { fontWeight: '600', fontSize: '18', fontFamily: '' },
-            oshis: [{ text: '输入标签', type: 'oshi-tag' }],
-            meta: [{ text: 'and more...', type: 'oshi-meta-tag' }]
-        }
+        id: 'boundaryCard',
+        build: (t) => ({ width: 1, title: t('templates.boundaryTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'profile-card-span', elements: [paragraph(t('templates.boundaryText'))] }),
     },
     {
-        name: '分组标签区块',
-        description: '适合分类展示标签，例如音游。',
-        data: {
-            type: 'groupedTagSection',
-            subheading: '分组标签标题', subheadingStyles: { fontWeight: '600', fontSize: '18', fontFamily: '' },
-            arcadeLabel: '分组1:', arcadeLabelStyles: { fontWeight: 'bold', fontSize: '15', fontFamily: '' },
-            arcade: [{ text: '标签A' }],
-            mobileLabel: '分组2:', mobileLabelStyles: { fontWeight: 'bold', fontSize: '15', fontFamily: '' },
-            mobile: [{ text: '标签B' }],
-            tagStyles: { fontWeight: '500', fontSize: '13', fontFamily: '' }
-        }
-    }
+        id: 'galleryCard',
+        build: (t) => ({ width: 3, title: t('templates.galleryTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'oshi-card-span', elements: [elementTemplate('imageGallery').build(t)] }),
+    },
+    {
+        id: 'profileInfoCard',
+        build: (t) => ({ width: 1, title: t('templates.profileInfoTitle'), titleStyles: { ...TITLE_STYLES }, layoutSpan: 'profile-card-span', elements: ['avatar', 'infoList', 'qrCode'].map(id => elementTemplate(id).build(t)) }),
+    },
 ];

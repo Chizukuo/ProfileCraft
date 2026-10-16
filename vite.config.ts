@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import pkg from './package.json' with { type: 'json' }
 
 const buildTime = new Date().toLocaleString();
 
@@ -7,8 +8,9 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'import.meta.env.VITE_BUILD_TIME': JSON.stringify(buildTime),
+    __APP_VERSION__: JSON.stringify(pkg.version),
   },
-  base: './', 
+  base: './',
   build: {
     rollupOptions: {
       output: {

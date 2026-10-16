@@ -15,6 +15,56 @@ export interface UserSettings {
   subtitleStyles: Styles;
   footerText: string;
   theme: string; // 新增：支持主题选择
+  qrCodeImage?: string; // 上传的二维码图片（data URL），优先于 qrCodeLink 生成的二维码
+  appearance?: Partial<AppearanceSettings>; // 外观定制，缺省字段回落到 DEFAULT_APPEARANCE
+}
+
+// ---- 外观定制 ----
+export type BackgroundType = 'theme' | 'color' | 'gradient' | 'image';
+export type BackgroundFit = 'cover' | 'contain' | 'repeat';
+export type CardShadow = 'none' | 'soft' | 'strong';
+
+export interface BackgroundSettings {
+  type: BackgroundType;
+  color: string;
+  gradientFrom: string;
+  gradientTo: string;
+  gradientAngle: number;
+  image: string;
+  imageFit: BackgroundFit;
+  overlayColor: string;
+  overlayOpacity: number; // 0 ~ 0.9，叠在背景图上方的纯色蒙版
+}
+
+export interface CardAppearance {
+  bgColor: string; // '' 表示跟随主题
+  opacity: number; // 0.2 ~ 1
+  radius: number; // px
+  shadow: CardShadow;
+  border: boolean;
+  textColor: string; // '' 表示跟随主题
+}
+
+export interface LayoutAppearance {
+  gapX: number;
+  gapY: number;
+  padding: number;
+  lineHeight: number;
+  fontScale: number;
+  fontFamily: string; // FONT_OPTIONS 的 key，'' 表示默认
+}
+
+// 头像 / 二维码已是独立区块（删掉即隐藏），这里只控制页面级元素
+export interface VisibilitySettings {
+  subtitle: boolean;
+  footer: boolean;
+}
+
+export interface AppearanceSettings {
+  background: BackgroundSettings;
+  card: CardAppearance;
+  layout: LayoutAppearance;
+  visibility: VisibilitySettings;
 }
 
 export interface TagData {
@@ -38,7 +88,11 @@ export interface ProfileItem {
   value: string;
 }
 
-export interface ProfileInfoElement extends BaseElement {
+/**
+ * 旧版“个人信息”复合区块（头像 + 信息 + 二维码）。只作为输入格式存在：
+ * 读取旧数据 / 导入 / AI 输出时由 profileSchema 拆成 avatar + infoList + qrCode。
+ */
+export interface LegacyProfileInfoElement extends BaseElement {
   type: 'profileInfo';
   nickname?: string;
   gender?: string;
@@ -47,6 +101,40 @@ export interface ProfileInfoElement extends BaseElement {
   mbti?: string;
   items?: ProfileItem[];
   textStyles: Styles;
+}
+
+// ---- 细分区块 ----
+export type BlockSize = 'sm' | 'md' | 'lg';
+
+/** 头像：显示 userSettings.avatarSrc（个人头像只有一个，多个头像区块显示同一张） */
+export interface AvatarElement extends BaseElement {
+  type: 'avatar';
+  size: BlockSize;
+  shape: 'circle' | 'rounded';
+}
+
+/** 标题：一行大字，比如昵称 */
+export interface HeadingElement extends BaseElement {
+  type: 'heading';
+  text: string;
+  size: BlockSize;
+}
+
+/** 信息列表：“标签: 内容”若干行 */
+export interface InfoListElement extends BaseElement {
+  type: 'infoList';
+  items: ProfileItem[];
+  textStyles: Styles;
+}
+
+/** 二维码：使用 userSettings.qrCodeLink / qrCodeImage */
+export interface QrCodeElement extends BaseElement {
+  type: 'qrCode';
+}
+
+export interface DividerElement extends BaseElement {
+  type: 'divider';
+  variant: 'line' | 'dashed' | 'space';
 }
 
 export interface TagSectionElement extends BaseElement {
@@ -79,9 +167,26 @@ export interface OshiSectionElement extends BaseElement {
   meta: TagData[];
 }
 
+export interface GalleryImage {
+  src: string;
+  caption?: string;
+}
+
+export interface ImageGalleryElement extends BaseElement {
+  type: 'imageGallery';
+  images: GalleryImage[];
+  columns: number; // 1 ~ 4
+  crop?: boolean; // 统一裁成正方形
+}
+
 export type CardElement =
+  | HeadingElement
   | ParagraphElement
-  | ProfileInfoElement
+  | AvatarElement
+  | InfoListElement
+  | QrCodeElement
+  | DividerElement
+  | ImageGalleryElement
   | TagSectionElement
   | GroupedTagSectionElement
   | OshiSectionElement;
@@ -94,12 +199,19 @@ export interface CardLayout {
     h: number;
 }
 
+export interface CardStyle {
+  bgColor?: string; // 单卡背景色，'' / 缺省表示跟随全局
+  textAlign?: 'left' | 'center';
+  hideTitle?: boolean;
+}
+
 export interface CardData {
   id: string;
   title: string;
   titleStyles: Styles;
   layoutSpan: string;
   layout?: CardLayout;
+  style?: CardStyle;
   elements: CardElement[];
 }
 
@@ -109,14 +221,18 @@ export interface ProfileData {
 }
 
 // ---- Templates ----
+export type TemplateTranslate = (key: string) => string;
+
 export interface CardTemplate {
-    name: string;
-    description: string;
-    data: Omit<CardData, 'id'>;
+    id: string; // 对应 i18n 键 cardTypes.<id> / cardTypes.<id>Desc
+    build: (t: TemplateTranslate) => Omit<CardData, 'id' | 'layout'> & { width: number };
 }
 
+/** 添加区块面板里的分组，对应 i18n 键 blockGroups.<group> */
+export type ElementTemplateGroup = 'text' | 'profile' | 'tags' | 'media';
+
 export interface ElementTemplate {
-    name: string;
-    description: string;
-    data: CardElement;
+    id: string; // 对应 i18n 键 blockTypes.<id> / blockTypes.<id>Desc
+    group: ElementTemplateGroup;
+    build: (t: TemplateTranslate) => CardElement;
 }

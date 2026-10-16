@@ -1,14 +1,16 @@
-import React, { useState, useCallback, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useCallback, useRef, Suspense } from 'react';
 import { useProfileDataCtx, useProfileActions } from '../context/ProfileContext';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, Sparkles, Download, Upload, Palette, Languages, Settings, Share, Settings2 } from 'lucide-react';
+import { FileCode2, Image, PlusSquare, RotateCcw, Star, Sparkles, Download, Upload, Palette, Languages, MoreHorizontal, Share, Settings2, Eye, BookOpen } from 'lucide-react';
+import { useEditorUI } from '../context/EditorUIContext';
+import { getGuideUrl } from '../utils/guide';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import localesManifest from '../config/locales.json';
-import { useThrottle } from '../hooks/useThrottle';
 import { useExportActions } from '../hooks/useExportActions';
+import { useDismissable } from '../hooks/useDismissable';
 import type { Locale } from '../context/LocaleContext';
+import ConfirmDialog from './ui/ConfirmDialog';
 
-const ConfirmDialog = React.lazy(() => import('./ui/ConfirmDialog'));
 const AIChatPanel = React.lazy(() => import('./AIChatPanel'));
 
 interface NavigationProps {
@@ -17,69 +19,32 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
   const { profileData } = useProfileDataCtx();
-  const { updateProfileData, resetProfileData } = useProfileActions();
-  const { theme, setTheme, resolvedTheme, themeOptions } = useTheme();
+  const { replaceProfileData, resetProfileData } = useProfileActions();
+  const { theme } = useTheme();
   const { t, locale, setLocale } = useTranslation();
-  
+
   const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [isAiModalOpen, setAiModalOpen] = useState(false);
   const [isExportMenuOpen, setExportMenuOpen] = useState(false);
-  const [isAppearanceOpen, setAppearanceOpen] = useState(false);
-  
-  const [displayColor, setDisplayColor] = useState(profileData?.userSettings?.accentColor || '#FFC300');
+  const { isCustomizeOpen, setCustomizeOpen, setPreview } = useEditorUI();
 
-  const appearanceRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
-  
-  // Custom hook for export actions
+
   const exportActions = useExportActions({
     profileData,
     theme,
     locale,
-    updateProfileData
+    replaceProfileData,
   });
-
-  const accentColor = profileData?.userSettings?.accentColor;
-  useEffect(() => {
-    if (accentColor) {
-      setDisplayColor(accentColor);
-    }
-  }, [accentColor]);
-
-  const throttledUpdateGlobalColor = useThrottle((newColor: string) => {
-    updateProfileData(prev => ({
-        ...prev!,
-        userSettings: { ...prev!.userSettings, accentColor: newColor }
-    }));
-  }, 50);
-
-  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newColor = e.target.value;
-    setDisplayColor(newColor);
-    throttledUpdateGlobalColor(newColor);
-  }, [throttledUpdateGlobalColor]);
 
   const confirmReset = useCallback(() => {
     resetProfileData();
     setResetModalOpen(false);
   }, [resetProfileData]);
 
-  // Handle clicks outside for both popovers
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (appearanceRef.current && !appearanceRef.current.contains(event.target as Node)) {
-        setAppearanceOpen(false);
-      }
-      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
-        setExportMenuOpen(false);
-      }
-    };
-    
-    if (isAppearanceOpen || isExportMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isAppearanceOpen, isExportMenuOpen]);
+  const closeExportMenu = useCallback(() => setExportMenuOpen(false), []);
+  const closeAi = useCallback(() => setAiModalOpen(false), []);
+  useDismissable(isExportMenuOpen, exportRef, closeExportMenu);
 
   if (!profileData) return null;
 
@@ -89,7 +54,6 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
   }));
 
   const closeAllMenus = () => {
-    setAppearanceOpen(false);
     setExportMenuOpen(false);
   };
 
@@ -118,7 +82,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
           
           <button 
             className="dock-btn dock-btn-magic" 
-            onClick={() => { closeAllMenus(); setAiModalOpen(true); }}
+            onClick={() => { closeAllMenus(); setCustomizeOpen(false); setAiModalOpen(true); }}
             title={t('toolbar.aiGenerate')}
           >
             <Sparkles size={22} strokeWidth={2.5} />
@@ -127,60 +91,31 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
 
           <div className="dock-divider"></div>
 
-          {/* Section 2: Appearance (Zero Learning Cost) */}
-          <div className="dock-popover-wrapper" ref={appearanceRef}>
-            <button
-              className={`dock-btn dock-btn-highlight ${isAppearanceOpen ? 'active' : ''}`}
-              onClick={() => {
-                setAppearanceOpen(!isAppearanceOpen);
-                setExportMenuOpen(false);
-              }}
-              title={t('toolbar.appearance')}
-              aria-expanded={isAppearanceOpen}
-              aria-haspopup="true"
-            >
-              <Palette size={22} strokeWidth={2.5} />
-              <span className="dock-btn-label">{t('toolbar.appearance')}</span>
-            </button>
-            
-            {isAppearanceOpen && (
-              <div className="dock-preferences-menu popover-appearance">
-                <div className="pref-header">
-                  <Palette size={18} className="pref-icon-inline" /> {t('toolbar.appearance')}
-                </div>
-                
-                {resolvedTheme.settings.isAccentColorEnabled && (
-                  <div className="pref-card">
-                    <span className="pref-card-title">{t('toolbar.themeColor')}</span>
-                    <div className="color-picker-container">
-                       <input
-                         type="color"
-                         className="pref-color-input-big"
-                         value={displayColor}
-                         onChange={handleColorChange}
-                       />
-                       <span className="color-hex-value">{displayColor.toUpperCase()}</span>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="pref-card">
-                  <span className="pref-card-title">{t('toolbar.themeStyle')}</span>
-                  <div className="theme-selector-grid">
-                    {themeOptions.map(opt => (
-                      <button 
-                        key={opt.value} 
-                        className={`theme-selector-btn ${theme === opt.value ? 'selected' : ''}`}
-                        onClick={() => setTheme(opt.value)}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Section 2: Appearance */}
+          <button
+            className={`dock-btn dock-btn-highlight ${isCustomizeOpen ? 'active' : ''}`}
+            onClick={() => {
+              closeAllMenus();
+              setCustomizeOpen(open => !open);
+            }}
+            title={t('toolbar.appearance')}
+            aria-expanded={isCustomizeOpen}
+          >
+            <Palette size={22} strokeWidth={2.5} />
+            <span className="dock-btn-label">{t('toolbar.appearance')}</span>
+          </button>
+
+          <button
+            className="dock-btn"
+            onClick={() => {
+              closeAllMenus();
+              setPreview(true);
+            }}
+            title={t('toolbar.previewHint')}
+          >
+            <Eye size={22} strokeWidth={2.5} />
+            <span className="dock-btn-label">{t('toolbar.preview')}</span>
+          </button>
 
           <div className="dock-divider"></div>
 
@@ -188,15 +123,12 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
           <div className="dock-popover-wrapper" ref={exportRef}>
             <button
               className={`dock-btn ${isExportMenuOpen ? 'active' : ''}`}
-              onClick={() => {
-                setExportMenuOpen(!isExportMenuOpen);
-                setAppearanceOpen(false);
-              }}
+              onClick={() => setExportMenuOpen(open => !open)}
               title={t('toolbar.exportSettings')}
               aria-expanded={isExportMenuOpen}
               aria-haspopup="true"
             >
-              <Settings size={22} strokeWidth={2.5} />
+              <MoreHorizontal size={22} strokeWidth={2.5} />
               <span className="dock-btn-label">{t('toolbar.exportSettings')}</span>
             </button>
             
@@ -228,7 +160,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
 
                 {/* Other Settings */}
                 <div className="pref-group-title">
-                  <Settings2 size={14} className="pref-icon-inline" /> {t('toolbar.exportSettings')}
+                  <Settings2 size={14} className="pref-icon-inline" /> {t('toolbar.settingsHelp')}
                 </div>
                 <div className="pref-row">
                   <Languages size={16} className="pref-icon" />
@@ -246,6 +178,11 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
                     ))}
                   </select>
                 </div>
+
+                <a className="pref-row pref-action" href={getGuideUrl(locale)} target="_blank" rel="noopener noreferrer" onClick={closeAllMenus}>
+                  <BookOpen size={16} className="pref-icon" />
+                  <span>{t('toolbar.userGuide')}</span>
+                </a>
 
                 <button type="button" className="pref-row pref-action" onClick={() => { setResetModalOpen(true); setExportMenuOpen(false); }}>
                   <RotateCcw size={16} className="pref-icon text-red" />
@@ -273,25 +210,19 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
         </div>
       </div>
 
-      <Suspense fallback={null}>
-        {isResetModalOpen && (
-          <ConfirmDialog
-            isOpen={isResetModalOpen}
-            onClose={() => setResetModalOpen(false)}
-            onConfirm={confirmReset}
-            title={t('modal.confirmReset')}
-            message={t('modal.confirmResetMessage')}
-            confirmText={t('modal.confirmResetButton')}
-            isDangerous={true}
-          />
-        )}
+      <ConfirmDialog
+        isOpen={isResetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        onConfirm={confirmReset}
+        title={t('modal.confirmReset')}
+        message={t('modal.confirmResetMessage')}
+        confirmText={t('modal.confirmResetButton')}
+        cancelText={t('modal.cancel')}
+        isDangerous={true}
+      />
 
-        {isAiModalOpen && (
-          <AIChatPanel
-            isOpen={isAiModalOpen}
-            onClose={() => setAiModalOpen(false)}
-          />
-        )}
+      <Suspense fallback={null}>
+        {isAiModalOpen && <AIChatPanel isOpen={isAiModalOpen} onClose={closeAi} />}
       </Suspense>
     </>
   );

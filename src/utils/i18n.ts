@@ -8,6 +8,9 @@ type TranslationObject = {
 // 缓存已加载的翻译文件
 const translationCache: Map<Locale, TranslationObject> = new Map();
 
+/** 同步读取已缓存的翻译（加载屏期间已预取全部语言），用于避免首帧闪出翻译键 */
+export const getCachedTranslations = (locale: Locale): TranslationObject | undefined => translationCache.get(locale);
+
 /**
  * 加载指定语言的翻译文件
  * @param locale 语言代码
@@ -79,7 +82,7 @@ export const t = (
   // 替换参数
   if (params) {
     Object.keys(params).forEach(paramKey => {
-      text = text.replace(`{${paramKey}}`, String(params[paramKey]));
+      text = text.split(`{${paramKey}}`).join(String(params[paramKey]));
     });
   }
   

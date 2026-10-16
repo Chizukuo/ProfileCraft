@@ -1,15 +1,59 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Settings, Sparkles, Send, RotateCcw, Wand2, Gamepad2, Music, Users, ChevronRight } from 'lucide-react';
+import { X, Settings, Sparkles, Send, RotateCcw, Wand2, Gamepad2, Music, Users, ChevronRight, MessageCircle, ExternalLink } from 'lucide-react';
+import { SegmentedControl } from './ui/EditorControls';
+import { fixCardLayouts } from '../utils/profileSchema';
 import { useTranslation } from '../hooks/useTranslation';
-import { useProfile } from '../context/ProfileContext';
+import { useProfileActions, useProfileDataCtx } from '../context/ProfileContext';
+import { isSubmitEnter } from '../utils/keyboard';
+import { safeGetItem, safeSetItem } from '../utils/storage';
 import {
   AI_LOCAL_STORAGE_KEY,
+  AI_REQUEST_TIMEOUT_MS,
   AiChatMessage,
   AiConfig,
+  DEFAULT_MODEL,
+  LEGACY_DEFAULT_MODELS,
+  PROVIDER_PRESETS,
   callAiInterviewer,
   normalizeGeneratedCards,
   resolveAiConfig,
 } from '../utils/aiProfile';
+
+/** 对话按标签页保存：误点遮罩 / 按 Esc 关掉面板后再打开，聊天记录还在 */
+const CHAT_SESSION_KEY = 'profilecraft-ai-chat';
+
+interface SavedChat {
+  messages: AiChatMessage[];
+  appliedCount: number;
+}
+
+const loadChat = (): SavedChat => {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(CHAT_SESSION_KEY) || 'null');
+    if (raw && Array.isArray(raw.messages)) {
+      return {
+        messages: raw.messages.filter((m: AiChatMessage) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'),
+        appliedCount: Number(raw.appliedCount) || 0,
+      };
+    }
+  } catch {
+    /* sessionStorage 不可用或内容损坏：从空对话开始 */
+  }
+  return { messages: [], appliedCount: 0 };
+};
+
+const loadConfig = (): AiConfig => {
+  try {
+    const saved = JSON.parse(safeGetItem(AI_LOCAL_STORAGE_KEY) || 'null') as Partial<AiConfig> | null;
+    if (!saved) return DEFAULT_CONFIG;
+    const config = { ...DEFAULT_CONFIG, ...saved };
+    // 旧版默认模型已停用或不对新 Key 开放：保存的仍是旧默认值时升级到该服务商的新默认值
+    if (LEGACY_DEFAULT_MODELS[config.provider]?.includes(config.model)) config.model = PROVIDER_PRESETS[config.provider].model;
+    return config;
+  } catch {
+    return DEFAULT_CONFIG;
+  }
+};
 
 interface AIChatPanelProps {
   isOpen: boolean;
@@ -20,33 +64,49 @@ const DEFAULT_CONFIG: AiConfig = {
   provider: 'gemini',
   apiKey: '',
   baseUrl: '',
-  model: 'gemini-2.5-flash-lite',
+  model: DEFAULT_MODEL,
 };
 
-const PROVIDER_PRESETS: Record<string, { baseUrl: string; model: string }> = {
-  gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-2.5-flash-lite' },
-  openai: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
-  anthropic: { baseUrl: 'https://api.anthropic.com', model: 'claude-sonnet-4-20250514' },
-  custom: { baseUrl: '', model: '' },
-};
+
+/** 提示词要求纯文本，但模型仍可能带 Markdown：去掉常见标记，列表符号换成圆点 */
+const plainReply = (text: string) =>
+  text
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*]\s+/gm, '• ');
+
+/** 免费获取 Gemini API Key 的页面 */
+const GEMINI_KEY_URL = 'https://aistudio.google.com/apikey';
+
+type ApplyMode = 'replace' | 'append';
 
 const QUICK_STARTS = [
-  { key: 'quickStart1', icon: Wand2, replyKey: 'quickReply4' },
+  { key: 'quickStart1', icon: MessageCircle, replyKey: 'quickReply4' },
   { key: 'quickStart2', icon: Gamepad2, replyKey: 'quickReply2' },
   { key: 'quickStart3', icon: Music, replyKey: 'quickReply3' },
   { key: 'quickStart4', icon: Users, replyKey: 'quickReply1' },
 ];
 
 const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation();
-  const { updateProfileData } = useProfile();
-  const [config, setConfig] = useState<AiConfig>(DEFAULT_CONFIG);
-  const [messages, setMessages] = useState<AiChatMessage[]>([]);
+  const { t, locale } = useTranslation();
+  const { replaceProfileData, undo } = useProfileActions();
+  const { profileData } = useProfileDataCtx();
+  const abortRef = useRef<AbortController | null>(null);
+
+  // 关闭面板时取消进行中的请求，避免关掉后结果仍然覆盖卡片
+  useEffect(() => () => abortRef.current?.abort(), []);
+  const [config, setConfig] = useState<AiConfig>(loadConfig);
+  const [messages, setMessages] = useState<AiChatMessage[]>(() => loadChat().messages);
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [appliedCount, setAppliedCount] = useState(0);
+  const [appliedCount, setAppliedCount] = useState(() => loadChat().appliedCount);
   const [showSettings, setShowSettings] = useState(false);
+  // 本次打开面板后应用过的生成可以就地撤销（不持久化：关闭期间用户可能已经改过内容）
+  const [canUndoGeneration, setCanUndoGeneration] = useState(false);
+  // 生成结果替换全部卡片，还是追加到现有卡片后面（追加时不改标题）
+  const [applyMode, setApplyMode] = useState<ApplyMode>('replace');
   const listRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -61,15 +121,11 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(AI_LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<AiConfig>;
-        setConfig({ ...DEFAULT_CONFIG, ...parsed });
-      }
+      sessionStorage.setItem(CHAT_SESSION_KEY, JSON.stringify({ messages, appliedCount } satisfies SavedChat));
     } catch {
-      setConfig(DEFAULT_CONFIG);
+      /* 存不下就算了，不影响使用 */
     }
-  }, []);
+  }, [messages, appliedCount]);
 
 
   useEffect(() => {
@@ -78,7 +134,11 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   }, [messages, isSubmitting]);
 
   const resolvedConfig = useMemo(() => resolveAiConfig(config), [config]);
-  const canSend = useMemo(() => Boolean(resolvedConfig.config.apiKey), [resolvedConfig]);
+  // 自定义端点（如本地代理）可以不需要 Key，但必须填 Base URL
+  const canSend = useMemo(
+    () => Boolean(resolvedConfig.config.apiKey) || (resolvedConfig.config.provider === 'custom' && Boolean(config.baseUrl.trim())),
+    [resolvedConfig, config.baseUrl],
+  );
   const interviewRound = useMemo(() => messages.filter(m => m.role === 'user').length, [messages]);
   const phase = useMemo(() => {
     if (appliedCount > 0) return 'done';
@@ -89,9 +149,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   const updateConfig = (patch: Partial<AiConfig>) => {
     setConfig(prev => {
       const next = { ...prev, ...patch };
-      try {
-        localStorage.setItem(AI_LOCAL_STORAGE_KEY, JSON.stringify(next));
-      } catch { /* quota exceeded */ }
+      safeSetItem(AI_LOCAL_STORAGE_KEY, JSON.stringify(next));
       return next;
     });
   };
@@ -101,15 +159,20 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
     const cards = normalizeGeneratedCards(raw?.cards);
     if (!cards.length) throw new Error(t('aiBuilder.emptyCardsError'));
 
-    updateProfileData(prev => {
-      const nextSettings = { ...prev.userSettings };
-      if (raw?.userSettings) {
-        if (raw.userSettings.mainTitle) nextSettings.mainTitle = raw.userSettings.mainTitle;
-        if (raw.userSettings.subtitle) nextSettings.subtitle = raw.userSettings.subtitle;
-      }
-      return { ...prev, userSettings: nextSettings, cards };
-    });
+    if (!profileData) return;
+    const nextSettings = { ...profileData.userSettings };
+    if (applyMode === 'replace' && raw?.userSettings) {
+      if (raw.userSettings.mainTitle) nextSettings.mainTitle = raw.userSettings.mainTitle;
+      if (raw.userSettings.subtitle) nextSettings.subtitle = raw.userSettings.subtitle;
+    }
+    // 追加：新卡片的 y 置空，由 fixCardLayouts 依次排到现有卡片下方
+    const nextCards = applyMode === 'append'
+      ? fixCardLayouts([...profileData.cards, ...cards.map(card => ({ ...card, layout: card.layout && { ...card.layout, y: Number.NaN } }))])
+      : cards;
+    // 走 replaceProfileData：可通过撤销提示或面板里的按钮撤销
+    replaceProfileData({ userSettings: nextSettings, cards: nextCards }, 'ai');
     setAppliedCount(cards.length);
+    setCanUndoGeneration(true);
   };
 
   const errorCodeToMessage = (code?: string, fallback?: string): string => {
@@ -123,9 +186,21 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   const runAi = async (nextHistory: AiChatMessage[], options?: { forceGenerate?: boolean }) => {
     setIsSubmitting(true);
     setError('');
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    // 超时与“关闭面板”都会 abort，用标记区分：超时要提示用户，关闭则静默
+    let timedOut = false;
+    const timer = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, AI_REQUEST_TIMEOUT_MS);
     try {
-      const result = await callAiInterviewer(resolvedConfig.config, nextHistory, options);
+      const result = await callAiInterviewer(resolvedConfig.config, nextHistory, { ...options, signal: controller.signal, locale });
+      if (controller.signal.aborted) return;
       if (result.debug?.error) {
+        // 调试信息（请求 / 响应摘要，不含 Key）只打到控制台，方便用户反馈问题时附上
+        console.warn('[AI]', result.debug);
         setError(errorCodeToMessage(result.debug.errorCode, result.debug.error));
         return;
       }
@@ -138,9 +213,16 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
         setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
       }
     } catch (err) {
+      if (timedOut) {
+        setError(t('aiBuilder.TIMEOUT'));
+        return;
+      }
+      if (controller.signal.aborted) return;
       setError(err instanceof Error ? err.message : t('aiBuilder.unknownError'));
     } finally {
-      setIsSubmitting(false);
+      window.clearTimeout(timer);
+      if (abortRef.current === controller) abortRef.current = null;
+      if (timedOut || !controller.signal.aborted) setIsSubmitting(false);
     }
   };
 
@@ -178,7 +260,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (isSubmitEnter(e) && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -210,7 +292,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
             >
               <Settings size={18} />
             </button>
-            <button type="button" className="ai-panel-header-btn" onClick={onClose} title="Close">
+            <button type="button" className="ai-panel-header-btn" onClick={onClose} title={t('common.close')}>
               <X size={18} />
             </button>
           </div>
@@ -243,7 +325,9 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
                   value={config.apiKey}
                   onChange={e => updateConfig({ apiKey: e.target.value })}
                   placeholder={t('aiBuilder.apiKeyPlaceholder')}
+                  autoComplete="off"
                 />
+                <small className="ai-settings-note">{t('aiBuilder.keyPrivacy')}</small>
               </label>
               <label className="ai-settings-field">
                 <span>{t('aiBuilder.baseUrl')}</span>
@@ -251,7 +335,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
                   type="text"
                   value={config.baseUrl}
                   onChange={e => updateConfig({ baseUrl: e.target.value })}
-                  placeholder="https://generativelanguage.googleapis.com/v1beta"
+                  placeholder={PROVIDER_PRESETS[config.provider]?.baseUrl || 'https://…/v1'}
                 />
               </label>
               <label className="ai-settings-field">
@@ -260,7 +344,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
                   type="text"
                   value={config.model}
                   onChange={e => updateConfig({ model: e.target.value })}
-                  placeholder="gemini-2.5-flash-lite"
+                  placeholder={PROVIDER_PRESETS[config.provider]?.model || 'model-id'}
                 />
               </label>
             </div>
@@ -279,7 +363,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
                 <Sparkles size={32} />
               </div>
               <p className="ai-welcome-text">{t('aiBuilder.welcomeQuestion')}</p>
-              <div className="ai-welcome-actions">
+              {canSend && <div className="ai-welcome-actions">
                 {QUICK_STARTS.map(qs => {
                   const Icon = qs.icon;
                   return (
@@ -296,16 +380,40 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
                     </button>
                   );
                 })}
-              </div>
+              </div>}
               {!canSend && (
-                <button
-                  type="button"
-                  className="ai-welcome-hint"
-                  onClick={() => setShowSettings(true)}
-                >
-                  <Settings size={14} />
-                  {t('aiBuilder.apiKeyRequired')}
-                </button>
+                <div className="ai-onboarding">
+                  <p className="ai-onboarding-title">{t('aiBuilder.onboardTitle')}</p>
+                  {config.provider === 'gemini' ? (
+                    <>
+                      <ol className="ai-onboarding-steps">
+                        <li>
+                          {t('aiBuilder.onboardStep1')}{' '}
+                          <a href={GEMINI_KEY_URL} target="_blank" rel="noopener noreferrer">
+                            Google AI Studio <ExternalLink size={12} />
+                          </a>
+                        </li>
+                        <li>{t('aiBuilder.onboardStep2')}</li>
+                      </ol>
+                      <input
+                        type="password"
+                        className="ai-onboarding-input"
+                        value={config.apiKey}
+                        onChange={e => updateConfig({ apiKey: e.target.value })}
+                        placeholder={t('aiBuilder.apiKeyPlaceholder')}
+                        aria-label={t('aiBuilder.apiKey')}
+                        autoComplete="off"
+                      />
+                      <p className="ai-onboarding-note">{t('aiBuilder.onboardPrivacy')}</p>
+                    </>
+                  ) : (
+                    <p className="ai-onboarding-note">{t('aiBuilder.apiKeyRequired')}</p>
+                  )}
+                  <button type="button" className="ai-welcome-hint" onClick={() => setShowSettings(true)}>
+                    <Settings size={14} />
+                    {t('aiBuilder.otherProviders')}
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -313,10 +421,10 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
           {messages.map((msg, i) => (
               <div key={`${msg.role}-${i}`} className={`ai-msg ${msg.role === 'user' ? 'ai-msg-user' : 'ai-msg-assistant'}`}>
                 <div className="ai-msg-bubble">
-                  {msg.content.split('\n').map((line, li) => (
+                  {(msg.role === 'assistant' ? plainReply(msg.content) : msg.content).split('\n').map((line, li, lines) => (
                     <React.Fragment key={li}>
                       {line}
-                      {li < msg.content.split('\n').length - 1 && <br />}
+                      {li < lines.length - 1 && <br />}
                     </React.Fragment>
                   ))}
                 </div>
@@ -346,12 +454,25 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
         {appliedCount > 0 && (
           <div className="ai-panel-success">
             <span>{t('aiBuilder.appliedCards', { count: appliedCount })}</span>
+            {canUndoGeneration && (
+              <button
+                type="button"
+                className="ai-panel-success-undo"
+                onClick={() => {
+                  undo();
+                  setCanUndoGeneration(false);
+                  setAppliedCount(0);
+                }}
+              >
+                {t('aiBuilder.undoGeneration')}
+              </button>
+            )}
           </div>
         )}
 
         {/* Input Area */}
         <div className="ai-panel-input-area">
-          {phase === 'interview' && (
+          {phase !== 'ready' && (
             <div className="ai-suggestion-chips">
               <button type="button" className="ai-chip" onClick={handleForceGenerate} disabled={isSubmitting || !canSend}>
                 <Wand2 size={14} /> {t('aiBuilder.generateNow')}
@@ -359,6 +480,13 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
               <button type="button" className="ai-chip" onClick={handleResetChat} disabled={isSubmitting}>
                 <RotateCcw size={14} /> {t('aiBuilder.resetChat')}
               </button>
+              <div className="ai-apply-mode" title={t('aiBuilder.applyModeLabel')}>
+                <SegmentedControl<ApplyMode>
+                  value={applyMode}
+                  options={[{ value: 'replace', label: t('aiBuilder.applyReplace') }, { value: 'append', label: t('aiBuilder.applyAppend') }]}
+                  onChange={setApplyMode}
+                />
+              </div>
             </div>
           )}
           <div className="ai-input-row">

@@ -1,64 +1,25 @@
 import React from 'react';
-import { useProfile } from '../../context/ProfileContext';
 import { ParagraphElement } from '../../types/data';
 import EditableText from '../ui/EditableText';
-import ActionButton from '../ui/ActionButton';
-import { X } from 'lucide-react';
-import { useDeleteHoverState } from '../../hooks';
+import BlockShell, { BlockProps } from './BlockShell';
+import { useElementActions } from '../../hooks/useElementActions';
+import { useTranslation } from '../../hooks/useTranslation';
 
+const ParagraphBlock: React.FC<BlockProps<ParagraphElement>> = ({ element, cardIndex, elementIndex, ...shell }) => {
+    const { update } = useElementActions<ParagraphElement>(cardIndex, elementIndex);
+    const { t } = useTranslation();
 
-interface ParagraphBlockProps {
-    element: ParagraphElement;
-    cardIndex: number;
-    elementIndex: number;
-    onDelete: () => void;
-}
-
-const ParagraphBlock: React.FC<ParagraphBlockProps> = ({ element, cardIndex, elementIndex, onDelete }) => {
-    const { updateProfileData } = useProfile();
-    const { isDeleteHovered, isContainerHovered, containerHoverHandlers, deleteHoverHandlers } = useDeleteHoverState();
-    
-    const handleUpdate = (field: keyof ParagraphElement, value: any) => {
-        updateProfileData(prev => ({
-            ...prev,
-            cards: prev.cards.map((card, i) => {
-                if (i === cardIndex) {
-                    const newElements = card.elements.map((el, j) => {
-                        if (j === elementIndex) {
-                            return { ...el, [field]: value };
-                        }
-                        return el;
-                    });
-                    return { ...card, elements: newElements };
-                }
-                return card;
-            })
-        }));
-    };
-    
     return (
-        <div 
-            className={`element-container ${isDeleteHovered ? 'is-deleting' : ''}`}
-            {...containerHoverHandlers}
-        >
-             <EditableText
+        <BlockShell title={t('blockTypes.paragraph')} {...shell}>
+            <EditableText
                 as="p"
                 className="content-text"
                 html={element.text}
                 styles={element.styles}
-                onUpdate={(html) => handleUpdate('text', html)}
-                onStyleUpdate={(styles) => handleUpdate('styles', styles)}
+                onUpdate={(html) => update({ text: html })}
             />
-            <ActionButton 
-              icon={<X size={12} />} 
-              title="删除此区块" 
-              onClick={onDelete} 
-                            variant="delete"
-                            className={`block-delete-btn ${isContainerHovered ? 'is-visible' : ''}`}
-                            {...deleteHoverHandlers}
-            />
-        </div>
+        </BlockShell>
     );
-}
+};
 
 export default ParagraphBlock;

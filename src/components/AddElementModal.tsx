@@ -1,8 +1,9 @@
 import React from 'react';
 import { ELEMENT_TEMPLATES } from '../utils/data';
-import { CardElement, ElementTemplate } from '../types/data';
+import { CardElement, ElementTemplate, ElementTemplateGroup } from '../types/data';
 import { useTranslation } from '../hooks/useTranslation';
 import Modal from './ui/Modal';
+import { BlockTemplateThumb } from './ui/TemplateThumb';
 
 interface AddElementModalProps {
   isOpen: boolean;
@@ -10,26 +11,13 @@ interface AddElementModalProps {
   onAddElement: (element: CardElement) => void;
 }
 
+const GROUP_ORDER: ElementTemplateGroup[] = ['text', 'profile', 'tags', 'media'];
+
 const AddElementModal: React.FC<AddElementModalProps> = ({ isOpen, onClose, onAddElement }) => {
   const { t } = useTranslation();
 
-  // 翻译键映射
-  const blockTypeKeys: Record<string, string> = {
-    '段落': 'blockTypes.paragraph',
-    '标签区块': 'blockTypes.tagSection',
-    '标签区块2': 'blockTypes.oshiSection',
-    '分组标签区块': 'blockTypes.groupedTagSection'
-  };
-
-  const blockDescKeys: Record<string, string> = {
-    '段落': 'blockTypes.paragraphDesc',
-    '标签区块': 'blockTypes.tagSectionDesc',
-    '标签区块2': 'blockTypes.oshiSectionDesc',
-    '分组标签区块': 'blockTypes.groupedTagSectionDesc'
-  };
-  
   const handleAddElement = (template: ElementTemplate) => {
-    onAddElement(template.data);
+    onAddElement(template.build(t));
     onClose();
   };
 
@@ -38,14 +26,21 @@ const AddElementModal: React.FC<AddElementModalProps> = ({ isOpen, onClose, onAd
       <p className="modal-intro-text">
         {t('modal.selectElementType')}
       </p>
-      <div className="template-grid">
-        {ELEMENT_TEMPLATES.map((template) => (
-          <div key={template.name} className="template-option" onClick={() => handleAddElement(template)}>
-            <h3 className="template-name">{t(blockTypeKeys[template.name] || template.name)}</h3>
-            <p className="template-description">{t(blockDescKeys[template.name] || template.description)}</p>
+      {GROUP_ORDER.map(group => (
+        <section key={group} className="template-group">
+          <h3 className="template-group-title">{t(`blockGroups.${group}`)}</h3>
+          <div className="template-grid">
+            {ELEMENT_TEMPLATES.filter(tpl => tpl.group === group).map((template) => (
+              <button type="button" key={template.id} className="template-option" onClick={() => handleAddElement(template)}>
+                {/* 缩略图直接画模板会插入的元素，保证与实际效果一致 */}
+                <BlockTemplateThumb element={template.build(t)} />
+                <h3 className="template-name">{t(`blockTypes.${template.id}`)}</h3>
+                <p className="template-description">{t(`blockTypes.${template.id}Desc`)}</p>
+              </button>
+            ))}
           </div>
-        ))}
-      </div>
+        </section>
+      ))}
     </Modal>
   );
 };
