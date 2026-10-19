@@ -1,5 +1,9 @@
 import { CardData, ProfileData, Styles, TagData } from '../types/data';
 import { normalizeCards } from './profileSchema';
+import { DEFAULT_CARD_HEIGHT, GRID_COLUMNS, getLayoutSpanFromWidth, getWidthFromLayoutSpan } from './gridLayout';
+import { ACCENT_PRESETS, CARD_COLOR_NAMES, FONT_OPTIONS, cardColorByName } from './appearance';
+import type { AccentName, StylePresetKey } from './appearance';
+import { escapeHtml } from './html';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -225,6 +229,10 @@ const defaultStyles = (overrides?: Styles): Styles => ({
   ...overrides,
 });
 
+// 与 data.ts 里模板的默认字号一致，AI 生成的卡片和手动添加的看起来一样
+const subheadingStyles = (): Styles => ({ fontWeight: '600', fontSize: '18', fontFamily: '' });
+const labelStyles = (): Styles => ({ fontWeight: 'bold', fontSize: '15', fontFamily: '' });
+
 const defaultTitleStyles = (): Styles => ({
   fontWeight: '600',
   fontSize: '22',
@@ -237,26 +245,36 @@ const getSafeString = (value: unknown, fallback = ''): string => {
   return fallback;
 };
 
+/**
+ * 模型输出的是纯文本，而卡片里的文字按 HTML 存储（EditableText 用 innerHTML 渲染）。
+ * 先转义，否则“BG<GL”这类写法会被当成标签吞掉；再把允许的少量格式转成 HTML。
+ */
+const plainText = (value: unknown) => escapeHtml(getSafeString(value).trim());
+/** 段落：支持 **重点** 加粗和换行 */
+const richText = (value: unknown) =>
+  plainText(value)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // 模型有时把换行写成字面的 \n（两个字符）
+    .replace(/\r?\n|\\n/g, '<br>');
+
 const normalizeTags = (value: unknown): TagData[] => {
   if (!Array.isArray(value)) return [];
   return value
     .map((item) => {
-      if (typeof item === 'string') {
-        return { text: item.trim() };
-      }
+      if (typeof item === 'string') return { text: plainText(item) };
       if (item && typeof item === 'object') {
         const raw = item as Record<string, unknown>;
-        return {
-          text: getSafeString(raw.text).trim(),
-          type: getSafeString(raw.type) || undefined,
-            };
+        return { text: plainText(raw.text), type: getSafeString(raw.type) || undefined };
       }
       return null;
     })
     .filter((tag): tag is TagData => Boolean(tag && tag.text));
 };
 
-// 这里只做 AI 输出特有的宽松兼容（字符串标签、groups 写法、默认文案等），
+const objects = (value: unknown): Record<string, unknown>[] =>
+  Array.isArray(value) ? value.filter((v): v is Record<string, unknown> => Boolean(v) && typeof v === 'object') : [];
+
+// 这里只做 AI 输出特有的宽松兼容（字符串标签、groups 写法、文字转义、字段改名等），
 // 最终结构由 profileSchema.normalizeCards 统一校验，旧版 profileInfo 也在那里拆成细分区块。
 type LooseElement = Record<string, unknown>;
 
@@ -265,167 +283,311 @@ const normalizeElement = (element: unknown): LooseElement | null => {
   const raw = element as Record<string, unknown>;
   const type = getSafeString(raw.type);
 
-  if (type === 'paragraph') {
-    return {
-      type,
-      text: getSafeString(raw.text || raw.content),
-      styles: defaultStyles(),
-    };
-  }
-
-  if (type === 'profileInfo') {
-    return {
-      type,
-      nickname: getSafeString(raw.nickname || raw.value),
-      gender: getSafeString(raw.gender),
-      age: getSafeString(raw.age),
-      location: getSafeString(raw.location),
-      mbti: getSafeString(raw.mbti),
-      items: Array.isArray(raw.items)
-        ? raw.items
-            .map((i) => {
-              if (!i || typeof i !== 'object') return null;
-              const item = i as Record<string, unknown>;
-              const label = getSafeString(item.label);
-              const value = getSafeString(item.value);
-              if (!label && !value) return null;
-              return { label, value };
-            })
-            .filter((i): i is { label: string; value: string } => Boolean(i))
-        : undefined,
-      textStyles: defaultStyles(),
-    };
-  }
-
-  if (type === 'tagSection') {
-    return {
-      type,
-      subheading: getSafeString(raw.subheading),
-      subheadingStyles: defaultStyles(),
-      tags: normalizeTags(raw.tags),
-      tagStyles: defaultStyles({ fontWeight: '500', fontSize: '13' }),
-    };
-  }
-
-  if (type === 'groupedTagSection') {
-    let arcadeLabel = getSafeString(raw.arcadeLabel);
-    let arcadeTags = normalizeTags(raw.arcade);
-    let mobileLabel = getSafeString(raw.mobileLabel);
-    let mobileTags = normalizeTags(raw.mobile);
-
-    if (Array.isArray(raw.groups) && raw.groups.length > 0) {
-      const g1 = raw.groups[0] as Record<string, unknown> | undefined;
-      if (g1) {
-        arcadeLabel = getSafeString(g1.title, arcadeLabel);
-        arcadeTags = normalizeTags(g1.tags);
+  switch (type) {
+    case 'paragraph':
+      return { type, text: richText(raw.text || raw.content), styles: defaultStyles() };
+    case 'heading':
+      return { type, text: richText(raw.text), size: raw.size, styles: { fontWeight: '700', fontFamily: '' } };
+    case 'avatar':
+      return { type, size: raw.size || 'lg', shape: raw.shape };
+    case 'qrCode':
+      return { type };
+    case 'divider':
+      return { type, variant: raw.variant };
+    case 'imageGallery':
+      // AI 不能放图片，只能留一个空的图片墙等用户上传
+      return { type, images: [], columns: raw.columns ?? 4, crop: true };
+    case 'infoList':
+    case 'profileInfo': {
+      const items = objects(raw.items)
+        .map((item) => ({ label: plainText(item.label), value: plainText(item.value) }))
+        .filter((item) => item.label || item.value);
+      if (type === 'profileInfo') {
+        return {
+          type,
+          nickname: plainText(raw.nickname || raw.value),
+          gender: plainText(raw.gender),
+          age: plainText(raw.age),
+          location: plainText(raw.location),
+          mbti: plainText(raw.mbti),
+          items: Array.isArray(raw.items) ? items : undefined,
+          textStyles: defaultStyles(),
+        };
       }
-      const g2 = raw.groups[1] as Record<string, unknown> | undefined;
-      if (g2) {
-        mobileLabel = getSafeString(g2.title, mobileLabel);
-        mobileTags = normalizeTags(g2.tags);
-      }
+      return items.length ? { type, items, layout: raw.layout, textStyles: defaultStyles() } : null;
     }
-
-    return {
-      type,
-      subheading: getSafeString(raw.subheading),
-      subheadingStyles: defaultStyles(),
-      arcadeLabel,
-      arcadeLabelStyles: defaultStyles(),
-      arcade: arcadeTags,
-      mobileLabel,
-      mobileLabelStyles: defaultStyles(),
-      mobile: mobileTags,
-      tagStyles: defaultStyles({ fontWeight: '500', fontSize: '13' }),
-    };
+    case 'tagSection':
+      return {
+        type,
+        subheading: plainText(raw.subheading),
+        subheadingStyles: subheadingStyles(),
+        tags: normalizeTags(raw.tags),
+        tagStyles: defaultStyles({ fontWeight: '500', fontSize: '13' }),
+        tone: raw.tone,
+      };
+    case 'groupedTagSection': {
+      let arcadeLabel = plainText(raw.arcadeLabel);
+      let arcadeTags = normalizeTags(raw.arcade);
+      let mobileLabel = plainText(raw.mobileLabel);
+      let mobileTags = normalizeTags(raw.mobile);
+      const groups = objects(raw.groups);
+      if (groups[0]) {
+        arcadeLabel = plainText(groups[0].title) || arcadeLabel;
+        arcadeTags = normalizeTags(groups[0].tags);
+      }
+      if (groups[1]) {
+        mobileLabel = plainText(groups[1].title) || mobileLabel;
+        mobileTags = normalizeTags(groups[1].tags);
+      }
+      return {
+        type,
+        subheading: plainText(raw.subheading),
+        subheadingStyles: subheadingStyles(),
+        arcadeLabel,
+        arcadeLabelStyles: labelStyles(),
+        arcade: arcadeTags,
+        mobileLabel,
+        mobileLabelStyles: labelStyles(),
+        mobile: mobileTags,
+        tagStyles: defaultStyles({ fontWeight: '500', fontSize: '13' }),
+      };
+    }
+    case 'tagSectionTwo':
+      return {
+        type,
+        subheading: plainText(raw.subheading),
+        subheadingStyles: subheadingStyles(),
+        oshis: normalizeTags(raw.oshis),
+        meta: normalizeTags(raw.meta),
+        tone: raw.tone,
+      };
+    case 'checklist': {
+      const source = Array.isArray(raw.options) ? raw.options : raw.items;
+      const items = (Array.isArray(source) ? source : [])
+        .map((o) => (typeof o === 'string' ? { text: plainText(o), checked: true } : o && typeof o === 'object' ? { text: plainText((o as Record<string, unknown>).text), checked: (o as Record<string, unknown>).checked !== false } : null))
+        .filter((o): o is { text: string; checked: boolean } => Boolean(o && o.text));
+      return items.length ? { type, subheading: plainText(raw.subheading), subheadingStyles: subheadingStyles(), items } : null;
+    }
+    case 'scale': {
+      const items = objects(Array.isArray(raw.scales) ? raw.scales : raw.items)
+        .map((s) => ({ left: plainText(s.left), right: plainText(s.right), value: Number(s.value) }))
+        .filter((s) => s.left && s.right);
+      return items.length ? { type, subheading: plainText(raw.subheading), subheadingStyles: subheadingStyles(), items } : null;
+    }
+    default:
+      return null;
   }
-
-  if (type === 'tagSectionTwo') {
-    return {
-      type,
-      subheading: getSafeString(raw.subheading),
-      subheadingStyles: defaultStyles(),
-      oshis: normalizeTags(raw.oshis),
-      meta: normalizeTags(raw.meta),
-    };
-  }
-
-  // heading / avatar / infoList / qrCode / divider 等交给 profileSchema 校验
-  return raw;
 };
 
+/** 没有有效内容的区块（空标签组等）会被丢掉，免得卡片上出现只有小标题的空壳 */
+const hasContent = (el: LooseElement): boolean => {
+  switch (el.type) {
+    case 'tagSection':
+      return (el.tags as unknown[]).length > 0;
+    case 'tagSectionTwo':
+      return (el.oshis as unknown[]).length > 0;
+    case 'groupedTagSection':
+      return (el.arcade as unknown[]).length + (el.mobile as unknown[]).length > 0;
+    case 'paragraph':
+    case 'heading':
+      return Boolean(el.text);
+    default:
+      return true;
+  }
+};
+
+/** 估算卡片内容多少，用于模型没给宽度时的默认值 */
+const estimateWidth = (elements: LooseElement[]): number => {
+  const weight = elements.reduce((sum, el) => {
+    const count = (key: string) => (Array.isArray(el[key]) ? (el[key] as unknown[]).length : 0);
+    const text = typeof el.text === 'string' ? el.text.replace(/<[^>]*>/g, '').length : 0;
+    return sum + count('tags') + count('oshis') + count('arcade') + count('mobile') + count('items') + text / 15;
+  }, 0);
+  return weight <= 6 ? 1 : weight <= 16 ? 2 : 3;
+};
+
+/**
+ * 自动排版：按顺序把卡片放进三列的行里。放不下就换行，并把上一行剩下的列分给那一行里内容最多的卡片，
+ * 保证每一行都是满的（模型自己填宽度时经常一行宽一行窄）。同一行的卡片 y 相同，高度由 useHeightSync 对齐。
+ */
+const packRows = <T extends { width: number; weight: number }>(cards: T[]): Array<T & { x: number; row: number }> => {
+  const rows: T[][] = [];
+  let row: T[] = [];
+  let used = 0;
+  const flush = () => {
+    if (!row.length) return;
+    const spare = GRID_COLUMNS - used;
+    if (spare > 0) {
+      const target = row.reduce((best, c) => (c.weight > best.weight ? c : best), row[0]);
+      target.width += spare;
+    }
+    rows.push(row);
+    row = [];
+    used = 0;
+  };
+  cards.forEach((card) => {
+    if (used + card.width > GRID_COLUMNS) flush();
+    row.push(card);
+    used += card.width;
+    if (used === GRID_COLUMNS) flush();
+  });
+  flush();
+  return rows.flatMap((r, rowIndex) => {
+    let x = 0;
+    return r.map((card) => {
+      const placed = { ...card, x, row: rowIndex };
+      x += card.width;
+      return placed;
+    });
+  });
+};
 
 export const normalizeGeneratedCards = (cards: unknown): CardData[] => {
   if (!Array.isArray(cards)) return [];
 
-  // 统一走 profileSchema：去重 id、补齐布局、校验并拆分区块
-  return normalizeCards(cards
+  const prepared = cards
     .map((card, index) => {
       if (!card || typeof card !== 'object') return null;
       const raw = card as Record<string, unknown>;
-      const id = getSafeString(raw.id) || `card_${Date.now()}_${index}`;
-      const title = getSafeString(raw.title);
-      const rawElements = Array.isArray(raw.elements) ? raw.elements : [];
-      const elements = rawElements.map(normalizeElement).filter((el): el is LooseElement => Boolean(el));
-      const layoutSpan = getSafeString(raw.layoutSpan, index === 0 ? 'profile-card-span' : index === 1 ? 'about-me-card-span' : 'oshi-card-span');
+      const elements = (Array.isArray(raw.elements) ? raw.elements : [])
+        .map(normalizeElement)
+        .filter((el): el is LooseElement => Boolean(el) && hasContent(el!));
       // 没有任何区块的卡片直接丢弃，不塞占位文字
       if (elements.length === 0) return null;
+      // 只有一个带小标题的区块时，小标题和卡片标题是两层重复的表头（如「避雷针 / NG」），只留卡片标题
+      const titled = elements.filter((el) => typeof el.subheading === 'string' && el.subheading);
+      if (plainText(raw.title) && raw.hideTitle !== true && titled.length === 1) titled[0].subheading = '';
 
+      const hint = Number(raw.width);
+      const width = Number.isFinite(hint) && hint >= 1
+        ? Math.min(GRID_COLUMNS, Math.round(hint))
+        : raw.layoutSpan ? getWidthFromLayoutSpan(getSafeString(raw.layoutSpan)) : estimateWidth(elements);
+      const bgColor = raw.color && raw.color !== 'default' ? cardColorByName(raw.color) : undefined;
+      const style = {
+        ...(bgColor ? { bgColor } : {}),
+        ...(raw.align === 'center' ? { textAlign: 'center' as const } : {}),
+        ...(raw.hideTitle === true ? { hideTitle: true } : {}),
+      };
       return {
-        id,
-        title,
-        titleStyles: defaultTitleStyles(),
-        layoutSpan,
+        id: `card_${Date.now()}_${index}`,
+        title: plainText(raw.title),
         elements,
+        style,
+        width,
+        weight: estimateWidth(elements) + elements.length * 0.01,
       };
     })
-    .filter(Boolean));
+    .filter((c): c is NonNullable<typeof c> => c !== null);
+
+  // 统一走 profileSchema：去重 id、校验并拆分区块；布局已经排好，fixCardLayouts 会原样保留
+  return normalizeCards(packRows(prepared).map((card) => ({
+    id: card.id,
+    title: card.title,
+    titleStyles: defaultTitleStyles(),
+    layoutSpan: getLayoutSpanFromWidth(card.width),
+    layout: { i: card.id, x: card.x, y: card.row * DEFAULT_CARD_HEIGHT, w: card.width, h: DEFAULT_CARD_HEIGHT },
+    style: card.style,
+    elements: card.elements,
+  })));
+};
+
+/** 模型选择的整体外观：只能从网站现成的风格 / 色板 / 字体里选 */
+export interface GeneratedLook {
+  style?: StylePresetKey;
+  accentColor?: string;
+  fontFamily?: string;
+}
+
+const LOOK_STYLES: StylePresetKey[] = ['classic', 'glass', 'minimal', 'journal', 'night'];
+const LOOK_FONTS = FONT_OPTIONS.map((f) => f.key).filter((key) => key && key !== 'mono');
+
+export const normalizeGeneratedLook = (look: unknown): GeneratedLook => {
+  if (!look || typeof look !== 'object') return {};
+  const raw = look as Record<string, unknown>;
+  const result: GeneratedLook = {};
+  if (LOOK_STYLES.includes(raw.style as StylePresetKey)) result.style = raw.style as StylePresetKey;
+  if (typeof raw.accent === 'string' && raw.accent in ACCENT_PRESETS) result.accentColor = ACCENT_PRESETS[raw.accent as AccentName];
+  if (typeof raw.font === 'string' && LOOK_FONTS.includes(raw.font)) result.fontFamily = raw.font;
+  return result;
+};
+
+/**
+ * 快捷回复：提示词要求模型在提问时，最后一行写 [[选项A | 选项B | 选项C]]。
+ * 显示时去掉这一行，把选项做成可以点的按钮。
+ */
+export const splitQuickReplies = (text: string): { text: string; options: string[] } => {
+  const lines = text.trimEnd().split('\n');
+  const match = lines[lines.length - 1]?.trim().match(/^\[\[(.+)\]\]$/);
+  if (!match) return { text, options: [] };
+  const options = match[1]
+    .split(/[|｜]/)
+    .map((o) => o.trim())
+    .filter((o) => o && o.length <= 20)
+    .slice(0, 6);
+  return { text: lines.slice(0, -1).join('\n').trimEnd(), options };
 };
 
 // ---------------------------------------------------------------------------
 // System prompt
 // ---------------------------------------------------------------------------
 
-const BASE_SYSTEM_PROMPT = `你是「芝士扩列条」的采访助手，熟悉二次元、游戏、音游、虚拟主播、偶像、追星等兴趣圈。你通过轻松的多轮聊天了解用户，然后调用 generate_profile_card 工具生成一张扩列卡（用来在社群里介绍自己、找同好的个人卡片）。
+// 结构按扩列条常见的写法组织：
+// 身份行“生日 | MBTI | IP”、大字标语、按圈子分组的标签、推分档、属性 / CP 立场、NG、扩列请 + 二维码。
+const BASE_SYSTEM_PROMPT = `你是「芝士扩列条」的采访助手，熟悉二次元、游戏、音游、虚拟主播、偶像、追星、cos 等兴趣圈和圈内说法。你通过轻松的多轮聊天了解用户，然后调用 generate_profile_card 工具生成一张扩列条（在社群里介绍自己、找同好的个人卡片）。
 
 【聊天方式】
-- 像朋友聊天：每次只问 1～2 个具体问题，回复简短（一般不超过 80 字），可以对用户的回答做一句真诚的回应再提问。
+- 像朋友聊天：每次只问 1～2 个具体问题，回复简短（一般不超过 60 字），可以先对用户的回答真诚地回应一句再提问。
 - 回复只用纯文本，不要用 Markdown（不要 **加粗**、# 标题、列表符号）。
-- 按需了解下面这些内容，用户不想说的就跳过，不要追问：
-  1. 希望别人怎么称呼 TA（昵称）
-  2. 主要的圈子和爱好（游戏、音游、番剧、偶像、乐队、画画……），以及常玩 / 常看的具体作品
-  3. 推（喜欢的角色、声优、偶像、主播等）
-  4. 想找什么样的朋友、希望一起做什么（扩列诉求）
-  5. 可选：MBTI、所在城市或“线上”、雷点 / 边界（如同担拒否、不聊某些话题）
-- 聊了 3～5 轮、已经有足够内容时，主动问用户要不要现在生成；用户说可以生成、或者点了「直接生成」时，立即调用工具。
+- 提问时，在回复的最后单独一行给出 2～5 个快捷选项，格式严格为 [[选项1 | 选项2 | 选项3]]，每个选项不超过 10 个字，用用户的语言；适合时包含一个“跳过”类的选项。不提问时不要加这一行。
+- 按下面的顺序了解，用户不想说的就跳过，不要追问：
+  1. 怎么称呼（cn），可选：生日或星座、MBTI、IP（城市或“线上”）
+  2. 主要的圈子，以及具体在玩 / 在追的作品
+  3. 推：问清楚哪些是最喜欢的（心肝 / 本命），哪些是一般喜欢（好感）
+  4. 属性与雷点：CP 立场（BG / BL / GL / 无 CP / 杂食 / 洁癖）、同担（拒否 / 不拒）、雷点；没提到的不要替用户决定
+  5. 想找什么样的朋友，以及加好友的规矩（在线时间、回复快慢、加好友要不要备注）
+  6. 想要什么感觉的卡片（可爱 / 清爽 / 极简 / 手账 / 夜间），选项用快捷回复给出
+- 聊了 3～5 轮、已经有足够内容时，主动问用户要不要现在生成；用户说可以、或者点了「直接生成」时，立即调用工具。
 
 【真实与隐私（必须遵守）】
-- 只使用用户明确说过的信息。用户没提到的字段（年龄、性别、地区、MBTI 等）直接省略，绝不编造或猜测。可以润色措辞，但不能改变事实。
+- 只使用用户明确说过的信息。用户没提到的内容（年龄、性别、生日、MBTI、属性、CP 立场、雷点等）直接省略，绝不编造或猜测。可以精简措辞，但不能改变事实。
 - 即使用户说“随便编”“帮我编得厉害点”，也不要编造兴趣、作品、推、经历或头衔：聊天时用一句话说明卡片只写真实信息，并问一两个简单问题；如果已经要求直接生成，就只生成有内容的部分，信息很少时卡片少一点没关系。
-- subtitle 只能概括用户说过的内容；信息太少时用“正在扩列中”这类中性的话，不要夸张。
-- 不主动询问真实姓名、手机号、具体住址、学校或公司全称、证件信息。用户自己提到时也不要写进卡片，联系方式由用户自己在卡片上添加二维码。
+- subtitle 只能概括用户说过的内容，不加用户没说过的头衔或形容词；信息太少时用“正在扩列中”这类中性的话。
+- 不主动询问真实姓名、手机号、QQ 号、微信号、具体住址、学校或公司全称、证件信息。用户自己提到时也不要写进卡片，联系方式由用户自己上传二维码。
 - 如果用户给的称呼看起来像真实全名（例如“王小明”），聊天时问一次要不要换成昵称；用户坚持或已经要求直接生成时，照用户说的写。
 - 不生成歧视、骚扰、色情或针对他人的内容；用户要求时礼貌拒绝。
 
-【生成卡片（调用 generate_profile_card）】
-- userSettings.mainTitle：用户的昵称；userSettings.subtitle：一句话签名或成分总结，不超过 30 字。
-- 卡片标题 2～6 个字。卡片按下面的顺序组织，没有对应信息的卡片就不要生成：
-  1. 个人档案（layoutSpan: profile-card-span）：一个 profileInfo，items 只放用户提供过的信息，如 [{"label":"昵称","value":"…"},{"label":"MBTI","value":"…"}]。
-  2. 爱好与涉猎（about-me-card-span）：一个或多个 tagSection，例如「常玩游戏」「在追的番」。
-  3. 我的推（oshi-card-span）：用 tagSectionTwo 列出推（oshis），或用 groupedTagSection 分两组展示（如「游戏 / 动漫」「虚拟 / 现实」）。
-  4. 扩列诉求（about-me-card-span）：一个 paragraph，用自然的口吻写想找什么样的朋友。
-  5. 雷点 / 边界（profile-card-span）：用户提到时才生成，一个 paragraph，每条之间用换行分隔。
-- 标签要短，每个不超过 10 个字，每组不超过 12 个；段落不超过 80 字。作品名、角色名保留用户的原始写法。
-- tagSection、tagSectionTwo、groupedTagSection 都必须写 subheading（小标题），groupedTagSection 还要写两个组名；全部使用用户的语言。
+【写法：要像真正的扩列条】
+- 简短、像属性表，不写长句。并列的信息用竖线 | 分隔；作品名可以加《》；保留用户和圈内的说法（cn、IP、同担拒否、杂食、洁癖、梦女等），作品名、角色名保留用户的原始写法。
+- 标签每个不超过 10 个字，每组不超过 12 个；段落不超过 60 字，可以用 **重点** 标出一两个关键词。
+- 一张卡片里有两个以上标签组 / 清单 / 滑杆时，每个都写小标题（如「心肝」「好感」）；只有一个时不写小标题，卡片标题已经说明了。
+- userSettings.mainTitle：用户的称呼。userSettings.subtitle：成分式的一句话，用 ｜ 分隔，不超过 30 字，例如“音游人｜ISTP｜周末搭子募集中”。
+- 大字标语（heading，size "lg"）只在用户自己说过某种态度或优先级时才写，并且要用用户的原话或几乎原话，例如用户说“聊得来最重要” → “聊得来 > 一切”。不要自己总结或发明口号（比如凭空写一句英文 slogan 或给用户安头衔），用户没说过就不写标语。
+
+【卡片结构（按信息挑选，没有对应信息的卡片不要生成）】
+每张卡片写 width（建议宽度 1～3 列，网站会自动凑满每一行）。卡片标题 2～6 个字，可以用圈内常见写法（About me、推し、NG 等），使用用户的语言。
+1. 身份卡（width 1，align "center"，hideTitle true）：avatar（size "lg"）+ infoList（layout "inline"，items 的 value 直接写“05.20”“INTP”“IP 上海”这样的短内容，label 写对应名称）+ 可选的大字标语 heading。称呼已经是页面大标题，这里不要重复。
+2. 在玩 / 在追（width 2）：一个或多个 tagSection，小标题用用户的说法（如「在玩」「在追」「音游」）；同类内容分两组时用 groupedTagSection。
+3. 推（width 2）：最喜欢的用 tagSection，tone "strong"（小标题如「心肝」「本命」）；一般喜欢的用 tagSection，tone "outline"（小标题如「好感」）；不分档时用一个 tagSectionTwo。用户提到推时，在这张卡最后加一个 imageGallery（columns 4），留给用户自己上传推图。
+4. 属性（width 1）：tagSection 列出用户说过的 CP 立场、同担态度、梦向等。游戏向用户可以用 checklist（options：用户的偏好，checked 为 true；用户明确说不要的写 checked false）和 scale（用户说过程度时，如“佛系一点”→ left "佛系"、right "硬核"、value 25）。
+5. NG（width 1）：tagSection，tone "ng"，每个雷点一个短标签；用户说过踩雷后的态度（如“会拉黑”）时，再加一个 paragraph。
+6. 扩列请（width 1）：一个 paragraph 写想找什么样的朋友和加好友的规矩（每条一行），最后加一个 qrCode 区块（二维码由用户自己上传）。
+- color：大多数卡片不填。最多给 1～2 张想突出的卡片设底色，例如 NG 卡用 "pink"。
+
+【外观（look）】
+- style 按用户想要的感觉选：可爱 / 少女 / 梦幻 → "glass"；简洁 / 冷淡 / 黑白 → "minimal"；手账 / 复古 / 温柔 → "journal"；酷 / 暗色 / 夜猫子 → "night"；没说 → "classic"。
+- accent：用户说过喜欢的颜色、推的应援色（用户提到时）或与风格相配的颜色。
+- font 只用于标题（只适合中文内容，其他语言不填）：可爱 → "zcoolKuaiLe"；文艺 → "notoSerif"；古风 → "maShanZheng"；手写感 → "longCang"；不确定就不填。
 
 【示例】
-用户说：叫我星之海就好，ISTP，最近在打 Arcaea 和 Phigros，推初音未来，想找周末一起打音游的朋友。
-可以生成：mainTitle "星之海"，subtitle "音游人 / ISTP / 寻找周末音游搭子"；
-个人档案 items：昵称 = 星之海，MBTI = ISTP；
-爱好与涉猎：tagSection「常玩音游」= [Arcaea, Phigros]；
-我的推：tagSectionTwo oshis = [初音未来]；
-扩列诉求：paragraph "想找周末一起打音游的朋友，水平不限，一起进步就好～"
-（用户没说年龄、性别、城市，所以都不写。）`;
+用户说过：叫我星之海，ISTP，IP 上海；在打 Arcaea 和 Phigros，也追《葬送的芙莉莲》；最喜欢初音未来，镜音铃也喜欢；不拒同担，雷 KY 和刷屏；想找周末一起打音游的，加我请备注来意；想要清爽一点。
+可以生成：mainTitle "星之海"，subtitle "音游人｜ISTP｜周末搭子募集中"，look { style "glass", accent "mint" }；
+身份卡：avatar + infoList inline [MBTI=ISTP, IP=IP 上海]；
+在玩：tagSection「音游」[Arcaea, Phigros]，tagSection「在追」[《葬送的芙莉莲》]；
+推：tagSection「心肝」tone strong [初音未来]，tagSection「好感」tone outline [镜音铃]，imageGallery；
+属性：tagSection「属性」[不拒同担]；
+NG：tagSection tone ng [KY, 刷屏]；
+扩列请：paragraph "想找周末一起打音游的朋友\\n加我请备注来意" + qrCode。
+（用户没说年龄、性别、生日、CP 立场，所以都不写。）`;
 
 const LANGUAGE_NAMES: Record<string, string> = { 'zh-CN': '简体中文', 'en-US': 'English', 'ja-JP': '日本語', 'ko-KR': '한국어' };
 
@@ -438,8 +600,8 @@ const buildSystemPrompt = (locale?: string) => {
   return `${BASE_SYSTEM_PROMPT}
 
 【当前对话上下文】
-- 界面已经替你发出了开场白：请用户介绍昵称和希望呈现的风格。用户的第一条消息就是对它的回答，不要再重复同样的问题。
-- 用户界面语言是 ${language}。聊天回复和卡片内容都使用用户实际使用的语言；无法判断时使用 ${language}。示例只是格式参考，不要照抄示例的语言或内容。`;
+- 界面已经替你发出了开场白：问用户怎么称呼、平时主要混哪些圈子。用户的第一条消息就是对它的回答，不要再重复同样的问题。
+- 用户界面语言是 ${language}。聊天回复、快捷选项和卡片内容都使用用户实际使用的语言；无法判断时使用 ${language}。示例只是格式参考，不要照抄示例的语言或内容。`;
 };
 
 // ---------------------------------------------------------------------------
@@ -447,10 +609,11 @@ const buildSystemPrompt = (locale?: string) => {
 // ---------------------------------------------------------------------------
 
 const stringArray = (description: string) => ({ type: 'array' as const, items: { type: 'string' as const }, description });
+const enumString = (values: readonly string[], description: string) => ({ type: 'string' as const, enum: [...values], description });
 
 const TOOL_SCHEMA_DEF = {
   name: 'generate_profile_card',
-  description: '信息足够时调用，生成扩列卡数据。只填用户明确提供过的信息，没有的字段省略。',
+  description: '信息足够时调用，生成扩列条数据。只填用户明确提供过的信息，没有的字段省略。',
   parameters: {
     type: 'object' as const,
     properties: {
@@ -458,8 +621,17 @@ const TOOL_SCHEMA_DEF = {
         type: 'object' as const,
         description: '页面顶部的标题区',
         properties: {
-          mainTitle: { type: 'string' as const, description: '主标题，即用户的昵称' },
-          subtitle: { type: 'string' as const, description: '副标题：一句话签名或成分总结，不超过 30 字' },
+          mainTitle: { type: 'string' as const, description: '主标题，即用户的称呼' },
+          subtitle: { type: 'string' as const, description: '成分式的一句话，用 ｜ 分隔，不超过 30 字' },
+        },
+      },
+      look: {
+        type: 'object' as const,
+        description: '整体外观，只能从给定选项里选',
+        properties: {
+          style: enumString(LOOK_STYLES, '整体风格'),
+          accent: enumString(Object.keys(ACCENT_PRESETS), '主题色'),
+          font: enumString(LOOK_FONTS, '字体（只适合中文内容，可省略）'),
         },
       },
       cards: {
@@ -469,28 +641,48 @@ const TOOL_SCHEMA_DEF = {
           type: 'object' as const,
           properties: {
             title: { type: 'string' as const, description: '卡片标题，2～6 个字' },
-            layoutSpan: { type: 'string' as const, description: '卡片宽度：profile-card-span（1 列）、about-me-card-span（2 列）、oshi-card-span（通栏 3 列）' },
+            width: { type: 'integer' as const, description: '建议宽度：1、2 或 3 列' },
+            align: enumString(['left', 'center'], '对齐方式，默认 left'),
+            hideTitle: { type: 'boolean' as const, description: '是否隐藏卡片标题（身份卡用 true）' },
+            color: enumString(CARD_COLOR_NAMES, '卡片底色，大多数卡片省略'),
             elements: {
               type: 'array' as const,
-              description: '卡片里的区块',
+              description: '卡片里的区块，按从上到下的顺序',
               items: {
                 type: 'object' as const,
                 properties: {
-                  type: { type: 'string' as const, description: '区块类型：profileInfo（个人档案）、paragraph（段落）、heading（大字标题）、tagSection（标签组）、tagSectionTwo（推）、groupedTagSection（两组标签）、divider（分割线）' },
-                  text: { type: 'string' as const, description: 'paragraph / heading 的文字。paragraph 不超过 80 字，换行用 \\n' },
+                  type: enumString(
+                    ['avatar', 'heading', 'infoList', 'paragraph', 'tagSection', 'tagSectionTwo', 'groupedTagSection', 'checklist', 'scale', 'imageGallery', 'qrCode', 'divider'],
+                    '区块类型：avatar 头像、heading 大字标语、infoList 信息、paragraph 段落、tagSection 标签组、tagSectionTwo 推、groupedTagSection 两组标签、checklist 勾选清单、scale 倾向滑杆、imageGallery 空图片墙（推图）、qrCode 二维码、divider 分割线',
+                  ),
+                  text: { type: 'string' as const, description: 'paragraph / heading 的文字。paragraph 不超过 60 字，换行用 \\n，可用 **重点**' },
+                  size: enumString(['sm', 'md', 'lg'], 'avatar / heading 的大小'),
+                  layout: enumString(['list', 'inline'], 'infoList 排列：inline 为“05.20 | INTP | IP 上海”式的单行'),
                   items: {
                     type: 'array' as const,
-                    description: 'profileInfo 的信息行，只放用户提供过的信息',
-                    items: { type: 'object' as const, properties: { label: { type: 'string' as const, description: '如：昵称、MBTI、坐标' }, value: { type: 'string' as const } } },
+                    description: 'infoList 的信息，只放用户提供过的',
+                    items: { type: 'object' as const, properties: { label: { type: 'string' as const, description: '如：生日、MBTI、IP' }, value: { type: 'string' as const } } },
                   },
-                  subheading: { type: 'string' as const, description: 'tagSection / tagSectionTwo / groupedTagSection 的小标题（必填，用用户的语言）' },
+                  subheading: { type: 'string' as const, description: '小标题（用用户的语言）。卡片里有多个标签组 / 清单 / 滑杆时写，只有一个时省略' },
                   tags: stringArray('tagSection 的标签，每个不超过 10 个字，最多 12 个'),
+                  tone: enumString(['default', 'strong', 'outline', 'ng'], 'tagSection / tagSectionTwo 的配色：strong 最喜欢、outline 一般喜欢、ng 雷点'),
                   oshis: stringArray('tagSectionTwo 的推（角色、声优、偶像、主播等）'),
                   meta: stringArray('tagSectionTwo 的补充说明标签，如 "and more…"，可省略'),
-                  arcadeLabel: { type: 'string' as const, description: 'groupedTagSection 第一组的组名，如「游戏」' },
+                  arcadeLabel: { type: 'string' as const, description: 'groupedTagSection 第一组的组名' },
                   arcade: stringArray('groupedTagSection 第一组的标签'),
-                  mobileLabel: { type: 'string' as const, description: 'groupedTagSection 第二组的组名，如「动漫」' },
+                  mobileLabel: { type: 'string' as const, description: 'groupedTagSection 第二组的组名' },
                   mobile: stringArray('groupedTagSection 第二组的标签'),
+                  options: {
+                    type: 'array' as const,
+                    description: 'checklist 的选项',
+                    items: { type: 'object' as const, properties: { text: { type: 'string' as const }, checked: { type: 'boolean' as const } } },
+                  },
+                  scales: {
+                    type: 'array' as const,
+                    description: 'scale 的每一行：两端文字和位置（0～100，越大越靠右）',
+                    items: { type: 'object' as const, properties: { left: { type: 'string' as const }, right: { type: 'string' as const }, value: { type: 'integer' as const } } },
+                  },
+                  variant: enumString(['line', 'dashed', 'space'], 'divider 的样式'),
                 },
                 required: ['type'],
               },

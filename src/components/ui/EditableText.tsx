@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, useCallback, CSSProperties, Element
 import { createPortal } from 'react-dom';
 import DOMPurify from 'dompurify';
 import { Styles } from '../../types/data';
-import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
+import { Bold, Italic, Underline, Strikethrough, RemoveFormatting } from 'lucide-react';
+import { TEXT_COLORS, TextColor, clearFormatting, getActiveRichFormats, toggleBigText, toggleTextColor } from '../../utils/richText';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useEditorUI } from '../../context/EditorUIContext';
 
@@ -18,14 +19,28 @@ interface EditableTextProps {
     onStyleUpdate?: (styles: Styles) => void;
 }
 
-// 内部组件：格式化工具栏
-// **重构**: 移除了字号和字体功能
+type ToolbarAction = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'big' | 'clear' | `color:${TextColor}`;
+
+interface ActiveFormats {
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+    strikethrough?: boolean;
+    big?: boolean;
+    color?: TextColor;
+}
+
+// 内部组件：格式化工具栏（选中文字时出现）：加粗 / 斜体 / 下划线 / 删除线 | 大字 | 五种颜色 | 清除格式
+const TOOLBAR_WIDTH = 420;
 const FormattingToolbar: React.FC<{
     position: { top: number; left: number };
-    activeFormats: { [key: string]: boolean };
-    onFormat: (command: string) => void;
+    activeFormats: ActiveFormats;
+    onFormat: (action: ToolbarAction) => void;
 }> = ({ position, activeFormats, onFormat }) => {
     const { t } = useTranslation();
+    const btn = (action: ToolbarAction, active: boolean | undefined, title: string, icon: React.ReactNode) => (
+        <button type="button" className={active ? 'is-active' : ''} onClick={() => onFormat(action)} title={title} aria-pressed={Boolean(active)}>{icon}</button>
+    );
 
     return createPortal(
         <div
@@ -33,10 +48,25 @@ const FormattingToolbar: React.FC<{
             style={{ top: position.top, left: position.left }}
             onMouseDown={(e) => e.preventDefault()} // 防止在工具栏点击时编辑器失去焦点
         >
-            <button className={activeFormats.bold ? 'is-active' : ''} onClick={() => onFormat('bold')} title={t('editor.bold')}><Bold size={16} /></button>
-            <button className={activeFormats.italic ? 'is-active' : ''} onClick={() => onFormat('italic')} title={t('editor.italic')}><Italic size={16} /></button>
-            <button className={activeFormats.underline ? 'is-active' : ''} onClick={() => onFormat('underline')} title={t('editor.underline')}><Underline size={16} /></button>
-            <button className={activeFormats.strikethrough ? 'is-active' : ''} onClick={() => onFormat('strikethrough')} title={t('editor.strikethrough')}><Strikethrough size={16} /></button>
+            {btn('bold', activeFormats.bold, t('editor.bold'), <Bold size={16} />)}
+            {btn('italic', activeFormats.italic, t('editor.italic'), <Italic size={16} />)}
+            {btn('underline', activeFormats.underline, t('editor.underline'), <Underline size={16} />)}
+            {btn('strikethrough', activeFormats.strikethrough, t('editor.strikethrough'), <Strikethrough size={16} />)}
+            <span className="toolbar-separator" />
+            {btn('big', activeFormats.big, t('editor.big'), <span className="toolbar-big-icon">A+</span>)}
+            <span className="toolbar-separator" />
+            {TEXT_COLORS.map((color) => (
+                <button
+                    type="button"
+                    key={color}
+                    className={`toolbar-color pc-swatch-${color}${activeFormats.color === color ? ' is-active' : ''}`}
+                    onClick={() => onFormat(`color:${color}`)}
+                    title={t(`editor.color.${color}`)}
+                    aria-pressed={activeFormats.color === color}
+                />
+            ))}
+            <span className="toolbar-separator" />
+            {btn('clear', false, t('editor.clearFormat'), <RemoveFormatting size={16} />)}
         </div>,
         document.body
     );
@@ -77,7 +107,7 @@ const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', clas
     const [toolbarState, setToolbarState] = useState<{
         show: boolean;
         position: { top: number; left: number };
-        activeFormats: { [key: string]: boolean };
+        activeFormats: ActiveFormats;
     }>({ show: false, position: { top: 0, left: 0 }, activeFormats: {} });
 
     // 当外部 html prop 更改时同步 DOM（仅在未聚焦时以避免覆盖用户输入）
@@ -108,18 +138,25 @@ const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', clas
         const rect = range.getBoundingClientRect();
         const effectiveRect = (rect.width === 0 && rect.height === 0) ? textRef.current.getBoundingClientRect() : rect;
         
-        const toolbarWidth = 150; // 工具栏宽度现在变小了
-        const top = effectiveRect.top + window.scrollY - 55;
-        const left = effectiveRect.left + window.scrollX + (effectiveRect.width / 2) - (toolbarWidth / 2);
+        const width = Math.min(TOOLBAR_WIDTH, document.documentElement.clientWidth - 20);
+        const toolbarHeight = width < TOOLBAR_WIDTH ? 90 : 55;
+        const top = effectiveRect.top >= toolbarHeight + 10
+            ? effectiveRect.top + window.scrollY - toolbarHeight
+            : effectiveRect.bottom + window.scrollY + 8;
+        const left = effectiveRect.left + window.scrollX + (effectiveRect.width / 2) - (width / 2);
+        const maxLeft = window.scrollX + document.documentElement.clientWidth - width - 10;
+        const rich = getActiveRichFormats(textRef.current);
 
         setToolbarState({
             show: true,
-            position: { top: Math.max(10, top), left: Math.max(10, left) },
+            position: { top: Math.max(10, top), left: Math.max(10, Math.min(left, maxLeft)) },
             activeFormats: {
                 bold: document.queryCommandState('bold'),
                 italic: document.queryCommandState('italic'),
                 underline: document.queryCommandState('underline'),
                 strikethrough: document.queryCommandState('strikethrough'),
+                big: rich.big,
+                color: rich.color,
             },
         });
     }, [isFocused, toolbarState.show]);
@@ -154,9 +191,14 @@ const EditableText: React.FC<EditableTextProps> = ({ as: Component = 'div', clas
         };
     }, [isFocused, updateToolbarPositionAndState]);
 
-    const handleFormat = (command: string) => {
-        document.execCommand(command, false, undefined);
-        textRef.current?.focus();
+    const handleFormat = (action: ToolbarAction) => {
+        const root = textRef.current;
+        if (!root) return;
+        if (action === 'big') toggleBigText(root);
+        else if (action === 'clear') clearFormatting(root);
+        else if (action.startsWith('color:')) toggleTextColor(root, action.slice(6) as TextColor);
+        else document.execCommand(action, false, undefined);
+        root.focus();
         updateToolbarPositionAndState();
         handleInput();
     };

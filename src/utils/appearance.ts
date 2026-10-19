@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { AppearanceSettings, BackgroundSettings, CardAppearance, LayoutAppearance, UserSettings, VisibilitySettings } from '../types/data';
+import type { AppearanceSettings, BackgroundPattern, BackgroundSettings, CardAppearance, LayoutAppearance, UserSettings, VisibilitySettings } from '../types/data';
 
 // 默认值与改版前的视觉效果保持一致，老数据没有 appearance 字段时看起来不变
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
@@ -13,6 +13,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
     imageFit: 'cover',
     overlayColor: '#FFFFFF',
     overlayOpacity: 0,
+    pattern: 'none',
   },
   card: {
     bgColor: '',
@@ -50,21 +51,110 @@ export const APPEARANCE_LIMITS = {
 
 export const CARD_COLOR_PRESETS = ['#FFFFFF', '#FFF7E0', '#FFE9EF', '#EAF4FF', '#E9F8EF', '#F1EAFF', '#F3F3F3', '#2B2B30'];
 
+export type DeepPartialAppearance = { [K in keyof AppearanceSettings]?: Partial<AppearanceSettings[K]> };
+
+export interface StylePreset {
+  key: string;
+  swatch: string;
+  value: DeepPartialAppearance;
+}
+
+// 一键风格：只覆盖背景 / 卡片 / 间距，不动显示开关
+export const STYLE_PRESETS: StylePreset[] = [
+  { key: 'classic', swatch: '#FFFDF5', value: { background: DEFAULT_APPEARANCE.background, card: DEFAULT_APPEARANCE.card, layout: { gapX: 24, gapY: 32, padding: 24 } } },
+  {
+    key: 'glass',
+    swatch: 'linear-gradient(135deg, #FFD6E7, #C9E4FF)',
+    value: {
+      background: { type: 'gradient', gradientFrom: '#FFD6E7', gradientTo: '#C9E4FF', gradientAngle: 135, pattern: 'none' },
+      card: { bgColor: '#FFFFFF', opacity: 0.62, radius: 24, shadow: 'strong', border: false, textColor: '' },
+      layout: { gapX: 20, gapY: 24, padding: 24 },
+    },
+  },
+  {
+    key: 'minimal',
+    swatch: '#F4F4F5',
+    value: {
+      background: { type: 'color', color: '#F4F4F5', pattern: 'none' },
+      card: { bgColor: '#FFFFFF', opacity: 1, radius: 8, shadow: 'none', border: true, textColor: '' },
+      layout: { gapX: 12, gapY: 12, padding: 20 },
+    },
+  },
+  {
+    key: 'journal',
+    swatch: '#F6EEDC',
+    value: {
+      background: { type: 'color', color: '#F6EEDC', pattern: 'grid' },
+      card: { bgColor: '#FFFBF2', opacity: 1, radius: 4, shadow: 'soft', border: true, textColor: '#5B4636' },
+      layout: { gapX: 20, gapY: 24, padding: 26 },
+    },
+  },
+  {
+    key: 'night',
+    swatch: 'linear-gradient(135deg, #1F2233, #3A2D4F)',
+    value: {
+      background: { type: 'gradient', gradientFrom: '#1F2233', gradientTo: '#3A2D4F', gradientAngle: 160, pattern: 'none' },
+      card: { bgColor: '#2B2B36', opacity: 0.92, radius: 18, shadow: 'strong', border: false, textColor: '#ECECF1' },
+      layout: { gapX: 20, gapY: 24, padding: 24 },
+    },
+  },
+];
+
+export type StylePresetKey = 'classic' | 'glass' | 'minimal' | 'journal' | 'night';
+
+/** 把一键风格叠加到现有外观上（只覆盖背景 / 卡片 / 间距，不动显示开关、字体等） */
+export const applyStylePreset = (current: Partial<AppearanceSettings> | undefined, key: string): AppearanceSettings => {
+  const base = resolveAppearance(current);
+  const preset = STYLE_PRESETS.find((p) => p.key === key);
+  if (!preset) return base;
+  return resolveAppearance({
+    ...base,
+    background: { ...base.background, ...preset.value.background },
+    card: { ...base.card, ...preset.value.card },
+    layout: { ...base.layout, ...preset.value.layout },
+  });
+};
+
+/** 卡片底色色板的名字（AI 用名字选色，避免它自己编颜色），顺序与 CARD_COLOR_PRESETS 一致 */
+export const CARD_COLOR_NAMES = ['white', 'cream', 'pink', 'blue', 'green', 'purple', 'gray', 'dark'] as const;
+export type CardColorName = typeof CARD_COLOR_NAMES[number];
+export const cardColorByName = (name: unknown): string | undefined => {
+  const index = CARD_COLOR_NAMES.indexOf(name as CardColorName);
+  return index >= 0 ? CARD_COLOR_PRESETS[index] : undefined;
+};
+
+/** 主题色色板：AI 和“换个风格”从这里选，保证和各风格搭配得上 */
+export const ACCENT_PRESETS = {
+  yellow: '#FFC300',
+  orange: '#FF9F43',
+  pink: '#FF7EB3',
+  red: '#F25F5C',
+  purple: '#A78BFA',
+  blue: '#5AA9E6',
+  mint: '#3CC8B4',
+  green: '#6BCB77',
+  black: '#4A4A55',
+} as const;
+export type AccentName = keyof typeof ACCENT_PRESETS;
+
+
 export interface FontOption {
   key: string;
   stack: string;
   /** Google Fonts（loli.net 镜像）样式表，系统字体则为空 */
   cssUrl?: string;
+  /** 手写 / 书法类字体：小字号下难以辨认，只用于标题（页面大标题、卡片标题、标题区块、小标题） */
+  titleOnly?: boolean;
 }
 
 // 标签文字走 i18n：appearance.fonts.<key>
 export const FONT_OPTIONS: FontOption[] = [
   { key: '', stack: '' },
-  { key: 'zcoolKuaiLe', stack: '"ZCOOL KuaiLe", sans-serif', cssUrl: 'https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap' },
+  { key: 'zcoolKuaiLe', titleOnly: true, stack: '"ZCOOL KuaiLe", sans-serif', cssUrl: 'https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap' },
   { key: 'zcoolXiaoWei', stack: '"ZCOOL XiaoWei", serif', cssUrl: 'https://fonts.loli.net/css2?family=ZCOOL+XiaoWei&display=swap' },
   { key: 'notoSerif', stack: '"Noto Serif SC", "Songti SC", "SimSun", serif', cssUrl: 'https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap' },
-  { key: 'maShanZheng', stack: '"Ma Shan Zheng", cursive', cssUrl: 'https://fonts.loli.net/css2?family=Ma+Shan+Zheng&display=swap' },
-  { key: 'longCang', stack: '"Long Cang", cursive', cssUrl: 'https://fonts.loli.net/css2?family=Long+Cang&display=swap' },
+  { key: 'maShanZheng', titleOnly: true, stack: '"Ma Shan Zheng", cursive', cssUrl: 'https://fonts.loli.net/css2?family=Ma+Shan+Zheng&display=swap' },
+  { key: 'longCang', titleOnly: true, stack: '"Long Cang", cursive', cssUrl: 'https://fonts.loli.net/css2?family=Long+Cang&display=swap' },
   { key: 'mono', stack: 'ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace' },
 ];
 
@@ -102,6 +192,7 @@ export const resolveAppearance = (input?: Partial<AppearanceSettings> | null): A
       imageFit: pickEnum(bg.imageFit, ['cover', 'contain', 'repeat'] as const, d.background.imageFit),
       overlayColor: pickColor(bg.overlayColor, d.background.overlayColor),
       overlayOpacity: clamp(bg.overlayOpacity, L.overlayOpacity.min, L.overlayOpacity.max, d.background.overlayOpacity),
+      pattern: pickEnum(bg.pattern, ['none', 'dots', 'stripes', 'grid'] as const, d.background.pattern),
     },
     card: {
       bgColor: pickOptionalColor(card.bgColor),
@@ -170,6 +261,12 @@ const SHADOWS: Record<AppearanceSettings['card']['shadow'], string> = {
   strong: '0 12px 32px rgba(0, 0, 0, 0.16)',
 };
 
+/** 卡片实际底色是否为深色（单卡颜色优先，其次全局卡片颜色）；用于把彩色文字换成更亮的版本 */
+export const isDarkCard = (appearance: AppearanceSettings, cardColor?: string): boolean => {
+  const color = pickOptionalColor(cardColor) || appearance.card.bgColor;
+  return Boolean(color) && getLuminance(color) < 110;
+};
+
 /** 卡片背景色：单卡颜色 > 全局颜色 > 白色（仅在需要透明度时） */
 export const getCardBackground = (appearance: AppearanceSettings, cardColor?: string) => {
   const color = pickOptionalColor(cardColor) || appearance.card.bgColor;
@@ -193,7 +290,7 @@ export const getAppearanceCssVars = (appearance: AppearanceSettings): CSSPropert
     '--pc-font-scale': String(layout.fontScale),
   };
   const font = getFontOption(layout.fontFamily);
-  if (font) vars['--pc-font-family'] = font.stack;
+  if (font) vars[font.titleOnly ? '--pc-title-font' : '--pc-font-family'] = font.stack;
 
   const cardBg = getCardBackground(appearance);
   if (cardBg) vars['--pc-card-bg'] = cardBg;
@@ -218,19 +315,69 @@ export interface PageBackgroundStyle {
   backgroundAttachment: string;
 }
 
-/** 页面背景 → body 内联样式；'theme' 返回 null，表示交给主题 CSS */
+/**
+ * 背景图案：只用 linear-gradient / radial-gradient 拼出来，html2canvas 导出 PNG 时也能画。
+ * 颜色按底色深浅选：深底用淡白，彩色浅底用半透明白，接近白色的底用淡灰。
+ */
+const PATTERN_SIZE: Record<Exclude<BackgroundPattern, 'none'>, string> = { dots: '22px 22px', stripes: '28px 28px', grid: '24px 24px' };
+
+const patternInk = (base: string) => {
+  const lum = getLuminance(base);
+  if (lum < 110) return 'rgba(255, 255, 255, 0.10)';
+  if (lum < 235) return 'rgba(255, 255, 255, 0.55)';
+  return 'rgba(0, 0, 0, 0.06)';
+};
+
+export const getPatternLayers = (pattern: BackgroundPattern, base: string): { images: string[]; size: string } | null => {
+  if (pattern === 'none') return null;
+  const c = patternInk(base);
+  // html2canvas only paints the first tile of a repeated radial gradient.
+  // An embedded SVG tile repeats correctly in the editor and both export formats.
+  const dotTile = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><circle cx="11" cy="11" r="3" fill="${c}"/></svg>`;
+  const images = pattern === 'dots'
+    ? [cssUrl(`data:image/svg+xml,${encodeURIComponent(dotTile)}`)]
+    : pattern === 'stripes'
+      ? [`linear-gradient(45deg, ${c} 25%, transparent 25%, transparent 50%, ${c} 50%, ${c} 75%, transparent 75%, transparent)`]
+      : [`linear-gradient(${c} 1px, transparent 1px)`, `linear-gradient(90deg, ${c} 1px, transparent 1px)`];
+  return { images, size: PATTERN_SIZE[pattern] };
+};
+
+/** 两种颜色的中间色，用来判断渐变整体的深浅 */
+const mixHex = (a: string, b: string) => {
+  const ch = (h: string, i: number) => parseInt(h.replace('#', '').padEnd(6, '0').slice(i, i + 2), 16);
+  return `#${[0, 2, 4].map((i) => Math.round((ch(a, i) + ch(b, i)) / 2).toString(16).padStart(2, '0')).join('')}`;
+};
+
+/** 页面背景 → body 内联样式；'theme' 且没有图案时返回 null，表示交给主题 CSS */
 export const getPageBackgroundStyle = (bg: BackgroundSettings): PageBackgroundStyle | null => {
+  if (bg.type === 'theme') {
+    // 主题背景本身来自主题 CSS，只叠图案（按浅色底处理）
+    const pattern = getPatternLayers(bg.pattern, '#FFFFFF');
+    if (!pattern) return null;
+    return { backgroundColor: '', backgroundImage: pattern.images.join(', '), backgroundSize: pattern.images.map(() => pattern.size).join(', '), backgroundRepeat: 'repeat', backgroundPosition: '', backgroundAttachment: '' };
+  }
   if (bg.type === 'color') {
-    return { backgroundColor: bg.color, backgroundImage: 'none', backgroundSize: '', backgroundRepeat: '', backgroundPosition: '', backgroundAttachment: '' };
+    const pattern = getPatternLayers(bg.pattern, bg.color);
+    return {
+      backgroundColor: bg.color,
+      backgroundImage: pattern ? pattern.images.join(', ') : 'none',
+      backgroundSize: pattern ? pattern.images.map(() => pattern.size).join(', ') : '',
+      backgroundRepeat: pattern ? 'repeat' : '',
+      backgroundPosition: '',
+      backgroundAttachment: '',
+    };
   }
   if (bg.type === 'gradient') {
+    const gradient = `linear-gradient(${bg.gradientAngle}deg, ${bg.gradientFrom}, ${bg.gradientTo})`;
+    const pattern = getPatternLayers(bg.pattern, mixHex(bg.gradientFrom, bg.gradientTo));
+    const layers = pattern ? pattern.images : [];
     return {
       backgroundColor: bg.gradientFrom,
-      backgroundImage: `linear-gradient(${bg.gradientAngle}deg, ${bg.gradientFrom}, ${bg.gradientTo})`,
-      backgroundSize: '100% 100%',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
+      backgroundImage: [...layers, gradient].join(', '),
+      backgroundSize: [...layers.map(() => pattern!.size), '100% 100%'].join(', '),
+      backgroundRepeat: [...layers.map(() => 'repeat'), 'no-repeat'].join(', '),
+      backgroundPosition: [...layers.map(() => '0 0'), 'center'].join(', '),
+      backgroundAttachment: [...layers.map(() => 'scroll'), 'fixed'].join(', '),
     };
   }
   if (bg.type === 'image' && bg.image) {

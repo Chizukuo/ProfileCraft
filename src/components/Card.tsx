@@ -15,10 +15,12 @@ import TagSectionBlock from './blocks/TagSectionBlock';
 import OshiSectionBlock from './blocks/OshiSectionBlock';
 import GroupedTagSectionBlock from './blocks/GroupedTagSectionBlock';
 import ImageGalleryBlock from './blocks/ImageGalleryBlock';
+import ChecklistBlock from './blocks/ChecklistBlock';
+import ScaleBlock from './blocks/ScaleBlock';
 import type { BlockProps } from './blocks/BlockShell';
 import AddElementModal from './AddElementModal';
 import { getWidthFromLayoutSpan, getLayoutSpanFromWidth } from '../utils/gridLayout';
-import { CARD_COLOR_PRESETS, getCardBackground, getCardTextOverride } from '../utils/appearance';
+import { CARD_COLOR_PRESETS, getCardBackground, getCardTextOverride, isDarkCard } from '../utils/appearance';
 import { AddButton, MoveControls, Popover, SegmentedControl, SettingRow, SwitchControl, ToolButton } from './ui/EditorControls';
 
 // 策略模式：元素类型 → 渲染组件映射表，新增元素类型只需在此注册
@@ -33,6 +35,8 @@ const ELEMENT_RENDERERS: Record<CardElement['type'], React.ComponentType<BlockPr
   tagSectionTwo: OshiSectionBlock,
   groupedTagSection: GroupedTagSectionBlock,
   imageGallery: ImageGalleryBlock,
+  checklist: ChecklistBlock,
+  scale: ScaleBlock,
 };
 
 interface CardProps {
@@ -137,6 +141,7 @@ const Card: React.FC<CardProps> = ({ cardData, cardIndex, appearance, isFirst, i
           cardData.layoutSpan,
           style.textAlign === 'center' ? 'is-centered' : '',
           style.hideTitle ? 'is-title-hidden' : '',
+          isDarkCard(appearance, style.bgColor) ? 'is-dark-card' : (style.bgColor || appearance.card.bgColor) ? 'is-light-card' : '',
         ].filter(Boolean).join(' ')}
         style={cardInlineStyle}
         data-card-id={cardId}

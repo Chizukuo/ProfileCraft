@@ -25,7 +25,10 @@
     "preview": "预览",
     "previewHint": "隐藏编辑按钮，查看导出效果",
     "userGuide": "使用指南",
-    "settingsHelp": "设置与帮助"
+    "settingsHelp": "设置与帮助",
+    "exportImagePhone": "导出竖版图片（手机）",
+    "exportImagePhoneShort": "竖版图片",
+    "startBlank": "从空白开始"
   },
   "card": {
     "width1": "1 列",
@@ -75,17 +78,21 @@
     "aboutMeCard": "关于我",
     "aboutMeCardDesc": "双列宽度，用段落介绍自己",
     "oshiCard": "我的推",
-    "oshiCardDesc": "通栏卡片，展示你的推和热爱",
+    "oshiCardDesc": "心肝和好感分两档，再留一个推图位",
     "fullWidthCard": "全宽卡片",
     "fullWidthCardDesc": "占满整行的卡片",
-    "wishCard": "扩列诉求",
-    "wishCardDesc": "想找什么样的朋友、能一起做什么",
-    "boundaryCard": "雷点 / 边界",
-    "boundaryCardDesc": "提前说清楚雷点和社交偏好",
+    "wishCard": "扩列请",
+    "wishCardDesc": "想找什么样的朋友、加好友的规矩和二维码",
+    "boundaryCard": "雷点 / NG",
+    "boundaryCardDesc": "红色标签列出雷点，再补一句说明",
     "galleryCard": "推图 / 图片墙",
     "galleryCardDesc": "上传多张图片，按列排布",
     "profileInfoCard": "个人信息",
-    "profileInfoCardDesc": "头像、基本信息和二维码"
+    "profileInfoCardDesc": "头像、基本信息和二维码",
+    "identityCard": "身份卡",
+    "identityCardDesc": "大头像 + 一行“生日 | MBTI | IP” + 标语",
+    "attributeCard": "属性",
+    "attributeCardDesc": "CP 立场、同担态度等"
   },
   "blockTypes": {
     "paragraph": "段落",
@@ -107,7 +114,11 @@
     "infoList": "信息列表",
     "infoListDesc": "“标签: 内容”，如昵称、MBTI",
     "qrCode": "二维码",
-    "qrCodeDesc": "链接生成或上传二维码图片"
+    "qrCodeDesc": "链接生成或上传二维码图片",
+    "checklist": "勾选清单",
+    "checklistDesc": "☑ / ☐ 选项，如偏好、需求",
+    "scale": "倾向滑杆",
+    "scaleDesc": "两端文字 + 滑杆，如 佛系 ←→ 硬核"
   },
   "common": {
     "confirm": "确认",
@@ -145,7 +156,7 @@
     "apiKeyPlaceholder": "输入你的 API Key",
     "baseUrl": "Base URL",
     "model": "模型",
-    "welcomeQuestion": "你好呀，我来帮你做扩列条。先告诉我你的昵称和你希望呈现的风格吧？",
+    "welcomeQuestion": "你好呀，我来帮你做扩列条～先说说怎么称呼你，平时主要混哪些圈子？",
     "fallbackQuestion": "收到啦。那我再追问一个：你最近最常玩的游戏或最喜欢的企划是什么？",
     "thinking": "正在思考中...",
     "you": "你",
@@ -174,13 +185,25 @@
     "otherProviders": "使用 OpenAI / Anthropic / 其他接口",
     "applyModeLabel": "生成的卡片如何应用",
     "applyReplace": "替换全部",
-    "applyAppend": "追加到末尾"
+    "applyAppend": "追加到末尾",
+    "shuffleStyle": "换个风格（当前：{style}）",
+    "shuffleStyleHint": "内容不变，只换整体风格，不会再次请求 AI",
+    "afterApplyHint": "头像、二维码和推图要你自己上传：关掉面板后点对应的位置就行。"
   },
   "editor": {
     "bold": "加粗",
     "italic": "斜体",
     "underline": "下划线",
-    "strikethrough": "删除线"
+    "strikethrough": "删除线",
+    "big": "大字",
+    "clearFormat": "清除格式",
+    "color": {
+      "accent": "主题色",
+      "red": "红色",
+      "blue": "蓝色",
+      "green": "绿色",
+      "purple": "紫色"
+    }
   },
   "block": {
     "newTagPlaceholder": "新标签名",
@@ -203,7 +226,11 @@
     "uploading": "处理中…",
     "addImages": "添加图片",
     "cropSquare": "方形裁切",
-    "replaceImage": "更换图片"
+    "replaceImage": "更换图片",
+    "addOption": "添加选项",
+    "newOptionPlaceholder": "新选项",
+    "addScale": "添加一行",
+    "sampleTagHint": "示例标签：加上你自己的标签后会自动消失，预览和导出时不显示"
   },
   "templates": {
     "paragraphText": "在这里编辑你的文本…",
@@ -225,13 +252,39 @@
     "aboutMeTitle": "关于我",
     "aboutMeText": "在这里写下更多关于你的介绍。",
     "oshiTitle": "我的推",
-    "wishTitle": "扩列诉求",
-    "wishText": "想找同担 / 同好一起聊天、开黑、线下面基～慢热但很好聊，欢迎来戳！",
-    "boundaryTitle": "雷点 / 边界",
-    "boundaryText": "· 不接受无理由删好友<br>· 私聊请先打招呼<br>· 同担：可以 / 拒否（自己改一下）",
+    "wishTitle": "扩列请",
+    "wishText": "想找一起聊天、开黑的朋友～<br>加好友请备注来意",
+    "boundaryTitle": "雷点 / NG",
+    "boundaryText": "· 私聊请先打招呼<br>· 不接受无理由删好友",
     "galleryTitle": "推图",
     "profileInfoTitle": "基本信息",
-    "headingText": "你的昵称"
+    "headingText": "你的昵称",
+    "checklistHeading": "我偏好",
+    "checklist1": "一起上分",
+    "checklist2": "语音开黑",
+    "checklist3": "线下面基",
+    "scaleHeading": "我的倾向",
+    "scaleLeft": "佛系",
+    "scaleRight": "硬核",
+    "scaleLeft2": "慢热",
+    "scaleRight2": "自来熟",
+    "scaleMiddle": "适中",
+    "identityTitle": "身份卡",
+    "labelBirthday": "生日",
+    "valueBirthday": "生日",
+    "valueIp": "IP 城市",
+    "mottoText": "一句话标语",
+    "oshiTopHeading": "心肝",
+    "oshiLikeHeading": "好感",
+    "oshiName2": "喜欢的角色",
+    "oshiName3": "喜欢的声优",
+    "attributeTitle": "属性",
+    "attr1": "CP 立场",
+    "attr2": "同担态度",
+    "attr3": "其他属性",
+    "ng1": "雷点一",
+    "ng2": "雷点二",
+    "blankSubtitle": "一句话介绍自己"
   },
   "undo": {
     "import": "已导入配置",
@@ -242,7 +295,9 @@
     "deleteBlock": "已删除区块",
     "deleteTag": "已删除标签",
     "deleteItem": "已删除信息",
-    "deleteImage": "已删除图片"
+    "deleteImage": "已删除图片",
+    "style": "已切换风格",
+    "blank": "已清空示例，从空白开始"
   },
   "customize": {
     "title": "外观定制",
@@ -308,7 +363,13 @@
     "showSubtitle": "副标题",
     "showFooter": "页脚",
     "resetAll": "恢复全部默认外观",
-    "perCardHint": "单张卡片的颜色、对齐：点卡片右上角 ⚙。"
+    "perCardHint": "单张卡片的颜色、对齐：点卡片右上角 ⚙。",
+    "pattern": "图案",
+    "patternNone": "无",
+    "patternDots": "波点",
+    "patternStripes": "条纹",
+    "patternGrid": "格子",
+    "titleFontNote": "这类字体只用在标题上，正文保持易读的字体。"
   },
   "controls": {
     "position": "位置",
@@ -336,7 +397,20 @@
     "style": "样式",
     "dividerLine": "实线",
     "dividerDashed": "虚线",
-    "dividerSpace": "留白"
+    "dividerSpace": "留白",
+    "tagTone": "配色",
+    "toneDefault": "默认",
+    "toneStrong": "醒目",
+    "toneOutline": "描边",
+    "toneNg": "雷点",
+    "infoLayout": "排列",
+    "infoLayoutList": "列表",
+    "infoLayoutInline": "单行",
+    "toggleChecked": "勾选 / 取消勾选",
+    "checklistGrid": "对齐",
+    "checklistCompact": "紧凑",
+    "scaleMiddle": "中间文字",
+    "blockKind": "类型"
   },
   "preview": {
     "title": "预览模式",
@@ -344,7 +418,8 @@
   },
   "guideHint": {
     "text": "第一次用？1 分钟看懂怎么玩",
-    "open": "打开使用指南"
+    "open": "打开使用指南",
+    "startBlank": "从空白开始"
   },
   "blockGroups": {
     "text": "文字",

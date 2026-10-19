@@ -26,5 +26,14 @@ export const useElementActions = <T extends CardElement>(cardIndex: number, elem
   /** 删除标签 / 图片 / 信息项等，走撤销历史 */
   const updateWithUndo = useCallback((patch: Patch<T>, label: UndoLabel) => commitWithUndo(apply(patch), label), [apply, commitWithUndo]);
 
-  return { update, updateWithUndo };
+  /** 整个换掉（例如段落 ↔ 标题互转），不保留旧类型的字段 */
+  const replace = useCallback((next: CardElement) => updateProfileData(prev => ({
+    ...prev,
+    cards: prev.cards.map((card, i) => i !== cardIndex ? card : {
+      ...card,
+      elements: card.elements.map((el, j) => (j === elementIndex ? next : el)),
+    }),
+  })), [cardIndex, elementIndex, updateProfileData]);
+
+  return { update, updateWithUndo, replace };
 };

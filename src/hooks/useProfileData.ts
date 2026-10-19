@@ -11,11 +11,11 @@ const MAX_UNDO_STEPS = 30;
 
 /** 可撤销操作的类型，对应撤销提示文案 undo.<label> */
 export type UndoLabel =
-  | 'import' | 'ai' | 'reset'
+  | 'import' | 'ai' | 'style' | 'reset' | 'blank'
   | 'deleteCard' | 'deleteBlock' | 'deleteTag' | 'deleteItem' | 'deleteImage';
 
 /** 整体替换数据的来源 */
-export type ReplaceReason = Extract<UndoLabel, 'import' | 'ai' | 'reset'>;
+export type ReplaceReason = Extract<UndoLabel, 'import' | 'ai' | 'style' | 'reset' | 'blank'>;
 
 export interface PendingUndo {
   label: UndoLabel;

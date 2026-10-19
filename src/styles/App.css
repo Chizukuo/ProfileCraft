@@ -1,4 +1,4 @@
-﻿@import './modules/app-shell.css';
+@import './modules/app-shell.css';
 @import './modules/error-boundary.css';
 
 @import './modules/dock.css';
@@ -135,6 +135,14 @@ main#profileCardContainer {
     font-family: var(--pc-font-family, inherit);
 }
 
+/* 手写 / 书法类字体只用于标题（--pc-title-font），正文保持易读的字体 */
+.main-title,
+h2.section-title,
+.block-heading,
+.card-content-subheading {
+    font-family: var(--pc-title-font, inherit);
+}
+
 /* 网格布局 */
 .grid-container {
     display: grid;
@@ -194,8 +202,9 @@ main#profileCardContainer {
 
 .subtitle {
     font-size: calc(1.2rem * var(--pc-font-scale, 1));
-    color: var(--pc-page-text, var(--ui-text-tertiary));
-    opacity: 0.92;
+    /* 次要文字色（--ui-text-tertiary）放在渐变 / 彩色背景上对比度只有 3:1 左右，改用正文色降一点透明度 */
+    color: var(--pc-page-text, var(--ui-text-secondary));
+    opacity: 0.78;
     font-weight: 500;
 }
 
@@ -213,6 +222,7 @@ main#profileCardContainer {
    4. 卡片样式
    =================================== */
 .ui-card {
+    box-sizing: border-box;
     background-color: var(--pc-card-bg, var(--ui-bg-card));
     border-radius: var(--pc-card-radius, var(--radius-l));
     border: 1px solid var(--pc-card-border, var(--ui-border-default));
@@ -312,6 +322,10 @@ h2.section-title {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     padding: var(--space-xs);
     display: flex;
+    flex-wrap: wrap;
+    width: 420px;
+    max-width: calc(100% - 20px);
+    box-sizing: border-box;
     align-items: center;
     gap: var(--space-xs);
     transition: opacity var(--transition-fast) ease-in-out, 
@@ -340,6 +354,33 @@ h2.section-title {
     color: var(--ui-text-secondary);
     transition: background-color var(--transition-base) ease;
 }
+
+.rich-text-toolbar .toolbar-big-icon {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* 颜色按钮：小圆点 */
+.rich-text-toolbar button.toolbar-color {
+    width: 22px;
+    height: 22px;
+    margin: 0 2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.rich-text-toolbar button.toolbar-color.is-active {
+    border-color: var(--ui-text-primary);
+}
+
+.pc-swatch-accent { background-color: var(--theme-accent) !important; }
+.pc-swatch-red { background-color: #B72D2D !important; }
+.pc-swatch-blue { background-color: #195BAB !important; }
+.pc-swatch-green { background-color: #216F32 !important; }
+.pc-swatch-purple { background-color: #633CC6 !important; }
 
 .rich-text-toolbar button:hover {
     background-color: var(--toolbar-button-active-bg);
@@ -407,6 +448,14 @@ h2.section-title {
     border-radius: var(--radius-s);
 }
 
+/* Give label text its own box so canvas export doesn't drop nested inline text. */
+.tag > span,
+.oshi-tag > span,
+.oshi-meta-tag > span {
+    display: inline-block;
+    position: relative;
+}
+
 .tag, 
 .oshi-tag, 
 .oshi-meta-tag { 
@@ -435,6 +484,25 @@ h2.section-title {
     color: var(--theme-text-strong); 
     font-style: italic; 
     border: 1px dashed var(--theme-accent); 
+}
+
+/* 模板里的示例标签：编辑时灰色虚线，预览 / 导出时不显示 */
+.tag-wrapper.is-placeholder .tag,
+.tag-wrapper.is-placeholder .oshi-tag {
+    background-color: transparent;
+    border: 1px dashed var(--ui-border-default);
+    padding: calc(0.3rem - 1px) calc(0.8rem - 1px);
+    color: var(--ui-text-tertiary);
+    font-weight: 400;
+}
+
+.tag-wrapper.is-placeholder .tag::before,
+.tag-wrapper.is-placeholder .oshi-tag::before {
+    content: none;
+}
+
+.pc-static .tag-wrapper.is-placeholder {
+    display: none;
 }
 
 .tag-wrapper:hover .tag, 
@@ -905,6 +973,35 @@ body[data-theme='dark'] .popover-item:hover {
     display: none !important;
 }
 
+/* Use content-driven rows in preview, just as HTML/PNG exports do. */
+.pc-static .layout {
+    display: grid !important;
+    height: auto !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--pc-gap-y, 32px) var(--pc-gap-x, 24px);
+}
+.pc-static .layout > .react-grid-item {
+    position: relative !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    width: auto !important;
+    height: auto !important;
+}
+.pc-static .layout > .profile-card-span { grid-column: span 1; }
+.pc-static .layout > .about-me-card-span { grid-column: span 2; }
+.pc-static .layout > .oshi-card-span,
+.pc-static .layout > .full-width-card-span { grid-column: span 3; }
+@media (max-width: 959px) {
+    .pc-static .layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pc-static .layout > .oshi-card-span,
+    .pc-static .layout > .full-width-card-span { grid-column: span 2; }
+}
+@media (max-width: 599px) {
+    .pc-static .layout { grid-template-columns: minmax(0, 1fr); }
+    .pc-static .layout > .react-grid-item { grid-column: span 1; }
+}
+
 .pc-static .section-title-container {
     margin-top: 30px;
 }
@@ -924,6 +1021,23 @@ body[data-theme='dark'] .popover-item:hover {
 
 .pc-static .card-content-subheading:empty,
 .pc-static .music-game-label:empty {
+    display: none;
+}
+
+/* 预览 / 导出：去掉卡片最后一个区块下面多余的外边距；还没放图片的图片墙整块不显示 */
+.pc-static .card-content-wrapper > .element-container:last-child > :last-child,
+.pc-static .card-content-wrapper > .element-container:has(+ .is-empty-gallery:last-child) > :last-child {
+    margin-bottom: 0;
+}
+
+/* 预览 / 导出里没有“添加”按钮，标签组下面不需要留那么多空 */
+.pc-static .tag-group-container,
+.pc-static .oshi-tag-container,
+.pc-static .music-game-category {
+    margin-bottom: var(--space-s);
+}
+
+.pc-static .element-container.is-empty-gallery {
     display: none;
 }
 
@@ -1036,3 +1150,234 @@ body[data-theme='dark'] .popover-item:hover {
     text-align: center;
 }
 
+/* 信息列表单行模式：05.20 | INTP | IP 成都 */
+.profile-info-inline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    row-gap: 2px;
+}
+
+.profile-inline-item {
+    position: relative;
+    margin: 0;
+}
+
+.profile-inline-item + .profile-inline-item::before {
+    content: '|';
+    margin: 0 0.6em;
+    color: var(--pc-card-text, var(--ui-text-tertiary));
+    opacity: 0.5;
+}
+
+.profile-info-inline .add-item-button-container {
+    flex-basis: 100%;
+}
+
+.ui-card:not(.is-centered) .profile-info-inline {
+    justify-content: flex-start;
+}
+
+/* 标签配色：醒目（心肝 / 本命）、描边（好感）、雷点 */
+.tone-strong .tag,
+.tone-strong .oshi-tag {
+    background-color: var(--theme-accent);
+    /* 按主题色亮度自动选黑 / 白字（colorUtils.applyThemeColors），对比度 ≥ 6.5:1 */
+    color: var(--button-text-on-accent);
+    font-weight: 600;
+}
+
+.tone-outline .tag,
+.tone-outline .oshi-tag {
+    background-color: rgba(255, 255, 255, 0.72);
+    /* 用真实边框而不是 inset 阴影：html2canvas 画不好 inset 阴影；内边距减 1px 保持尺寸不变 */
+    border: 1px solid var(--theme-accent);
+    padding: calc(0.3rem - 1px) calc(0.8rem - 1px);
+}
+
+.tone-ng .tag,
+.tone-ng .oshi-tag {
+    background-color: #FFECEC;
+    color: #B42318;
+    border: 1px solid #F5B5B0;
+    padding: calc(0.3rem - 1px) calc(0.8rem - 1px);
+}
+
+.tone-ng .tag::before,
+.tone-ng .oshi-tag::before {
+    content: '✕';
+    margin-right: 0.35em;
+    font-weight: 700;
+}
+
+/* 勾选清单 */
+.checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px 12px;
+    margin-bottom: var(--space-s);
+    text-align: left;
+}
+
+/* 紧凑：选项一个挨一个，适合“周一 周二 …”这种短选项 */
+.checklist.is-compact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+}
+
+.ui-card.is-centered .checklist.is-compact {
+    justify-content: center;
+}
+
+.checklist .pc-inline-adder,
+.checklist .pc-add-btn {
+    justify-self: start;
+}
+
+.checklist-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--pc-card-text, var(--ui-text-secondary));
+    font-size: calc(0.9375rem * var(--pc-font-scale, 1));
+    line-height: 1.5;
+}
+
+.checklist-box {
+    flex-shrink: 0;
+    width: 1.05em;
+    height: 1.05em;
+    margin-top: 0.22em;
+    border-radius: 4px;
+    border: 1.5px solid var(--theme-accent);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: inherit;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.checklist-item.is-checked .checklist-box {
+    background: var(--theme-accent);
+}
+
+.checklist-item.is-checked .checklist-box::after {
+    content: '✓';
+    color: var(--button-text-on-accent);
+    font-size: 0.75em;
+    font-weight: 700;
+}
+
+.pc-static .checklist-box {
+    cursor: default;
+}
+
+/* 倾向滑杆 */
+.scale-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: var(--space-s);
+}
+
+.scale-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(3em, 1fr) minmax(80px, 3fr) minmax(3em, 1fr);
+    align-items: center;
+    gap: 10px;
+    color: var(--pc-card-text, var(--ui-text-secondary));
+    font-size: calc(0.9375rem * var(--pc-font-scale, 1));
+}
+
+.scale-label.is-left { text-align: right; }
+.scale-label.is-right { text-align: left; }
+
+.scale-track {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--theme-tag-bg);
+}
+
+.scale-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 3px;
+    background: var(--theme-accent);
+    opacity: 0.45;
+}
+
+.scale-dot {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: var(--theme-accent);
+    box-shadow: 0 0 0 3px var(--pc-card-bg, var(--ui-bg-card));
+}
+
+/* 中间文字放在轨道正下方 */
+.scale-list.has-middle .scale-row {
+    padding-bottom: 1.1em;
+}
+
+.scale-label.is-middle {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.9em;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.scale-input {
+    position: absolute;
+    inset: -8px 0;
+    width: 100%;
+    height: calc(100% + 16px);
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.scale-row .add-item-button-container,
+.scale-list > .add-item-button-container {
+    margin-top: 0;
+}
+
+/* 富文本：大字与文字颜色（工具栏 A+ 和色点，见 utils/richText.ts）。
+   浅底用深一些的颜色，深色卡片 / 深色主题换成更亮的同色系，保证读得清 */
+.pc-big {
+    font-size: 1.3em;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.pc-c-accent { color: var(--theme-text-strong); }
+.pc-c-red { color: #B72D2D; }
+.pc-c-blue { color: #195BAB; }
+.pc-c-green { color: #216F32; }
+.pc-c-purple { color: #633CC6; }
+
+.is-dark-card .pc-c-accent,
+body[data-theme-scheme='dark'] .pc-c-accent:not(.is-light-card *) { color: var(--theme-accent); }
+.is-dark-card .pc-c-red,
+body[data-theme-scheme='dark'] .pc-c-red:not(.is-light-card *) { color: #FF8A8A; }
+.is-dark-card .pc-c-blue,
+body[data-theme-scheme='dark'] .pc-c-blue:not(.is-light-card *) { color: #7DB8FF; }
+.is-dark-card .pc-c-green,
+body[data-theme-scheme='dark'] .pc-c-green:not(.is-light-card *) { color: #74D492; }
+.is-dark-card .pc-c-purple,
+body[data-theme-scheme='dark'] .pc-c-purple:not(.is-light-card *) { color: #B9A2FF; }

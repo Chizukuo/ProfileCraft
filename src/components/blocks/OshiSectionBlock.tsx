@@ -6,6 +6,7 @@ import { InlineAdder } from '../ui/EditorControls';
 import BlockShell, { BlockProps } from './BlockShell';
 import { useElementActions } from '../../hooks/useElementActions';
 import { useTranslation } from '../../hooks/useTranslation';
+import TagToneSetting, { toneClass } from './TagToneSetting';
 
 type Group = 'oshis' | 'meta';
 const GROUP_STYLES = { oshis: { fontWeight: '400', fontSize: '14.4' }, meta: { fontWeight: '400', fontSize: '14' } };
@@ -25,7 +26,11 @@ const OshiSectionBlock: React.FC<BlockProps<OshiSectionElement>> = ({ element, c
     ));
 
     return (
-        <BlockShell title={t('blockTypes.oshiSection')} {...shell}>
+        <BlockShell
+            title={t('blockTypes.oshiSection')}
+            {...shell}
+            settings={() => <TagToneSetting value={element.tone} onChange={(tone) => update({ tone })} />}
+        >
             <EditableText
                 as="h3"
                 className="card-content-subheading"
@@ -33,13 +38,13 @@ const OshiSectionBlock: React.FC<BlockProps<OshiSectionElement>> = ({ element, c
                 styles={element.subheadingStyles}
                 onUpdate={(html) => update({ subheading: html })}
             />
-            <div className="oshi-tag-container">
+            <div className={`oshi-tag-container${toneClass(element.tone)}`}>
                 {renderTags('oshis')}
                 {renderTags('meta')}
                 <InlineAdder
                     label={t('controls.addTag')}
                     placeholder={t('block.newTagPlaceholder')}
-                    onAdd={(text) => update(el => ({ oshis: [...el.oshis, { text, type: 'oshi-tag' }] }))}
+                    onAdd={(text) => update(el => ({ oshis: [...el.oshis.filter(x => !x.placeholder), { text, type: 'oshi-tag' }] }))}
                 />
             </div>
         </BlockShell>

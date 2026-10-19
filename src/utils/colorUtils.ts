@@ -45,7 +45,8 @@ export const applyThemeColors = (accent: string) => {
     const newPageBg = lightenHexColor(accent, 0.95);
     const newTagBg = lightenHexColor(accent, 0.8);
     const newTagBgAlt = lightenHexColor(accent, 0.5);
-    const newTextStrong = darkenHexColor(accent, 0.4);
+    // 标签文字：加深 55%，在浅色标签底上对比度 ≥ 5:1（原来 40% 时黄色主题只有 3.9:1）
+    const newTextStrong = darkenHexColor(accent, 0.55);
     const newDivider = lightenHexColor(accent, 0.2);
     const accentBrightness = getBrightness(accent);
     const buttonTextOnAccent = accentBrightness > 128 ? '#000000' : '#FFFFFF';

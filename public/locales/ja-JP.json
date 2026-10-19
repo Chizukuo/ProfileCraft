@@ -25,7 +25,10 @@
     "preview": "プレビュー",
     "previewHint": "編集ボタンを隠して書き出し時の見た目を確認",
     "userGuide": "使い方ガイド",
-    "settingsHelp": "設定とヘルプ"
+    "settingsHelp": "設定とヘルプ",
+    "exportImagePhone": "縦長画像でエクスポート（スマホ向け）",
+    "exportImagePhoneShort": "縦長画像",
+    "startBlank": "白紙から始める"
   },
   "card": {
     "width1": "1列",
@@ -75,17 +78,21 @@
     "aboutMeCard": "自己紹介",
     "aboutMeCardDesc": "2列幅、文章で自己紹介",
     "oshiCard": "推し",
-    "oshiCardDesc": "全幅カード、推しを紹介",
+    "oshiCardDesc": "最推しと好きを2段に分けて、推し画像の場所も",
     "fullWidthCard": "全幅カード",
     "fullWidthCardDesc": "全幅に広がるカード",
-    "wishCard": "募集",
-    "wishCardDesc": "どんな人と繋がりたいか",
-    "boundaryCard": "地雷・注意事項",
-    "boundaryCardDesc": "苦手なことや交流のスタンス",
+    "wishCard": "つながりたい人",
+    "wishCardDesc": "どんな人と仲良くなりたいか、追加のルール、QR コード",
+    "boundaryCard": "地雷 / NG",
+    "boundaryCardDesc": "赤いタグで地雷を並べて、ひとこと添える",
     "galleryCard": "推し画像",
     "galleryCardDesc": "複数の画像を並べて表示",
     "profileInfoCard": "プロフィール",
-    "profileInfoCardDesc": "アイコン・基本情報・QRコード"
+    "profileInfoCardDesc": "アイコン・基本情報・QRコード",
+    "identityCard": "プロフィールカード",
+    "identityCardDesc": "大きいアイコン + 「誕生日 | MBTI | 地域」の1行 + ひとこと",
+    "attributeCard": "属性",
+    "attributeCardDesc": "CP、同担について など"
   },
   "blockTypes": {
     "paragraph": "段落",
@@ -107,7 +114,11 @@
     "infoList": "情報リスト",
     "infoListDesc": "「項目: 内容」形式（名前、MBTI など）",
     "qrCode": "QRコード",
-    "qrCodeDesc": "リンクから生成、または画像をアップロード"
+    "qrCodeDesc": "リンクから生成、または画像をアップロード",
+    "checklist": "チェックリスト",
+    "checklistDesc": "☑ / ☐ の項目（好み・希望など）",
+    "scale": "傾向スライダー",
+    "scaleDesc": "両端の言葉 + スライダー（例：エンジョイ ←→ ガチ）"
   },
   "common": {
     "confirm": "確認",
@@ -145,7 +156,7 @@
     "apiKeyPlaceholder": "API Key を入力",
     "baseUrl": "Base URL",
     "model": "モデル",
-    "welcomeQuestion": "こんにちは。拡列カード作成を手伝います。まずはニックネームと雰囲気を教えてください。",
+    "welcomeQuestion": "こんにちは！自己紹介カード作りをお手伝いします。まず、呼び名と、よくいるジャンルや趣味を教えてください。",
     "fallbackQuestion": "ありがとうございます。最近よく遊ぶゲームや推しの作品は何ですか？",
     "thinking": "考え中...",
     "you": "あなた",
@@ -174,13 +185,25 @@
     "otherProviders": "OpenAI / Anthropic / その他のエンドポイントを使う",
     "applyModeLabel": "生成したカードの反映方法",
     "applyReplace": "すべて置き換え",
-    "applyAppend": "末尾に追加"
+    "applyAppend": "末尾に追加",
+    "shuffleStyle": "別のスタイル（現在：{style}）",
+    "shuffleStyleHint": "内容はそのまま、全体のスタイルだけ変えます。AI へのリクエストは発生しません",
+    "afterApplyHint": "アイコン・QR コード・推し画像はご自身でアップロードしてください。パネルを閉じて該当箇所をクリックします。"
   },
   "editor": {
     "bold": "太字",
     "italic": "斜体",
     "underline": "下線",
-    "strikethrough": "取り消し線"
+    "strikethrough": "取り消し線",
+    "big": "大きく",
+    "clearFormat": "書式をクリア",
+    "color": {
+      "accent": "テーマカラー",
+      "red": "赤",
+      "blue": "青",
+      "green": "緑",
+      "purple": "紫"
+    }
   },
   "block": {
     "newTagPlaceholder": "新しいタグ",
@@ -203,7 +226,11 @@
     "uploading": "処理中…",
     "addImages": "画像を追加",
     "cropSquare": "正方形に切り抜き",
-    "replaceImage": "画像を変更"
+    "replaceImage": "画像を変更",
+    "addOption": "項目を追加",
+    "newOptionPlaceholder": "新しい項目",
+    "addScale": "行を追加",
+    "sampleTagHint": "サンプルタグ：自分のタグを追加すると消えます。プレビューと書き出しには表示されません"
   },
   "templates": {
     "paragraphText": "ここにテキストを入力…",
@@ -225,13 +252,39 @@
     "aboutMeTitle": "自己紹介",
     "aboutMeText": "ここに自己紹介を書いてください。",
     "oshiTitle": "推し",
-    "wishTitle": "募集",
-    "wishText": "同じ趣味の方と話したり、一緒に遊んだりしたいです。人見知りですが気軽にどうぞ！",
-    "boundaryTitle": "地雷・注意事項",
-    "boundaryText": "· DMの前に一言お願いします<br>· 無言フォロー解除はご遠慮ください<br>· 同担：歓迎 / 拒否（編集してね）",
+    "wishTitle": "つながりたい人",
+    "wishText": "一緒に話したり遊んだりできる友だち募集中〜<br>追加するときはひとことください",
+    "boundaryTitle": "地雷 / NG",
+    "boundaryText": "・DM の前にひとこと挨拶を<br>・無言のフォロー解除はご遠慮ください",
     "galleryTitle": "推し画像",
     "profileInfoTitle": "プロフィール",
-    "headingText": "あなたの名前"
+    "headingText": "あなたの名前",
+    "checklistHeading": "好み",
+    "checklist1": "一緒にランク戦",
+    "checklist2": "ボイチャ",
+    "checklist3": "オフ会",
+    "scaleHeading": "傾向",
+    "scaleLeft": "エンジョイ",
+    "scaleRight": "ガチ",
+    "scaleLeft2": "人見知り",
+    "scaleRight2": "社交的",
+    "scaleMiddle": "ふつう",
+    "identityTitle": "プロフィール",
+    "labelBirthday": "誕生日",
+    "valueBirthday": "誕生日",
+    "valueIp": "地域",
+    "mottoText": "ひとこと",
+    "oshiTopHeading": "最推し",
+    "oshiLikeHeading": "好き",
+    "oshiName2": "好きなキャラ",
+    "oshiName3": "好きな声優",
+    "attributeTitle": "属性",
+    "attr1": "CP",
+    "attr2": "同担",
+    "attr3": "その他",
+    "ng1": "地雷1",
+    "ng2": "地雷2",
+    "blankSubtitle": "ひとことで自己紹介"
   },
   "undo": {
     "import": "設定をインポートしました",
@@ -242,7 +295,9 @@
     "deleteBlock": "ブロックを削除しました",
     "deleteTag": "タグを削除しました",
     "deleteItem": "項目を削除しました",
-    "deleteImage": "画像を削除しました"
+    "deleteImage": "画像を削除しました",
+    "style": "スタイルを変更しました",
+    "blank": "サンプルを消して白紙にしました"
   },
   "customize": {
     "title": "外観のカスタマイズ",
@@ -308,7 +363,13 @@
     "showSubtitle": "サブタイトル",
     "showFooter": "フッター",
     "resetAll": "外観設定をすべてリセット",
-    "perCardHint": "カードごとの色や配置は、カード右上の ⚙ から。"
+    "perCardHint": "カードごとの色や配置は、カード右上の ⚙ から。",
+    "pattern": "柄",
+    "patternNone": "なし",
+    "patternDots": "ドット",
+    "patternStripes": "ストライプ",
+    "patternGrid": "チェック",
+    "titleFontNote": "このフォントは見出しだけに使い、本文は読みやすいフォントのままです。"
   },
   "controls": {
     "position": "位置",
@@ -336,7 +397,20 @@
     "style": "スタイル",
     "dividerLine": "実線",
     "dividerDashed": "点線",
-    "dividerSpace": "余白"
+    "dividerSpace": "余白",
+    "tagTone": "配色",
+    "toneDefault": "標準",
+    "toneStrong": "強調",
+    "toneOutline": "枠線",
+    "toneNg": "地雷",
+    "infoLayout": "並び",
+    "infoLayoutList": "リスト",
+    "infoLayoutInline": "1行",
+    "toggleChecked": "チェックの切り替え",
+    "checklistGrid": "そろえる",
+    "checklistCompact": "詰める",
+    "scaleMiddle": "中央の文字",
+    "blockKind": "種類"
   },
   "preview": {
     "title": "プレビュー中",
@@ -344,7 +418,8 @@
   },
   "guideHint": {
     "text": "初めての方へ：1分でわかる使い方",
-    "open": "ガイドを開く"
+    "open": "ガイドを開く",
+    "startBlank": "白紙から始める"
   },
   "blockGroups": {
     "text": "テキスト",
