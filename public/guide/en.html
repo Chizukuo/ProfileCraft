@@ -170,7 +170,7 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
     <section id="quick-start">
       <h2><span class="num">1</span>Quick start</h2>
       <ol class="steps">
-        <li><strong>Edit</strong><br>Click any text to change it. Click the avatar or QR code to use your own.</li>
+        <li><strong>Edit</strong><br>Click any text to change it. Click the avatar or QR code to use your own. Rather not delete the sample bit by bit? Use <span class="ui">More Settings → Start from blank</span>.</li>
         <li><strong>Style</strong><br>Open <span class="ui">Customize</span> at the bottom, pick a quick style, then fine-tune.</li>
         <li><strong>Share</strong><br>Click <span class="ui">Preview</span> to check the result, then <span class="ui">Export Image</span>.</li>
       </ol>
@@ -188,10 +188,10 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
       <table>
         <thead><tr><th>To…</th><th>Do this</th></tr></thead>
         <tbody>
-          <tr><td>Edit text</td><td>Click the text. Selecting text shows a <b>bold / italic / underline / strikethrough</b> bar.</td></tr>
+          <tr><td>Edit text</td><td>Click the text. Selecting text shows a bar with <b>bold / italic / underline / strikethrough</b>, <b>A+ large text</b>, <b>five colors</b> and clear formatting.</td></tr>
           <tr><td>Change an image</td><td>Click the image (avatar, QR code, any picture in an image wall).</td></tr>
           <tr><td>Change settings for a card or block</td><td>Hover it (tap it on a phone). A <span class="ui">⚙</span> appears in the top-right corner with width, color, position and more.</td></tr>
-          <tr><td>Delete</td><td>The <span class="ui">×</span> next to the ⚙. Tags, images and info rows have their own small × in their corner.</td></tr>
+          <tr><td>Delete</td><td>The <span class="ui">×</span> next to the ⚙. Tags and images have a small × in their corner; info rows have one just after the text.</td></tr>
           <tr><td>Add</td><td>Every add button is a dashed <span class="ui">+ Add…</span> button.</td></tr>
           <tr><td>Reorder</td><td>Cards and blocks: <span class="ui">⚙</span> → Move up / Move down. On a computer you can also drag a card by its <span class="ui">⠿</span> handle.</td></tr>
           <tr><td>Undo a mistake</td><td>Deleting never asks for confirmation. Click <span class="ui">Undo</span> at the bottom or press <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>⌘</kbd>+<kbd>Z</kbd> on Mac).</td></tr>
@@ -209,14 +209,19 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
     <section id="cards">
       <h2><span class="num">3</span>Cards</h2>
       <h3>Adding a card</h3>
-      <p>Click <span class="ui">Add Card</span> and pick a template. New cards appear at the bottom.</p>
+      <p>Click <span class="ui">Add Card</span> and pick a template. If the last row has room, the card goes there; otherwise it goes to the bottom. The page scrolls to it either way.</p>
       <ul>
-        <li><b>Basic card</b> (1 column), <b>About me</b> (2 columns), <b>My faves</b> (full width).</li>
-        <li><b>Looking for</b>: the kind of friends you want to meet.</li>
-        <li><b>Boundaries</b>: dealbreakers and social preferences.</li>
-        <li><b>Image wall</b>: several pictures in a grid.</li>
-        <li><b>Profile info</b>: three blocks (avatar, info list, QR code) that you can delete or adjust individually.</li>
+        <li><b>Identity card</b>: big avatar, one line like “Birthday | MBTI | City”, and a motto.</li>
+        <li><b>About me</b> (2 columns), <b>Basic card</b> (1 column).</li>
+        <li><b>My faves</b>: top faves (bold) and likes (outlined) in two tiers, plus a spot for pictures.</li>
+        <li><b>Preferences</b>: shipping, how you feel about fans of the same fave, and so on.</li>
+        <li><b>No-gos</b>: red tags for your no-gos plus a short note.</li>
+        <li><b>Add me</b>: who you want to meet, how to add you, and your QR code.</li>
+        <li><b>Image wall</b>: several pictures. <b>Profile info</b>: avatar, info list and QR code.</li>
       </ul>
+      <p>Grey dashed tags in a template are <b>sample tags</b>. They disappear once you add your own and never show in preview or exports, so there’s nothing to delete.</p>
+      <h3>Starting from blank</h3>
+      <p>The homepage showcases the site owner's own profile, including their avatar and QR code. To make yours, click <span class="ui">Start from blank</span> below the homepage title (also in More Settings): you get placeholder images, one identity card and one about-me card, while keeping your theme and look. You can undo it.</p>
       <h3>Card settings</h3>
       <p>A card’s <span class="ui">⚙</span> holds its width (1 / 2 / 3 columns), its own background color, left or center alignment, whether to show the title, and Move up / Move down.</p>
       <figure class="diagram">
@@ -229,14 +234,17 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
       <h2><span class="num">4</span>Blocks &amp; tags</h2>
       <p>Each card is made of blocks that you can combine and reorder freely. Click <span class="ui">+ Add block</span> at the bottom of a card. The panel groups them into <b>Text / Profile / Tags / Images</b>, and each thumbnail shows exactly what gets inserted:</p>
       <figure class="diagram">
-        <img src="img/d-blocks.svg" width="640" height="396" alt="The ten block types" loading="lazy">
-        <figcaption><strong>The ten block types</strong><ol class="legend"><li>Heading: one line of large text, e.g. your name (size in ⚙)</li><li>Paragraph: free text</li><li>Divider: solid, dashed or blank space</li><li>Avatar: size and circle / rounded shape in ⚙</li><li>Info list: rows like “Name: …”, “MBTI: …”</li><li>QR code: from a link or an uploaded image</li><li>Tags: heading plus tags</li><li>My faves: faves plus a dashed “and more…”</li><li>Grouped tags: two named tag groups</li><li>Image wall: several pictures (starts with just an add box)</li></ol></figcaption>
+        <img src="img/d-blocks.svg" width="640" height="396" alt="The twelve block types" loading="lazy">
+        <figcaption><strong>The twelve block types</strong><ol class="legend"><li>Heading: one line of large text, e.g. your name or a motto like “Good vibes &gt; everything” (size in ⚙)</li><li>Paragraph: free text (switch between paragraph and heading in ⚙; the text is kept)</li><li>Divider: solid, dashed or blank space</li><li>Avatar: size and circle / rounded shape in ⚙</li><li>Info list: rows like “Name: …”; switch it to <b>One line</b> in ⚙ for “05.20 | INTP | Chengdu”</li><li>QR code: from a link or an uploaded image</li><li>Tags: heading plus tags</li><li>My faves: faves plus a dashed “and more…”</li><li>Grouped tags: two named tag groups</li><li>Checklist: ☑ / ☐ options, click a box to toggle; good for preferences. Pick “Compact” in ⚙ to fit short options like weekdays on one line</li><li>Slider scale: two ends and a dot you drag, e.g. “Casual ←→ Tryhard”. Turn on “Middle label” in ⚙ for three levels</li><li>Image wall: several pictures (starts with just an add box)</li></ol></figcaption>
       </figure>
+      <div class="tip">Colors and A+ change only the selected text. Emphasize a few keywords and keep body text at its normal size. Clear formatting also affects only your selection.</div>
       <h3>Tags</h3>
       <ul>
         <li>Click <span class="ui">+ Add tag</span>, type, press <kbd>Enter</kbd>. The box stays open so you can add several in a row. Press <kbd>Esc</kbd> or click elsewhere to finish.</li>
+        <li>Add several at once by separating them with commas or semicolons: “Miku, Rin, Luka” becomes three tags (slashes don’t split, so “BG/GL” stays one tag).</li>
         <li>Pressing Enter to confirm a Chinese or Japanese input-method candidate will not add a half-typed tag.</li>
         <li>Click a tag to edit it. Hover it and use the small × to delete it.</li>
+        <li>In a tag block’s ⚙ you can pick a <b>Color</b>: Default, <b>Bold</b> (solid, for top faves), <b>Outline</b> (for likes) or <b>No-go</b> (red with ✕).</li>
       </ul>
     </section>
 
@@ -276,9 +284,9 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
       <ul>
         <li><b>Quick styles</b>: Classic, Glass, Minimal, Journal, Night. Start from the closest one.</li>
         <li><b>Theme &amp; accent</b>: the accent color tints tags and dividers. The Cyberpunk theme uses a fixed palette.</li>
-        <li><b>Page background</b>: theme default, solid color, gradient, or your own image (cover / contain / tile, with an optional overlay for readability).</li>
+        <li><b>Page background</b>: theme default, solid color, gradient, or your own image (cover / contain / tile, with an optional overlay for readability). Solid colors and gradients can also get a <b>dots / stripes / grid</b> pattern.</li>
         <li><b>Cards</b>: color, opacity (lower it for a frosted-glass look), corner radius, shadow, border, text color.</li>
-        <li><b>Spacing &amp; text</b>: gaps between cards, card padding, line height, font size and font family.</li>
+        <li><b>Spacing &amp; text</b>: gaps between cards, card padding, line height, font size and font family. Handwriting and brush-style fonts are only used for headings, so body text stays easy to read.</li>
         <li><b>Show on page</b>: turn the subtitle or footer off. The avatar and QR code are blocks; just delete them if you don’t need them.</li>
       </ul>
       <div class="tip">On a dark background, the title and footer text automatically switch to a light color. A card you give a dark color gets light text too.</div>
@@ -296,6 +304,7 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
         <thead><tr><th>Export</th><th>Best for</th></tr></thead>
         <tbody>
           <tr><td><b>Export Image</b> (PNG)</td><td>Posting to chats and social media. Always uses the 3-column desktop layout at 3× resolution.</td></tr>
+          <tr><td><b>Export Image (phone, vertical)</b> (PNG)</td><td>Viewing on a phone or posting to phone-first apps. All cards in one long column, in the same left-to-right, top-to-bottom order as on desktop.</td></tr>
           <tr><td><b>Export HTML</b></td><td>A standalone web page you can host anywhere or open on a phone (it switches to one column on small screens).</td></tr>
           <tr><td><b>Export Config</b> (JSON)</td><td>Backups and moving to another device. Restore it with <span class="ui">Import Config</span>.</td></tr>
         </tbody>
@@ -326,8 +335,11 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
       <div class="warn">On Gemini’s free tier, Google may use conversations to improve its products. Don’t share your real name, phone number, address or other private details; the AI won’t put them on your card either.</div>
       <h3>Chatting and generating</h3>
       <ul>
-        <li>The AI asks one or two questions at a time; just say “skip” to anything you’d rather not answer. It only uses what you told it and won’t invent your age, gender and so on.</li>
-        <li>When you’re ready, click <span class="ui">Generate Now</span>. Next to it, choose <b>Replace all</b> (replace your cards and title) or <b>Add to end</b> (keep your cards and add the new ones after them).</li>
+        <li>The AI asks one or two questions at a time, with a few <b>quick options</b> under each question you can tap instead of typing; just say “skip” to anything you’d rather not answer. It only uses what you told it and won’t invent your age, gender, preferences and so on.</li>
+        <li>It follows the usual structure of intro cards: avatar plus one line like “05.20 | INTP | Chengdu”, what you play or watch, faves (top faves and likes kept apart), preferences, no-gos, and how to add you with a QR code. Topics you didn’t talk about are left out. Card widths are arranged automatically so every row is full.</li>
+        <li>When you’re ready, click <span class="ui">Generate Now</span>. Next to it, choose <b>Replace all</b> (replace your cards and title, and apply a style and accent color that match what you asked for) or <b>Add to end</b> (keep your cards and look, and add the new cards after them).</li>
+        <li>After generating, click <span class="ui">Try another style</span> to cycle through the five styles. Your content stays the same and no new AI request is made.</li>
+        <li>Generated cards start with a placeholder avatar and QR code. Upload your own avatar, QR code and fave pictures: close the panel and click those spots.</li>
         <li>Not happy? Click <span class="ui">Undo this generation</span> in the panel, or use the undo prompt / <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
         <li>Closed the panel by accident? Reopen it in the same tab and the conversation is still there.</li>
       </ul>
@@ -371,7 +383,7 @@ footer { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size
       </details>
       <details>
         <summary>I picked a font but nothing changed.</summary>
-        <p>Decorative Chinese fonts load from the internet and can take a few seconds the first time. If your network blocks the font service, the system font is used instead.</p>
+        <p>Decorative Chinese fonts load from the internet and can take a few seconds the first time. If your network blocks the font service, the system font is used instead. Also, handwriting and brush-style fonts only change headings, not body text.</p>
       </details>
       <details>
         <summary>Card colors don't work in the Cyberpunk theme.</summary>
