@@ -403,20 +403,33 @@ body[data-theme='dark'] .star-pulse-bg {
 @media (max-width: 768px) {
     .floating-dock-container {
         width: 100%;
+        box-sizing: border-box;
         bottom: 0;
         padding: 0 16px 24px 16px; /* Space from edges and safe area */
     }
     
     .floating-dock {
         width: 100%;
+        box-sizing: border-box;
         justify-content: space-around;
-        padding: 6px 8px;
+        gap: 2px;
+        padding: 6px;
         border-radius: 30px;
+    }
+
+    .dock-btn-label {
+        font-size: 0.6rem;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .dock-btn {
-        width: 64px;
+        flex: 1;
+        width: auto;
+        min-width: 0;
         height: 56px;
+        padding: 0 2px;
     }
     
     .dock-divider {

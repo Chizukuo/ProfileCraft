@@ -1,4 +1,5 @@
-import { CardData, CardElement, ProfileData, Styles, TagData } from '../types/data';
+import { CardData, ProfileData, Styles, TagData } from '../types/data';
+import { normalizeCards } from './profileSchema';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,7 +24,14 @@ export interface AiConfigResolution {
   usesFallbackApiKey: boolean;
 }
 
-export type AiErrorCode = 'NETWORK_ERROR' | 'PARSE_ERROR' | 'API_ERROR' | 'EMPTY_RESPONSE' | 'MALFORMED_CALL';
+export type AiErrorCode = 'NETWORK_ERROR' | 'PARSE_ERROR' | 'API_ERROR' | 'EMPTY_RESPONSE' | 'MALFORMED_CALL' | 'TRUNCATED' | 'TIMEOUT';
+
+/** 每次请求的可选项：强制生成、取消信号、界面语言（让模型用同一种语言回复） */
+export interface AiCallOptions {
+  forceGenerate?: boolean;
+  signal?: AbortSignal;
+  locale?: string;
+}
 
 interface ToolFunctionCall {
   name: string;
@@ -44,6 +52,7 @@ interface OpenAiMessage {
 
 interface OpenAiChoice {
   message?: OpenAiMessage;
+  finish_reason?: string;
 }
 
 interface OpenAiResponse {
@@ -128,7 +137,16 @@ export interface AiDebugTrace {
 export const AI_LOCAL_STORAGE_KEY = 'profilecraft-ai-config';
 const DEFAULT_PROVIDER = 'gemini';
 const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
-const DEFAULT_MODEL = 'gemini-2.5-flash-lite';
+// 2026-09 起 Gemini 2.5 系列只对已在使用的项目开放，新 Key 必须用新模型
+export const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+/** 旧版默认模型；读取到用户保存的旧默认值时自动升级到对应服务商的新默认值 */
+export const LEGACY_DEFAULT_MODELS: Partial<Record<AiConfig['provider'], string[]>> = {
+  gemini: ['gemini-2.5-flash-lite'],
+  // gpt-4o-mini 于 2027-01-14 停用，OpenAI 推荐替换为 gpt-6-luna
+  openai: ['gpt-4o-mini'],
+};
+/** 单次请求超时 */
+export const AI_REQUEST_TIMEOUT_MS = 90_000;
 
 const getEnvValue = (value: string | boolean | undefined): string => {
   return typeof value === 'string' ? value.trim() : '';
@@ -138,33 +156,61 @@ const getEnvValue = (value: string | boolean | undefined): string => {
 // Config resolution
 // ---------------------------------------------------------------------------
 
+/** 各服务商的默认地址和模型；地址 / 模型留空时用所选服务商自己的默认值 */
+export const PROVIDER_PRESETS: Record<AiConfig['provider'], { baseUrl: string; model: string }> = {
+  gemini: { baseUrl: DEFAULT_BASE_URL, model: DEFAULT_MODEL },
+  openai: { baseUrl: 'https://api.openai.com/v1', model: 'gpt-6-luna' },
+  anthropic: { baseUrl: 'https://api.anthropic.com', model: 'claude-haiku-5-5' },
+  custom: { baseUrl: '', model: '' },
+};
+
+const isProvider = (value: string): value is AiConfig['provider'] => value in PROVIDER_PRESETS;
+
+/**
+ * 计算实际使用的配置。规则：
+ * 1. 用户完全没配置（没填 Key，地址 / 模型是默认值或空），且构建时提供了兜底 Key → 整套使用兜底配置（包括 provider）。
+ * 2. 否则只用用户的配置；地址 / 模型留空时取所选服务商的默认值。
+ *    兜底 Key 不会和用户自己的地址混用，避免把站点的 Key 发到用户随手填的地址上。
+ */
 export const resolveAiConfig = (input: Partial<AiConfig>): AiConfigResolution => {
-  const fallbackProvider = getEnvValue(import.meta.env.VITE_AI_FALLBACK_PROVIDER) as AiConfig['provider'] || '';
   const fallbackApiKey = getEnvValue(import.meta.env.VITE_AI_FALLBACK_API_KEY);
+  const rawFallbackProvider = getEnvValue(import.meta.env.VITE_AI_FALLBACK_PROVIDER);
+  const fallbackProvider: AiConfig['provider'] = isProvider(rawFallbackProvider) ? rawFallbackProvider : DEFAULT_PROVIDER;
   const fallbackBaseUrl = getEnvValue(import.meta.env.VITE_AI_FALLBACK_BASE_URL);
   const fallbackModel = getEnvValue(import.meta.env.VITE_AI_FALLBACK_MODEL);
 
-  const userProvider = input.provider;
+  const userProvider: AiConfig['provider'] = input.provider && isProvider(input.provider) ? input.provider : DEFAULT_PROVIDER;
+  const userPreset = PROVIDER_PRESETS[userProvider];
   const userApiKey = getEnvValue(input.apiKey);
-  const rawUserBaseUrl = getEnvValue(input.baseUrl);
-  const rawUserModel = getEnvValue(input.model);
+  const userBaseUrl = getEnvValue(input.baseUrl);
+  const userModel = getEnvValue(input.model);
 
-  const isImplicitDefaultConfig =
+  const untouched =
     !userApiKey &&
-    (!rawUserBaseUrl || rawUserBaseUrl === DEFAULT_BASE_URL) &&
-    (!rawUserModel || rawUserModel === DEFAULT_MODEL);
+    (!userBaseUrl || userBaseUrl === userPreset.baseUrl) &&
+    (!userModel || userModel === userPreset.model || Boolean(LEGACY_DEFAULT_MODELS[userProvider]?.includes(userModel)));
 
-  const userBaseUrl = isImplicitDefaultConfig ? '' : rawUserBaseUrl;
-  const userModel = isImplicitDefaultConfig ? '' : rawUserModel;
-
-  const provider = userProvider || fallbackProvider || DEFAULT_PROVIDER;
-  const apiKey = userApiKey || fallbackApiKey;
-  const baseUrl = userBaseUrl || fallbackBaseUrl || DEFAULT_BASE_URL;
-  const model = userModel || fallbackModel || DEFAULT_MODEL;
+  if (untouched && fallbackApiKey) {
+    const preset = PROVIDER_PRESETS[fallbackProvider];
+    return {
+      config: {
+        provider: fallbackProvider,
+        apiKey: fallbackApiKey,
+        baseUrl: fallbackBaseUrl || preset.baseUrl,
+        model: fallbackModel || preset.model,
+      },
+      usesFallbackApiKey: true,
+    };
+  }
 
   return {
-    config: { provider, apiKey, baseUrl, model },
-    usesFallbackApiKey: !userApiKey && Boolean(fallbackApiKey),
+    config: {
+      provider: userProvider,
+      apiKey: userApiKey,
+      baseUrl: userBaseUrl || userPreset.baseUrl,
+      model: userModel || userPreset.model,
+    },
+    usesFallbackApiKey: false,
   };
 };
 
@@ -203,15 +249,18 @@ const normalizeTags = (value: unknown): TagData[] => {
         return {
           text: getSafeString(raw.text).trim(),
           type: getSafeString(raw.type) || undefined,
-          styles: raw.styles && typeof raw.styles === 'object' ? (raw.styles as Styles) : undefined,
-        };
+            };
       }
       return null;
     })
     .filter((tag): tag is TagData => Boolean(tag && tag.text));
 };
 
-const normalizeElement = (element: unknown): CardElement | null => {
+// 这里只做 AI 输出特有的宽松兼容（字符串标签、groups 写法、默认文案等），
+// 最终结构由 profileSchema.normalizeCards 统一校验，旧版 profileInfo 也在那里拆成细分区块。
+type LooseElement = Record<string, unknown>;
+
+const normalizeElement = (element: unknown): LooseElement | null => {
   if (!element || typeof element !== 'object') return null;
   const raw = element as Record<string, unknown>;
   const type = getSafeString(raw.type);
@@ -220,7 +269,7 @@ const normalizeElement = (element: unknown): CardElement | null => {
     return {
       type,
       text: getSafeString(raw.text || raw.content),
-      styles: defaultStyles(raw.styles as Styles),
+      styles: defaultStyles(),
     };
   }
 
@@ -244,26 +293,24 @@ const normalizeElement = (element: unknown): CardElement | null => {
             })
             .filter((i): i is { label: string; value: string } => Boolean(i))
         : undefined,
-      textStyles: defaultStyles(raw.textStyles as Styles),
-      styles: raw.styles && typeof raw.styles === 'object' ? (raw.styles as Styles) : undefined,
+      textStyles: defaultStyles(),
     };
   }
 
   if (type === 'tagSection') {
     return {
       type,
-      subheading: getSafeString(raw.subheading, '标签'), // AI prompt 生态专用，不走 i18n
-      subheadingStyles: defaultStyles(raw.subheadingStyles as Styles),
+      subheading: getSafeString(raw.subheading),
+      subheadingStyles: defaultStyles(),
       tags: normalizeTags(raw.tags),
-      tagStyles: defaultStyles((raw.tagStyles as Styles) || { fontWeight: '500', fontSize: '13' }),
-      styles: raw.styles && typeof raw.styles === 'object' ? (raw.styles as Styles) : undefined,
+      tagStyles: defaultStyles({ fontWeight: '500', fontSize: '13' }),
     };
   }
 
   if (type === 'groupedTagSection') {
-    let arcadeLabel = getSafeString(raw.arcadeLabel, '分组1:'); // AI prompt 生态专用，不走 i18n
+    let arcadeLabel = getSafeString(raw.arcadeLabel);
     let arcadeTags = normalizeTags(raw.arcade);
-    let mobileLabel = getSafeString(raw.mobileLabel, '分组2:'); // AI prompt 生态专用，不走 i18n
+    let mobileLabel = getSafeString(raw.mobileLabel);
     let mobileTags = normalizeTags(raw.mobile);
 
     if (Array.isArray(raw.groups) && raw.groups.length > 0) {
@@ -281,145 +328,169 @@ const normalizeElement = (element: unknown): CardElement | null => {
 
     return {
       type,
-      subheading: getSafeString(raw.subheading, '分组标签'), // AI prompt 生态专用，不走 i18n
-      subheadingStyles: defaultStyles(raw.subheadingStyles as Styles),
+      subheading: getSafeString(raw.subheading),
+      subheadingStyles: defaultStyles(),
       arcadeLabel,
-      arcadeLabelStyles: defaultStyles(raw.arcadeLabelStyles as Styles),
+      arcadeLabelStyles: defaultStyles(),
       arcade: arcadeTags,
       mobileLabel,
-      mobileLabelStyles: defaultStyles(raw.mobileLabelStyles as Styles),
+      mobileLabelStyles: defaultStyles(),
       mobile: mobileTags,
-      tagStyles: defaultStyles((raw.tagStyles as Styles) || { fontWeight: '500', fontSize: '13' }),
-      styles: raw.styles && typeof raw.styles === 'object' ? (raw.styles as Styles) : undefined,
+      tagStyles: defaultStyles({ fontWeight: '500', fontSize: '13' }),
     };
   }
 
   if (type === 'tagSectionTwo') {
     return {
       type,
-      subheading: getSafeString(raw.subheading, '我的推'), // AI prompt 生态专用，不走 i18n
-      subheadingStyles: defaultStyles(raw.subheadingStyles as Styles),
+      subheading: getSafeString(raw.subheading),
+      subheadingStyles: defaultStyles(),
       oshis: normalizeTags(raw.oshis),
       meta: normalizeTags(raw.meta),
-      styles: raw.styles && typeof raw.styles === 'object' ? (raw.styles as Styles) : undefined,
     };
   }
 
-  return null;
+  // heading / avatar / infoList / qrCode / divider 等交给 profileSchema 校验
+  return raw;
 };
 
-const fallbackCardElements = (): CardElement[] => [
-  {
-    type: 'paragraph',
-    text: '这里是 AI 生成的内容，你可以继续编辑。', // AI prompt 生态专用，不走 i18n
-    styles: defaultStyles(),
-  },
-];
 
 export const normalizeGeneratedCards = (cards: unknown): CardData[] => {
   if (!Array.isArray(cards)) return [];
 
-  return cards
+  // 统一走 profileSchema：去重 id、补齐布局、校验并拆分区块
+  return normalizeCards(cards
     .map((card, index) => {
       if (!card || typeof card !== 'object') return null;
       const raw = card as Record<string, unknown>;
       const id = getSafeString(raw.id) || `card_${Date.now()}_${index}`;
-      const title = getSafeString(raw.title, `AI 卡片 ${index + 1}`);
+      const title = getSafeString(raw.title);
       const rawElements = Array.isArray(raw.elements) ? raw.elements : [];
-      const elements = rawElements.map(normalizeElement).filter((el): el is CardElement => Boolean(el));
+      const elements = rawElements.map(normalizeElement).filter((el): el is LooseElement => Boolean(el));
       const layoutSpan = getSafeString(raw.layoutSpan, index === 0 ? 'profile-card-span' : index === 1 ? 'about-me-card-span' : 'oshi-card-span');
+      // 没有任何区块的卡片直接丢弃，不塞占位文字
+      if (elements.length === 0) return null;
 
       return {
         id,
         title,
-        titleStyles: raw.titleStyles && typeof raw.titleStyles === 'object' ? (raw.titleStyles as Styles) : defaultTitleStyles(),
+        titleStyles: defaultTitleStyles(),
         layoutSpan,
-        elements: elements.length > 0 ? elements : fallbackCardElements(),
+        elements,
       };
     })
-    .filter((card): card is CardData => Boolean(card));
+    .filter(Boolean));
 };
 
 // ---------------------------------------------------------------------------
 // System prompt
 // ---------------------------------------------------------------------------
 
-const defaultSystemPrompt = `你是一个深谙 ACG 文化与各类青年流行文化（如二次元、游戏、虚拟主播、偶像等）的专属"个人扩列卡片"生成助手。
+const BASE_SYSTEM_PROMPT = `你是「芝士扩列条」的采访助手，熟悉二次元、游戏、音游、虚拟主播、偶像、追星等兴趣圈。你通过轻松的多轮聊天了解用户，然后调用 generate_profile_card 工具生成一张扩列卡（用来在社群里介绍自己、找同好的个人卡片）。
 
-你的核心任务是：通过轻松、自然的引导式多轮对话，帮助用户挖掘并梳理出具有个人特色和文化属性的信息，最终调用 generate_profile_card 工具，为他们生成排版精美、信息丰富且具有社区身份认同感的扩列卡片（Profile Card）。
+【聊天方式】
+- 像朋友聊天：每次只问 1～2 个具体问题，回复简短（一般不超过 80 字），可以对用户的回答做一句真诚的回应再提问。
+- 回复只用纯文本，不要用 Markdown（不要 **加粗**、# 标题、列表符号）。
+- 按需了解下面这些内容，用户不想说的就跳过，不要追问：
+  1. 希望别人怎么称呼 TA（昵称）
+  2. 主要的圈子和爱好（游戏、音游、番剧、偶像、乐队、画画……），以及常玩 / 常看的具体作品
+  3. 推（喜欢的角色、声优、偶像、主播等）
+  4. 想找什么样的朋友、希望一起做什么（扩列诉求）
+  5. 可选：MBTI、所在城市或“线上”、雷点 / 边界（如同担拒否、不聊某些话题）
+- 聊了 3～5 轮、已经有足够内容时，主动问用户要不要现在生成；用户说可以生成、或者点了「直接生成」时，立即调用工具。
 
-【对话策略与互动规范】
-1. **自然亲切**：以朋友聊天的方式展开，每次围绕一个主题抛出 1-2 个具体问题，避免连珠炮式的提问（查户口）。
-2. **基础与进阶并重**：不仅要收拢基础属性（昵称、地区、MBTI、核心主推或爱好），更要引导用户分享能体现资历或热爱的"进阶细节"。例如：
-   - 音游玩家可询问常玩机种、自豪成绩或段位。
-   - 企划/VTB厨可询问主推、是否参与线下或购买周边。
-   - 竞技游戏玩家可询问区服、段位或擅长位置。
-   - 适当询问是否有"雷点"、"同担拒否"等社交偏好声明，尊重个性化需求。
-3. **适时收网**：当收集到的信息足以构建一张丰满的卡片，或者用户主动表示"可以生成了"、"没什么可补充的"时，果断调用 generate_profile_card 结束对话，切勿无意义地拖延。
-4. **针对轻量级模型优化**：指令要清晰，避免过于复杂的逻辑推演，直接将核心要素抽取为结构化数据。
+【真实与隐私（必须遵守）】
+- 只使用用户明确说过的信息。用户没提到的字段（年龄、性别、地区、MBTI 等）直接省略，绝不编造或猜测。可以润色措辞，但不能改变事实。
+- 即使用户说“随便编”“帮我编得厉害点”，也不要编造兴趣、作品、推、经历或头衔：聊天时用一句话说明卡片只写真实信息，并问一两个简单问题；如果已经要求直接生成，就只生成有内容的部分，信息很少时卡片少一点没关系。
+- subtitle 只能概括用户说过的内容；信息太少时用“正在扩列中”这类中性的话，不要夸张。
+- 不主动询问真实姓名、手机号、具体住址、学校或公司全称、证件信息。用户自己提到时也不要写进卡片，联系方式由用户自己在卡片上添加二维码。
+- 如果用户给的称呼看起来像真实全名（例如“王小明”），聊天时问一次要不要换成昵称；用户坚持或已经要求直接生成时，照用户说的写。
+- 不生成歧视、骚扰、色情或针对他人的内容；用户要求时礼貌拒绝。
 
-【UI 排版与数据结构生成规范（严格执行）】
-优秀的卡片需要将高密度信息合理拆解并运用网格布局，请严格遵循以下卡片拆分与组件搭配规范：
+【生成卡片（调用 generate_profile_card）】
+- userSettings.mainTitle：用户的昵称；userSettings.subtitle：一句话签名或成分总结，不超过 30 字。
+- 卡片标题 2～6 个字。卡片按下面的顺序组织，没有对应信息的卡片就不要生成：
+  1. 个人档案（layoutSpan: profile-card-span）：一个 profileInfo，items 只放用户提供过的信息，如 [{"label":"昵称","value":"…"},{"label":"MBTI","value":"…"}]。
+  2. 爱好与涉猎（about-me-card-span）：一个或多个 tagSection，例如「常玩游戏」「在追的番」。
+  3. 我的推（oshi-card-span）：用 tagSectionTwo 列出推（oshis），或用 groupedTagSection 分两组展示（如「游戏 / 动漫」「虚拟 / 现实」）。
+  4. 扩列诉求（about-me-card-span）：一个 paragraph，用自然的口吻写想找什么样的朋友。
+  5. 雷点 / 边界（profile-card-span）：用户提到时才生成，一个 paragraph，每条之间用换行分隔。
+- 标签要短，每个不超过 10 个字，每组不超过 12 个；段落不超过 80 字。作品名、角色名保留用户的原始写法。
+- tagSection、tagSectionTwo、groupedTagSection 都必须写 subheading（小标题），groupedTagSection 还要写两个组名；全部使用用户的语言。
 
-- 整体配置 (userSettings)：核心必填项。mainTitle 为用户尊称/昵称，subtitle 为高度凝练的一句话签名、成分总结或个人宣言。
-- Card 1【个人档案】：layoutSpan 必须为 'profile-card-span'（窄列）。主体必须为 profileInfo 类型（含昵称、性别/代名词、年龄、坐标等）。若用户有长段自我评价，可在其下追加 paragraph 组件进行展示。
-- Card 2【涉猎与技能】：layoutSpan 必须为 'about-me-card-span'（中宽列）。推荐使用 tagSection 组件，将用户的游戏、副业、特长、性格标签矩阵化呈现。若类目庞杂，可拆分为多个 tagSection。
-- Card 3【主推与成分】：layoutSpan 必须为 'oshi-card-span'（宽列）。强烈推荐使用 groupedTagSection 组件进行分组呈现（例如："街机 / 移动端"，"虚拟区 / 现实区"，"游戏 / 动漫"等），让核心热爱一目了然。
-- Card 4【社交/扩列宣言】：（按需生成）layoutSpan 推荐 'about-me-card-span'。使用 paragraph 组件，用地道的语境写出用户期望结交怎样的同好，或展示自己的社交态度。
+【示例】
+用户说：叫我星之海就好，ISTP，最近在打 Arcaea 和 Phigros，推初音未来，想找周末一起打音游的朋友。
+可以生成：mainTitle "星之海"，subtitle "音游人 / ISTP / 寻找周末音游搭子"；
+个人档案 items：昵称 = 星之海，MBTI = ISTP；
+爱好与涉猎：tagSection「常玩音游」= [Arcaea, Phigros]；
+我的推：tagSectionTwo oshis = [初音未来]；
+扩列诉求：paragraph "想找周末一起打音游的朋友，水平不限，一起进步就好～"
+（用户没说年龄、性别、城市，所以都不写。）`;
 
-【优质排版数据参考示例】
-- userSettings: {"mainTitle": "星之海喵", "subtitle": "探索型玩家 / 杂食党 / ISTP / 寻找周末开黑搭子"}
-- Card 1 (profile-card-span): profileInfo (昵称: 星之海喵, 坐标: 线上活跃)。下方 paragraph: "主打一个随缘的杂食系玩家，除了恐怖游戏什么都愿意尝试一下，重度收集控。"
-- Card 2 (about-me-card-span): tagSection "当前爱好: 音游, 摄影, 重度剧情体验", "主要阵地: Steam, Switch, PS5"
-- Card 3 (oshi-card-span): groupedTagSection 分组一 "音乐游戏": ["Arcaea", "Phigros", "Cytus II"], 分组二 "长线沉迷": ["最终幻想14", "星露谷物语"]`;
+const LANGUAGE_NAMES: Record<string, string> = { 'zh-CN': '简体中文', 'en-US': 'English', 'ja-JP': '日本語', 'ko-KR': '한국어' };
+
+/**
+ * 实际发送的系统提示 = 基础提示 + 当前对话上下文。
+ * 界面上的欢迎语不在消息历史里（Anthropic 要求第一条消息必须来自用户），所以在这里告诉模型它已经问过什么。
+ */
+const buildSystemPrompt = (locale?: string) => {
+  const language = (locale && LANGUAGE_NAMES[locale]) || LANGUAGE_NAMES['zh-CN'];
+  return `${BASE_SYSTEM_PROMPT}
+
+【当前对话上下文】
+- 界面已经替你发出了开场白：请用户介绍昵称和希望呈现的风格。用户的第一条消息就是对它的回答，不要再重复同样的问题。
+- 用户界面语言是 ${language}。聊天回复和卡片内容都使用用户实际使用的语言；无法判断时使用 ${language}。示例只是格式参考，不要照抄示例的语言或内容。`;
+};
 
 // ---------------------------------------------------------------------------
 // Tool schema — single source of truth
 // ---------------------------------------------------------------------------
 
+const stringArray = (description: string) => ({ type: 'array' as const, items: { type: 'string' as const }, description });
+
 const TOOL_SCHEMA_DEF = {
   name: 'generate_profile_card',
-  description: '当信息足够时，生成可直接渲染的扩列卡片数据。',
+  description: '信息足够时调用，生成扩列卡数据。只填用户明确提供过的信息，没有的字段省略。',
   parameters: {
     type: 'object' as const,
     properties: {
       userSettings: {
         type: 'object' as const,
-        description: '页面级别的全局设置',
+        description: '页面顶部的标题区',
         properties: {
-          mainTitle: { type: 'string' as const, description: '页面顶部的主标题（通常为用户昵称）' },
-          subtitle: { type: 'string' as const, description: '页面顶部的副标题（通常为一句话简介或ID）' },
+          mainTitle: { type: 'string' as const, description: '主标题，即用户的昵称' },
+          subtitle: { type: 'string' as const, description: '副标题：一句话签名或成分总结，不超过 30 字' },
         },
       },
       cards: {
         type: 'array' as const,
+        description: '卡片列表，按展示顺序排列',
         items: {
           type: 'object' as const,
           properties: {
-            id: { type: 'string' as const },
-            title: { type: 'string' as const },
-            layoutSpan: { type: 'string' as const, description: '卡片宽度类名，建议：profile-card-span, about-me-card-span, oshi-card-span' },
+            title: { type: 'string' as const, description: '卡片标题，2～6 个字' },
+            layoutSpan: { type: 'string' as const, description: '卡片宽度：profile-card-span（1 列）、about-me-card-span（2 列）、oshi-card-span（通栏 3 列）' },
             elements: {
               type: 'array' as const,
+              description: '卡片里的区块',
               items: {
                 type: 'object' as const,
                 properties: {
-                  type: { type: 'string' as const, description: '类型：paragraph, profileInfo, tagSection, groupedTagSection, tagSectionTwo' },
-                  text: { type: 'string' as const, description: 'paragraph的文本内容' },
-                  nickname: { type: 'string' as const, description: 'profileInfo的昵称' },
-                  gender: { type: 'string' as const, description: 'profileInfo的性别' },
-                  age: { type: 'string' as const, description: 'profileInfo的年龄' },
-                  location: { type: 'string' as const, description: 'profileInfo的地区/常驻' },
-                  mbti: { type: 'string' as const, description: 'profileInfo的mbti/属性' },
-                  items: { type: 'array' as const, items: { type: 'object' as const, properties: { label: { type: 'string' as const }, value: { type: 'string' as const } } }, description: 'profileInfo的额外自定义键值对' },
-                  subheading: { type: 'string' as const, description: 'tagSection/groupedTagSection的副标题' },
-                  tags: { type: 'array' as const, items: { type: 'string' as const }, description: 'tagSection的标签数组' },
-                  arcadeLabel: { type: 'string' as const, description: 'groupedTagSection的街机/分组1标题' },
-                  arcade: { type: 'array' as const, items: { type: 'string' as const }, description: 'groupedTagSection的分组1标签数组' },
-                  mobileLabel: { type: 'string' as const, description: 'groupedTagSection的手游/分组2标题' },
-                  mobile: { type: 'array' as const, items: { type: 'string' as const }, description: 'groupedTagSection的分组2标签数组' },
-                  oshis: { type: 'array' as const, items: { type: 'string' as const }, description: 'tagSectionTwo的推数组' },
-                  meta: { type: 'array' as const, items: { type: 'string' as const }, description: 'tagSectionTwo的附加信息数组' },
+                  type: { type: 'string' as const, description: '区块类型：profileInfo（个人档案）、paragraph（段落）、heading（大字标题）、tagSection（标签组）、tagSectionTwo（推）、groupedTagSection（两组标签）、divider（分割线）' },
+                  text: { type: 'string' as const, description: 'paragraph / heading 的文字。paragraph 不超过 80 字，换行用 \\n' },
+                  items: {
+                    type: 'array' as const,
+                    description: 'profileInfo 的信息行，只放用户提供过的信息',
+                    items: { type: 'object' as const, properties: { label: { type: 'string' as const, description: '如：昵称、MBTI、坐标' }, value: { type: 'string' as const } } },
+                  },
+                  subheading: { type: 'string' as const, description: 'tagSection / tagSectionTwo / groupedTagSection 的小标题（必填，用用户的语言）' },
+                  tags: stringArray('tagSection 的标签，每个不超过 10 个字，最多 12 个'),
+                  oshis: stringArray('tagSectionTwo 的推（角色、声优、偶像、主播等）'),
+                  meta: stringArray('tagSectionTwo 的补充说明标签，如 "and more…"，可省略'),
+                  arcadeLabel: { type: 'string' as const, description: 'groupedTagSection 第一组的组名，如「游戏」' },
+                  arcade: stringArray('groupedTagSection 第一组的标签'),
+                  mobileLabel: { type: 'string' as const, description: 'groupedTagSection 第二组的组名，如「动漫」' },
+                  mobile: stringArray('groupedTagSection 第二组的标签'),
                 },
                 required: ['type'],
               },
@@ -507,43 +578,52 @@ const safePreview = (value: unknown): unknown => {
   return `${str.slice(0, 2400)}...(truncated)`;
 };
 
+// 明确选择的 provider 优先，只有“自定义”时才按地址猜测；
+// 否则选了 OpenAI 却填 Gemini 的 OpenAI 兼容地址（…/v1beta/openai）时，会错发 Gemini 原生格式
 const isGeminiProvider = (config: AiConfig): boolean => {
-  return config.provider === 'gemini' || /generativelanguage\.googleapis\.com/i.test(config.baseUrl);
+  if (config.provider !== 'custom') return config.provider === 'gemini';
+  return /generativelanguage\.googleapis\.com/i.test(config.baseUrl) && !/\/openai\/?$/i.test(config.baseUrl);
 };
 
 const isAnthropicProvider = (config: AiConfig): boolean => {
-  return config.provider === 'anthropic' || /anthropic\.com/i.test(config.baseUrl);
+  if (config.provider !== 'custom') return config.provider === 'anthropic';
+  return /api\.anthropic\.com/i.test(config.baseUrl);
 };
 
-const buildGeminiEndpoint = (baseUrl: string, model: string, apiKey: string): string => {
+const buildGeminiEndpoint = (baseUrl: string, model: string): string => {
   let trimmed = baseUrl.trim().replace(/\/+$/, '');
-
-  if (!trimmed) {
-    trimmed = 'https://generativelanguage.googleapis.com/v1beta';
-  }
-
-  if (/models\/.+:generateContent/i.test(trimmed)) {
-    const separator = trimmed.includes('?') ? '&' : '?';
-    return `${trimmed}${separator}key=${encodeURIComponent(apiKey)}`;
-  }
-
+  if (!trimmed) trimmed = DEFAULT_BASE_URL;
+  if (/models\/.+:generateContent/i.test(trimmed)) return trimmed;
   const withVersion = /\/v1(beta)?$/i.test(trimmed) ? trimmed : `${trimmed}/v1beta`;
-  return `${withVersion}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  return `${withVersion}/models/${encodeURIComponent(model)}:generateContent`;
 };
 
 const buildAnthropicEndpoint = (baseUrl: string): string => {
   const trimmed = baseUrl.trim().replace(/\/+$/, '');
   if (!trimmed) return 'https://api.anthropic.com/v1/messages';
   if (trimmed.endsWith('/messages')) return trimmed;
+  if (/\/v1$/i.test(trimmed)) return `${trimmed}/messages`;
   return `${trimmed}/v1/messages`;
 };
+
+/** 合并相邻的同角色消息：请求失败后用户再发一条，会出现两条连续的 user 消息 */
+const mergeConsecutive = (history: AiChatMessage[]): AiChatMessage[] =>
+  history.reduce<AiChatMessage[]>((acc, m) => {
+    const last = acc[acc.length - 1];
+    if (last && last.role === m.role) {
+      acc[acc.length - 1] = { role: m.role, content: `${last.content}\n\n${m.content}` };
+    } else {
+      acc.push({ ...m });
+    }
+    return acc;
+  }, []);
 
 // ---------------------------------------------------------------------------
 // Gemini helpers
 // ---------------------------------------------------------------------------
 
 const toGeminiContents = (history: AiChatMessage[]): Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> => {
-  return history.map((m) => ({
+  return mergeConsecutive(history).map((m) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
   }));
@@ -562,7 +642,7 @@ const extractTextFromGemini = (content?: GeminiContent): string => {
 // ---------------------------------------------------------------------------
 
 const toAnthropicMessages = (history: AiChatMessage[]): Array<{ role: 'user' | 'assistant'; content: string }> => {
-  return history.map((m) => ({
+  return mergeConsecutive(history).map((m) => ({
     role: m.role,
     content: m.content,
   }));
@@ -657,6 +737,7 @@ const safeFetchJson = async (endpoint: string, init: RequestInit): Promise<SafeF
   try {
     response = await fetch(endpoint, init);
   } catch (fetchErr) {
+    if (fetchErr instanceof DOMException && fetchErr.name === 'AbortError') throw fetchErr;
     const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
     return { error: `Network error: ${msg}`, errorCode: 'NETWORK_ERROR' };
   }
@@ -682,13 +763,15 @@ const safeFetchJson = async (endpoint: string, init: RequestInit): Promise<SafeF
 const callGemini = async (
   config: AiConfig,
   history: AiChatMessage[],
-  options: { forceGenerate?: boolean },
+  options: AiCallOptions,
   startedAt: number,
 ): Promise<AiChatResult> => {
-  const endpoint = buildGeminiEndpoint(config.baseUrl, config.model, config.apiKey);
+  const endpoint = buildGeminiEndpoint(config.baseUrl, config.model);
+  const systemPrompt = buildSystemPrompt(options.locale);
+  const geminiHeaders = { 'Content-Type': 'application/json', 'x-goog-api-key': config.apiKey };
   const requestPayload = {
     systemInstruction: {
-      parts: [{ text: defaultSystemPrompt }],
+      parts: [{ text: systemPrompt }],
     },
     contents: toGeminiContents(history),
     tools: buildGeminiTools(),
@@ -711,7 +794,8 @@ const callGemini = async (
 
   const fetchResult = await safeFetchJson(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    signal: options.signal,
+    headers: geminiHeaders,
     body: JSON.stringify(requestPayload),
   });
 
@@ -734,7 +818,7 @@ const callGemini = async (
   if (isMalformedFunctionCall && options.forceGenerate) {
     const fallbackPayload = {
       systemInstruction: {
-        parts: [{ text: `${defaultSystemPrompt}\n\n现在不要调用函数，请直接输出 JSON 对象，格式必须是 {"cards":[...]}。` }],
+        parts: [{ text: `${systemPrompt}\n\n现在不要调用函数，请直接输出 JSON 对象，格式必须是 {"cards":[...]}。` }],
       },
       contents: [
         ...toGeminiContents(history),
@@ -745,7 +829,8 @@ const callGemini = async (
 
     const fbResult = await safeFetchJson(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      signal: options.signal,
+      headers: geminiHeaders,
       body: JSON.stringify(fallbackPayload),
     });
 
@@ -773,7 +858,7 @@ const callGemini = async (
 
     if (fbResult.response!.ok && parsed) {
       return {
-        assistantText: 'MALFORMED_FUNCTION_CALL fallback succeeded.',
+        // 不把调试信息展示给用户；assistantText 为空时界面显示通用的“已应用”文案
         generated: parsed,
         debug: {
           provider: 'gemini',
@@ -815,7 +900,10 @@ const callGemini = async (
   const content = data.candidates?.[0]?.content;
   const functionCall = content?.parts?.find((p) => p.functionCall)?.functionCall;
   if (functionCall?.name === 'generate_profile_card') {
-    const parsed = functionCall.args as AiChatResult['generated'];
+    const parsed = parseGeneratedObject(functionCall.args);
+    if (!parsed) {
+      return { debug: buildDebugError(base, 'gemini', 'Function call arguments missing cards.', 'MALFORMED_CALL', elapsed(), data) };
+    }
     return {
       assistantText: extractTextFromGemini(content) || undefined,
       generated: parsed,
@@ -869,13 +957,13 @@ const callGemini = async (
 const callOpenAiCompatible = async (
   config: AiConfig,
   history: AiChatMessage[],
-  options: { forceGenerate?: boolean },
+  options: AiCallOptions,
   startedAt: number,
 ): Promise<AiChatResult> => {
   const endpoint = buildEndpoint(config.baseUrl);
   const messages: OpenAiMessage[] = [
-    { role: 'system', content: defaultSystemPrompt },
-    ...history.map((m) => ({ role: m.role, content: m.content })),
+    { role: 'system', content: buildSystemPrompt(options.locale) },
+    ...mergeConsecutive(history).map((m) => ({ role: m.role, content: m.content })),
   ];
 
   const isOpenAiOfficial = config.provider === 'openai';
@@ -883,12 +971,17 @@ const callOpenAiCompatible = async (
     ? { type: 'function' as const, function: { name: 'generate_profile_card' } }
     : 'auto' as const;
 
+  // 不传 temperature：推理类模型（o 系列、GPT-5 之后）只接受默认值，传了会直接报 400
   const requestPayload: Record<string, unknown> = {
     model: config.model,
     messages,
     tools: buildOpenAiTools(),
-    temperature: 0.7,
   };
+  // OpenAI 官方文档：GPT-6 系列在 Chat Completions 上只有 reasoning_effort 为 none 时才支持函数调用。
+  // 旧模型（如 gpt-4o-mini）不认识这个参数，所以只对 GPT-6 系列添加。
+  if (config.provider === 'openai' && /^gpt-6/i.test(config.model)) {
+    requestPayload.reasoning_effort = 'none';
+  }
 
   if (options.forceGenerate) {
     requestPayload.tool_choice = forceToolChoice;
@@ -905,6 +998,7 @@ const callOpenAiCompatible = async (
 
   const fetchResult = await safeFetchJson(endpoint, {
     method: 'POST',
+    signal: options.signal,
     headers,
     body: JSON.stringify(requestPayload),
   });
@@ -930,7 +1024,12 @@ const callOpenAiCompatible = async (
 
   const firstToolCall = message.tool_calls?.[0];
   if (firstToolCall?.type === 'function' && firstToolCall.function.name === 'generate_profile_card') {
-    const parsed = parseToolArguments(firstToolCall.function.arguments);
+    const parsed = parseGeneratedObject(parseToolArguments(firstToolCall.function.arguments));
+    if (!parsed) {
+      // 参数被截断或不是合法 JSON：报错，而不是假装模型在追问
+      const truncated = data.choices?.[0]?.finish_reason === 'length';
+      return { debug: buildDebugError(base, 'openai-compatible', 'Tool call arguments are not valid card JSON.', truncated ? 'TRUNCATED' : 'MALFORMED_CALL', elapsed(), data) };
+    }
     return {
       assistantText: message.content || undefined,
       generated: parsed,
@@ -984,7 +1083,7 @@ const callOpenAiCompatible = async (
 const callAnthropic = async (
   config: AiConfig,
   history: AiChatMessage[],
-  options: { forceGenerate?: boolean },
+  options: AiCallOptions,
   startedAt: number,
 ): Promise<AiChatResult> => {
   const endpoint = buildAnthropicEndpoint(config.baseUrl);
@@ -992,8 +1091,8 @@ const callAnthropic = async (
   const anthropicTools = buildAnthropicTools();
   const requestPayload: Record<string, unknown> = {
     model: config.model,
-    max_tokens: 4096,
-    system: defaultSystemPrompt,
+    max_tokens: 8192,
+    system: buildSystemPrompt(options.locale),
     messages: toAnthropicMessages(history),
     tools: anthropicTools,
   };
@@ -1007,10 +1106,13 @@ const callAnthropic = async (
 
   const fetchResult = await safeFetchJson(endpoint, {
     method: 'POST',
+    signal: options.signal,
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': config.apiKey,
       'anthropic-version': '2023-06-01',
+      // 从浏览器直接调用 Anthropic API 必须带这个头，否则 CORS 预检会被拒绝
+      'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify(requestPayload),
   });
@@ -1030,8 +1132,15 @@ const callAnthropic = async (
   const text = extractTextFromAnthropic(data.content);
   const toolUseBlock = data.content?.find((b) => b.type === 'tool_use' && b.name === 'generate_profile_card');
 
-  if (toolUseBlock?.input) {
-    const parsed = toolUseBlock.input as AiChatResult['generated'];
+  if (toolUseBlock) {
+    // 输出被 max_tokens 截断时，tool_use 的参数是不完整的
+    if (data.stop_reason === 'max_tokens') {
+      return { debug: buildDebugError(base, 'anthropic', 'Response truncated by max_tokens.', 'TRUNCATED', elapsed(), data) };
+    }
+    const parsed = parseGeneratedObject(toolUseBlock.input);
+    if (!parsed) {
+      return { debug: buildDebugError(base, 'anthropic', 'Tool input missing cards.', 'MALFORMED_CALL', elapsed(), data) };
+    }
     return {
       assistantText: text || undefined,
       generated: parsed,
@@ -1085,7 +1194,7 @@ const callAnthropic = async (
 export const callAiInterviewer = async (
   config: AiConfig,
   history: AiChatMessage[],
-  options?: { forceGenerate?: boolean },
+  options?: AiCallOptions,
 ): Promise<AiChatResult> => {
   const startedAt = Date.now();
   const opts = options || {};

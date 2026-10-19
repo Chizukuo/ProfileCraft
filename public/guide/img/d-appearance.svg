@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 330" width="640" height="330" role="img" aria-label="Appearance settings"><style>
+.pg{fill:#FFF8E7}.cd{fill:#fff;stroke:#E8E1CF;stroke-width:1.5}.ln{fill:#E6E0D2}.hd{fill:#BDB29C}
+.pl{fill:#FFE9A8}.pl2{fill:#FFD866}.ac{fill:#FFC300}.acs{fill:none;stroke:#FFC300;stroke-width:2.5}
+.ds{fill:none;stroke:#C4BBA5;stroke-width:1.5;stroke-dasharray:4 3}.dsa{fill:none;stroke:#E0A800;stroke-width:1.5;stroke-dasharray:4 3}
+.bt{fill:#fff;stroke:#D6CEBA;stroke-width:1.2}.ic{fill:none;stroke:#7d7464;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.icw{fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round}.dg{fill:#EF4444}
+.hov{fill:#FFC300;fill-opacity:.07;stroke:#FFC300;stroke-width:1.5;stroke-dasharray:5 4}
+.mk{fill:#8B4513}.mt{fill:#fff;font:700 12px -apple-system,"Segoe UI",sans-serif;text-anchor:middle;dominant-baseline:central}
+.ar{fill:none;stroke:#8B4513;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.num{fill:#9C9078;font:700 20px -apple-system,"Segoe UI",sans-serif;text-anchor:middle;dominant-baseline:central}
+.key{fill:#5b5348;font:600 11px -apple-system,"Segoe UI",sans-serif;text-anchor:middle;dominant-baseline:central}
+.im1{fill:#D6E6FF}.im2{fill:#FFD3E0}.im3{fill:#CFF0DD}.imf{fill:#fff;fill-opacity:.7}
+.slot{fill:#FFC300;fill-opacity:.06}.toast{fill:#2b2b30}.tl{fill:#fff;fill-opacity:.55}.cur{fill:#1d1d1f;stroke:#fff;stroke-width:1.2}
+.g1{stop-color:#FFD6E7}.g2{stop-color:#C9E4FF}.glass{fill:#fff;fill-opacity:.62;stroke:#fff;stroke-opacity:.8}
+@media (prefers-color-scheme:dark){
+.pg{fill:#1f1f24}.cd{fill:#2a2a30;stroke:#3d3d46}.ln{fill:#44444d}.hd{fill:#7d7d89}
+.pl{fill:#5b4b16}.pl2{fill:#7a6214}.ds{stroke:#62626d}.bt{fill:#2a2a30;stroke:#50505b}.ic{stroke:#b9b9c4}
+.mk{fill:#FFC300}.mt{fill:#1d1d1f}.ar{stroke:#FFC300}.num{fill:#8f8f9b}.key{fill:#d5d5de}
+.im1{fill:#2d3f5e}.im2{fill:#5e2e3f}.im3{fill:#2e5c47}.imf{fill-opacity:.25}.slot{fill-opacity:.08}
+.toast{fill:#e8e8ee}.tl{fill:#1d1d1f;fill-opacity:.5}
+.g1{stop-color:#3a2a44}.g2{stop-color:#1f2e46}.glass{fill:#2a2a30;fill-opacity:.7;stroke:#4a4a55}
+}
+</style><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="g1"/><stop offset="1" class="g2"/></linearGradient></defs><rect width="640" height="330" rx="18" fill="url(#bg)"/><circle cx="26" cy="26" r="11" class="mk"/><text x="26" y="26.5" class="mt">1</text><rect x="60" y="52" width="230" height="176" rx="22" class="glass"/><rect x="80" y="72" width="190" height="136" rx="8" class="dsa"/><rect x="96" y="88" width="90" height="10" rx="5" class="hd"/><rect x="96" y="112" width="150" height="7" rx="3.5" class="ln"/><rect x="96" y="126" width="130" height="7" rx="3.5" class="ln"/><rect x="96" y="140" width="150" height="7" rx="3.5" class="ln"/><rect x="96" y="162" width="44" height="18" rx="9" class="pl"/><rect x="146" y="162" width="52" height="18" rx="9" class="pl"/><circle cx="270" cy="212" r="11" class="mk"/><text x="270" y="212.5" class="mt">4</text><rect x="316" y="52" width="264" height="176" rx="22" class="glass"/><rect x="340" y="76" width="80" height="10" rx="5" class="hd"/><rect x="340" y="100" width="200" height="7" rx="3.5" class="ln"/><rect x="340" y="114" width="180" height="7" rx="3.5" class="ln"/><rect x="340" y="140" width="50" height="18" rx="9" class="pl"/><rect x="396" y="140" width="64" height="18" rx="9" class="pl"/><rect x="466" y="140" width="44" height="18" rx="9" class="pl"/><circle cx="448" cy="196" r="11" class="mk"/><text x="448" y="196.5" class="mt">2</text><path class="ar" d="M558 56a22 22 0 0 1 18 18"/><circle cx="604" cy="40" r="11" class="mk"/><text x="604" y="40.5" class="mt">5</text><path class="ar" d="M294 140h18M300 134l-6 6l6 6M306 134l6 6l-6 6"/><circle cx="303" cy="112" r="11" class="mk"/><text x="303" y="112.5" class="mt">3</text><rect x="60" y="252" width="520" height="56" rx="22" class="glass"/><rect x="84" y="272" width="70" height="10" rx="5" class="hd"/><rect x="84" y="288" width="46" height="18" rx="9" class="pl"/><rect x="136" y="288" width="58" height="18" rx="9" class="pl"/><path class="ar" d="M175 232v16M169 238l6-6l6 6M169 242l6 6l6-6"/></svg>

@@ -5,6 +5,7 @@ import './styles/App.css';
 import { ProfileProvider } from './context/ProfileContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LocaleProvider } from './context/LocaleContext';
+import { EditorUIProvider } from './context/EditorUIContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <LocaleProvider>
         <ProfileProvider>
           <ThemeProvider>
-            <App />
+            <EditorUIProvider>
+              <App />
+            </EditorUIProvider>
           </ThemeProvider>
         </ProfileProvider>
       </LocaleProvider>

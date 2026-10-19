@@ -20,7 +20,7 @@ export type ThemeKey = keyof typeof themesManifest;
 export const themeKeys = Object.keys(manifest) as ThemeKey[];
 
 export const resolveTheme = (themeKey: string = fallbackThemeKey): ResolvedTheme => {
-    const key = themeKey in manifest ? themeKey : fallbackThemeKey;
+    const key = isKnownTheme(themeKey) ? themeKey : fallbackThemeKey;
     const theme = manifest[key] ?? manifest[fallbackThemeKey];
 
     return {
@@ -58,6 +58,7 @@ export const getThemeCssPath = (themeKey: string = fallbackThemeKey) => {
     return resolveTheme(themeKey).path ?? '';
 };
 
-export const isKnownTheme = (themeKey: string): themeKey is ThemeKey => {
-    return themeKey in manifest;
-};
+export function isKnownTheme(themeKey: string): themeKey is ThemeKey {
+    // 不能用 `in`：'constructor' 之类的原型属性也会命中
+    return Object.prototype.hasOwnProperty.call(manifest, themeKey);
+}

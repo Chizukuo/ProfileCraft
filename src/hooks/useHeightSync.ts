@@ -2,13 +2,21 @@ import { useState, useCallback, useEffect } from 'react';
 import type { ProfileData } from '../types/data';
 import { createDefaultLayout } from './useGridLayout';
 
+const ROW_HEIGHT = 10;
+
 interface UseHeightSyncOptions {
   profileData: ProfileData | null;
   isLoaded: boolean;
-  updateProfileData: (updater: (prev: ProfileData) => ProfileData) => void;
+  /** 应传入 updateLayout：高度同步是自动修正，不能清空撤销历史 */
+  updateLayout: (updater: (prev: ProfileData) => ProfileData) => void;
+  /** 卡片纵向间距（px），与 react-grid-layout 的 margin[1] 一致 */
+  marginY: number;
 }
 
-export const useHeightSync = ({ profileData, isLoaded, updateProfileData }: UseHeightSyncOptions) => {
+/**
+ * 根据卡片内容的实际像素高度换算网格行数；同一行（相同 layout.y）的卡片取最高者，保持整行等高。
+ */
+export const useHeightSync = ({ profileData, isLoaded, updateLayout, marginY }: UseHeightSyncOptions) => {
   const [contentHeights, setContentHeights] = useState<Record<string, number>>({});
 
   const handleHeightChange = useCallback((id: string, height: number) => {
@@ -21,64 +29,35 @@ export const useHeightSync = ({ profileData, isLoaded, updateProfileData }: UseH
   useEffect(() => {
     if (!profileData || !isLoaded) return;
 
-    const rowGroups: Record<number, string[]> = {};
-    profileData.cards.forEach(card => {
-      // Use y = 0 if layout is missing (though it should be migration-guaranteed now)
-      const y = card.layout?.y ?? 0;
-      if (!rowGroups[y]) rowGroups[y] = [];
-      rowGroups[y].push(card.id);
-    });
-
-    const ROW_HEIGHT = 10;
-    const MARGIN_Y = 32;
-
-    let updatesNeeded = false;
-    const currentCards = profileData.cards;
-    
-    const newCards = currentCards.map((card, index) => {
-      const y = card.layout?.y ?? 0;
-      const rowIds = rowGroups[y];
-      
-      if (!rowIds) return card;
-
-      let maxPixelHeight = 0;
-      rowIds.forEach(id => {
-        const h = contentHeights[id] ?? 0;
-        if (h > maxPixelHeight) maxPixelHeight = h;
+    const computeCards = (cards: ProfileData['cards']) => {
+      const rowMax: Record<number, number> = {};
+      cards.forEach(card => {
+        const y = card.layout?.y ?? 0;
+        rowMax[y] = Math.max(rowMax[y] ?? 0, contentHeights[card.id] ?? 0);
       });
 
-      // Avoid 0/NaN issues
-      if (maxPixelHeight <= 0) return card;
-
-      const requiredH = Math.ceil((maxPixelHeight + MARGIN_Y) / (ROW_HEIGHT + MARGIN_Y));
-
-      if (card.layout?.h !== requiredH) {
-        updatesNeeded = true;
+      let changed = false;
+      const next = cards.map((card, index) => {
+        const maxPixelHeight = rowMax[card.layout?.y ?? 0];
+        if (!maxPixelHeight || maxPixelHeight <= 0) return card;
+        const requiredH = Math.max(1, Math.ceil((maxPixelHeight + marginY) / (ROW_HEIGHT + marginY)));
+        if (card.layout?.h === requiredH) return card;
+        changed = true;
         return {
           ...card,
-          layout: {
-            ...(card.layout ?? createDefaultLayout(card.id, index, card.layoutSpan)),
-            h: requiredH,
-          },
+          layout: { ...(card.layout ?? createDefaultLayout(card.id, index, card.layoutSpan)), h: requiredH },
         };
-      }
-      return card;
-    });
+      });
+      return changed ? next : null;
+    };
 
-    if (updatesNeeded) {
-      // Use a functional update to ensure we have the latest state and avoid racing
-      updateProfileData((prev: ProfileData) => {
-        // Double check within the updater if heights actually still need changing
-        // to handle cases where multiple updates might be queued
-        const stillNeedsUpdate = newCards.some((newCard, idx) => {
-            return newCard.layout?.h !== prev.cards[idx]?.layout?.h;
-        });
-        
-        if (!stillNeedsUpdate) return prev;
-        return { ...prev, cards: newCards };
+    if (computeCards(profileData.cards)) {
+      updateLayout(prev => {
+        const next = computeCards(prev.cards);
+        return next ? { ...prev, cards: next } : prev;
       });
     }
-  }, [contentHeights, profileData, updateProfileData, isLoaded]);
+  }, [contentHeights, profileData, updateLayout, isLoaded, marginY]);
 
   return { handleHeightChange };
 };

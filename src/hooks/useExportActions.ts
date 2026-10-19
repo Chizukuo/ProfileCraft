@@ -2,19 +2,20 @@ import React, { useCallback, useRef } from 'react';
 import { ProfileData } from '../types/data';
 import type { ThemeKey } from '../utils/themeUtils';
 import type { Locale } from '../context/LocaleContext';
+import type { ReplaceReason } from './useProfileData';
 
 interface UseExportActionsProps {
   profileData: ProfileData | null;
   theme: ThemeKey;
   locale: Locale;
-  updateProfileData: (updater: (prev: ProfileData) => ProfileData) => void;
+  replaceProfileData: (next: ProfileData, reason: ReplaceReason) => void;
 }
 
 export const useExportActions = ({
   profileData,
   theme,
   locale,
-  updateProfileData
+  replaceProfileData
 }: UseExportActionsProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,12 +49,12 @@ export const useExportActions = ({
     const file = e.target.files?.[0];
     if (file) {
       const { importConfig } = await import('../utils/importUtils');
-      importConfig(file, locale, (data) => updateProfileData(() => data));
+      importConfig(file, locale, (data) => replaceProfileData(data, 'import'));
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
-  }, [locale, updateProfileData]);
+  }, [locale, replaceProfileData]);
 
   return {
     fileInputRef,

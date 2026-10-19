@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocale } from '../context/LocaleContext';
-import { loadTranslations, createT } from '../utils/i18n';
+import { loadTranslations, createT, getCachedTranslations } from '../utils/i18n';
 
 /**
  * 使用翻译的自定义 Hook
@@ -8,22 +8,32 @@ import { loadTranslations, createT } from '../utils/i18n';
  */
 export const useTranslation = () => {
   const { locale, setLocale } = useLocale();
-  const [translations, setTranslations] = useState<any>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [translations, setTranslations] = useState<any>(() => getCachedTranslations(locale) ?? {});
+  const [isLoading, setIsLoading] = useState(() => !getCachedTranslations(locale));
 
   useEffect(() => {
-    const loadLanguage = async () => {
-      setIsLoading(true);
-      const data = await loadTranslations(locale);
+    let cancelled = false;
+    const cached = getCachedTranslations(locale);
+    if (cached) {
+      setTranslations(cached);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    loadTranslations(locale).then((data) => {
+      if (cancelled) return;
       setTranslations(data);
       setIsLoading(false);
+    });
+    return () => {
+      cancelled = true;
     };
-
-    loadLanguage();
   }, [locale]);
 
+  const t = useMemo(() => createT(translations), [translations]);
+
   return {
-    t: createT(translations),
+    t,
     locale,
     setLocale,
     isLoading

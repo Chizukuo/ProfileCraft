@@ -1,4 +1,5 @@
 import html2canvas from 'html2canvas';
+import { showNotification } from './notify';
 import { ProfileData } from '../types/data';
 import { loadTranslations, createT } from './i18n';
 import { Locale } from '../context/LocaleContext';
@@ -22,26 +23,13 @@ async function getTranslationFunction(locale: Locale) {
   return cachedT;
 }
 
+// 编辑器控件统一带 .editor-only；其余几项是第三方组件或富文本工具栏
 const EXPORT_HIDDEN_SELECTORS = [
-    '.action-button',
-    '.delete-action-btn',
-    '.add-tag-button-container',
-    '.tag-actions-container',
-    '.delete-element-btn',
-    '.card-actions-container',
-    '.edit-popup',
-    '.qr-code-link-input',
+    '.editor-only',
+    '.pc-controls',
+    '.hidden-file-input',
     '.rich-text-toolbar',
-    '.qr-code-wrapper p.text-sm',
-    '.qr-code-wrapper .text-sm',
-    '.hamburger-menu',
-    '.action-button-text-with-icon',
-    '.drag-handle',
-    '.width-control-container',
-    '.react-resizable-handle',
-    '.delete-item-btn',
-    '.add-item-btn',
-    '.sidebar-container'
+    '.react-resizable-handle'
 ];
 
 const EDITOR_OVERLAY_SELECTORS = '.editor-toolbar, .edit-popup, .rich-text-toolbar';
@@ -63,12 +51,6 @@ const cleanupContentEditableElements = (root: ParentNode, resetInlineStyles: boo
             htmlEl.style.padding = '';
             htmlEl.style.margin = '';
         }
-    });
-};
-
-const setAvatarNonInteractive = (root: ParentNode) => {
-    root.querySelectorAll('.avatar-container').forEach((el) => {
-        (el as HTMLElement).style.cursor = 'default';
     });
 };
 
@@ -114,7 +96,31 @@ const getThemeCssContent = async (themeName: Theme) => {
 };
 
 export type Theme = ThemeKey;
-import appCssContent from '../styles/App.css?raw'; // Import App.css content directly
+import appCssRaw from '../styles/App.css?raw';
+import { getFontOption, resolveAppearance } from './appearance';
+
+// ?raw 不会展开 @import（styles/modules/ 都是编辑器专用样式），去掉以免导出文件里残留无效引用
+const appCssContent = appCssRaw.replace(/^\uFEFF?\s*@import[^;]*;\s*$/gm, '');
+
+const getFontLinkTag = (profileData: ProfileData) => {
+    const font = getFontOption(resolveAppearance(profileData.userSettings.appearance).layout.fontFamily);
+    return font?.cssUrl ? `<link href="${font.cssUrl}" rel="stylesheet">` : '';
+};
+
+// 导出 HTML 时复刻 body 上的自定义背景（外观定制里的纯色 / 渐变 / 图片）
+const getBodyBackgroundCss = () => {
+    const body = document.body.style;
+    if (!body.backgroundColor && !body.backgroundImage) return '';
+    const decl = (prop: string, value: string) => (value ? `${prop}: ${value} !important;` : '');
+    return `body {
+        ${decl('background-color', body.backgroundColor)}
+        ${decl('background-image', body.backgroundImage)}
+        ${decl('background-size', body.backgroundSize)}
+        ${decl('background-repeat', body.backgroundRepeat)}
+        ${decl('background-position', body.backgroundPosition)}
+        ${decl('background-attachment', body.backgroundAttachment)}
+    }`;
+};
 
 // 将当前文档 (:root) 上定义的 CSS 变量复制到目标节点，确保主题变量可用
 const cloneRootCssVariables = (target: HTMLElement) => {
@@ -140,7 +146,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
     const t = await getTranslationFunction(locale);
     const container = document.getElementById('profileCardContainer');
     if (!container) {
-        showNotification(t('notification.exportContainerNotFound') || 'Container not found', 'error');
+        showNotification(t('notification.containerNotFound') || 'Container not found', 'error');
         return;
     }
 
@@ -157,7 +163,6 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
 
     // 移除 contenteditable 属性，并清理编辑时的视觉样式
     cleanupContentEditableElements(exportContainer, true);
-    setAvatarNonInteractive(exportContainer);
 
     // 更新页脚信息
     const footerP = exportContainer.querySelector('.page-footer p');
@@ -175,6 +180,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
     <meta name="description" content="使用 ProfileCraft 创建的个人扩列条">
     <title>${stripHtmlTags(profileData.userSettings.mainTitle)} - 扩列条</title>
     <link href="https://fonts.loli.net/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    ${getFontLinkTag(profileData)}
     <style>
         /* App.css 内容 */
         ${appCssContent}
@@ -185,27 +191,14 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         /* 动态主题变量 */
         ${dynamicThemeStyleBlock}
 
-        /* 导出时隐藏的元素 */
-        .editor-toolbar,
-        .edit-popup,
-        .rich-text-toolbar,
-        .action-button,
-        .delete-action-btn,
-        .add-tag-button-container,
-        .tag-actions-container,
-        .delete-element-btn,
-        .card-actions-container,
-        .qr-code-link-input,
-        .hamburger-menu,
-        .action-button-text-with-icon,
-        .drag-handle,
-        .width-control-container,
-        .react-resizable-handle,
-        .delete-item-btn,
-        .add-item-btn,
-        .avatar-container:hover::after,
-        [contenteditable]:hover { 
-            display: none !important;
+        /* 外观定制：页面背景 */
+        ${getBodyBackgroundCss()}
+
+        /* 移动端：导出的 HTML 在手机上打开时改为单列 */
+        @media (max-width: 720px) {
+            .layout { grid-template-columns: 1fr !important; }
+            .layout > .react-grid-item { grid-column: span 1 !important; }
+            main#profileCardContainer { padding: 24px 16px !important; }
         }
 
         /* 保持卡片在编辑器中的实际位置 */
@@ -223,7 +216,7 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
             height: auto !important;
             display: grid !important;
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 32px 24px !important;
+            gap: var(--pc-gap-y, 32px) var(--pc-gap-x, 24px) !important;
             width: 100% !important;
         }
         .react-grid-item {
@@ -240,21 +233,6 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
         .oshi-card-span,
         .full-width-card-span { grid-column: span 3 !important; }
 
-        .card-top-controls {
-            display: none !important;
-            min-height: 0 !important;
-            margin: 0 !important;
-        }
-
-        .section-title-container {
-            margin-top: 30px !important;
-        }
-
-        h2.section-title {
-            border-bottom: 1px solid var(--theme-divider, var(--ui-border-default, rgba(0, 0, 0, 0.18))) !important;
-            padding-bottom: var(--space-m) !important;
-        }
-
         .page-footer {
             display: block !important;
             margin-top: 48px !important;
@@ -263,32 +241,15 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
             z-index: 1 !important;
         }
 
-        .sidebar-container,
-        .hamburger-menu {
-            display: none !important;
-        }
-        
-        /* 静态元素样式 */
-        [contenteditable] {
-            cursor: default !important;
-            border: none !important;
-            background-color: transparent !important;
-            outline: none !important;
-        }
-        
-        /* 移除工具栏预留空间 */
-        body { 
-            padding-top: 0 !important; 
-        }
-        
-        /* 确保头像不可点击 */
-        .avatar-container {
-            cursor: default !important;
+        /* 移除编辑器为底部 Dock 预留的空间 */
+        body {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
         }
     </style>
 </head>
-<body data-theme="${currentThemeName}">
-    <main id="profileCardContainer">
+<body class="pc-static" data-theme="${currentThemeName}">
+    <main id="profileCardContainer" style="${(container.getAttribute('style') || '').replace(/"/g, '&quot;')}">
         ${exportContainer.innerHTML}
     </main>
 </body>
@@ -382,7 +343,7 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
             height: auto !important;
             display: grid !important;
             grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 32px 24px !important;
+            gap: var(--pc-gap-y, 32px) var(--pc-gap-x, 24px) !important;
             width: 100% !important;
         }
         #export-root .react-grid-item {
@@ -406,6 +367,8 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
 
     // 创建包裹层，复用页面背景，并容纳内容与赛博朋克扫描线
     const wrapper = document.createElement('div');
+    // 与预览模式共用 .pc-static 样式（见 App.css）
+    wrapper.className = 'pc-static';
     wrapper.style.width = '1080px';
     wrapper.style.margin = '0 auto';
     wrapper.style.position = 'relative';
@@ -429,7 +392,6 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
 
     removeElementsBySelectors(clonedElement, EXPORT_HIDDEN_SELECTORS);
     cleanupContentEditableElements(clonedElement, false);
-    setAvatarNonInteractive(clonedElement);
 
     wrapper.appendChild(clonedElement);
 
@@ -527,64 +489,4 @@ export const exportConfig = async (profileData: ProfileData | null, locale: Loca
     }
 };
 
-/**
- * 显示通知消息
- * @param message 通知消息内容
- * @param type 通知类型：success 或 error
- */
-export const showNotification = (message: string, type: 'success' | 'error') => {
-    if (!document.getElementById('profilecraft-export-notification-animation')) {
-        const animationStyle = document.createElement('style');
-        animationStyle.id = 'profilecraft-export-notification-animation';
-        animationStyle.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(animationStyle);
-    }
-
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
-        color: white;
-        padding: 16px 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 9999;
-        font-size: 14px;
-        font-weight: 500;
-        animation: slideIn 0.3s ease-out;
-    `;
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
-    
-    // 3 秒后自动移除
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-out';
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
-};
+export { showNotification } from './notify';

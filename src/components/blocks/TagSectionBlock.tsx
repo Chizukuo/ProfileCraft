@@ -1,114 +1,42 @@
-import React, { useState } from 'react';
-import { useProfile } from '../../context/ProfileContext';
-import { TagSectionElement, TagData, Styles } from '../../types/data'; // 引入 Styles
+import React from 'react';
+import { TagSectionElement } from '../../types/data';
 import EditableText from '../ui/EditableText';
-import ActionButton from '../ui/ActionButton';
-import { X, Plus } from 'lucide-react';
 import Tag from '../ui/Tag';
-import { useDeleteHoverState } from '../../hooks';
+import { InlineAdder } from '../ui/EditorControls';
+import BlockShell, { BlockProps } from './BlockShell';
+import { useElementActions } from '../../hooks/useElementActions';
+import { useTranslation } from '../../hooks/useTranslation';
 
-interface TagSectionBlockProps {
-    element: TagSectionElement;
-    cardIndex: number;
-    elementIndex: number;
-    onDelete: () => void;
-}
+const TagSectionBlock: React.FC<BlockProps<TagSectionElement>> = ({ element, cardIndex, elementIndex, ...shell }) => {
+    const { update, updateWithUndo } = useElementActions<TagSectionElement>(cardIndex, elementIndex);
+    const { t } = useTranslation();
 
-const TagSectionBlock: React.FC<TagSectionBlockProps> = ({ element, cardIndex, elementIndex, onDelete }) => {
-    const { updateProfileData } = useProfile();
-    const [newTagText, setNewTagText] = useState('');
-    const { isDeleteHovered, isContainerHovered, containerHoverHandlers, deleteHoverHandlers } = useDeleteHoverState();
-
-    const handleUpdateElement = (field: keyof TagSectionElement, value: any) => {
-        updateProfileData(prev => ({
-            ...prev!,
-            cards: prev!.cards.map((card, i) => {
-                if (i === cardIndex) {
-                    const newElements = card.elements.map((el, j) => (
-                        j === elementIndex ? { ...el, [field]: value } : el
-                    ));
-                    return { ...card, elements: newElements };
-                }
-                return card;
-            })
-        }));
-    };
-
-    const addTag = () => {
-        if(newTagText.trim()){
-            const newTag: TagData = { text: newTagText.trim() };
-            handleUpdateElement('tags', [...element.tags, newTag]);
-            setNewTagText('');
-        }
-    };
-    
-    const updateTag = (tagIndex: number, newTagData: Partial<TagData>) => {
-        const newTags = element.tags.map((tag, i) => (
-            i === tagIndex ? { ...tag, ...newTagData } : tag
-        ));
-        handleUpdateElement('tags', newTags);
-    };
-
-    const deleteTag = (tagIndex: number) => {
-        handleUpdateElement('tags', element.tags.filter((_, i) => i !== tagIndex));
-    };
-    
-    // --- FIX START: 增加处理标签样式更新的函数 ---
-    const handleTagStyleUpdate = (tagIndex: number, newStyles: Styles) => {
-        const newTags = element.tags.map((tag, i) => (
-            i === tagIndex ? { ...tag, styles: newStyles } : tag
-        ));
-        handleUpdateElement('tags', newTags);
-    };
-    // --- FIX END ---
-    
     return (
-        <div 
-            className={`element-container ${isDeleteHovered ? 'is-deleting' : ''}`}
-            {...containerHoverHandlers}
-        >
-             <EditableText
+        <BlockShell title={t('blockTypes.tagSection')} {...shell}>
+            <EditableText
                 as="h3"
                 className="card-content-subheading"
                 html={element.subheading}
                 styles={element.subheadingStyles}
-                onUpdate={(html) => handleUpdateElement('subheading', html)}
-                onStyleUpdate={(styles) => handleUpdateElement('subheadingStyles', styles)}
+                onUpdate={(html) => update({ subheading: html })}
             />
             <div className="tag-group-container">
                 {element.tags.map((tag, i) => (
-                    <Tag 
-                        key={i} 
+                    <Tag
+                        key={i}
                         tagData={tag}
-                        defaultStyles={element.tagStyles} 
-                        onUpdate={(newTagData) => updateTag(i, newTagData)}
-                        onDelete={() => deleteTag(i)}
-                        // --- FIX START: 传入样式更新函数 ---
-                        onStyleUpdate={(styles) => handleTagStyleUpdate(i, styles)}
-                        // --- FIX END ---
+                        defaultStyles={element.tagStyles}
+                        onUpdate={(d) => update(el => ({ tags: el.tags.map((x, j) => (j === i ? { ...x, ...d } : x)) }))}
+                        onDelete={() => updateWithUndo(el => ({ tags: el.tags.filter((_, j) => j !== i) }), 'deleteTag')}
                     />
                 ))}
-                <div className="add-tag-button-container">
-                     <input 
-                        type="text" 
-                        className="add-tag-input"
-                        placeholder="新标签名"
-                        value={newTagText}
-                        onChange={(e) => setNewTagText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && addTag()}
-                    />
-                    <ActionButton icon={<Plus size={16} />} title="添加标签" onClick={addTag} />
-                </div>
+                <InlineAdder
+                    label={t('controls.addTag')}
+                    placeholder={t('block.newTagPlaceholder')}
+                    onAdd={(text) => update(el => ({ tags: [...el.tags, { text }] }))}
+                />
             </div>
-            <ActionButton 
-              icon={<X size={12} />} 
-              title="删除此区块" 
-              onClick={onDelete} 
-                            variant="delete"
-                            className={`block-delete-btn ${isContainerHovered ? 'is-visible' : ''}`}
-                            {...deleteHoverHandlers}
-            />
-        </div>
+        </BlockShell>
     );
 };
 

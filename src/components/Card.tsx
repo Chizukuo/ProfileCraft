@@ -1,244 +1,258 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useProfile } from '../context/ProfileContext';
-import { CardData, CardElement, ProfileData } from '../types/data';
+import { useProfileActions } from '../context/ProfileContext';
+import { useEditorUI } from '../context/EditorUIContext';
+import { AppearanceSettings, CardData, CardElement, CardStyle, ProfileData } from '../types/data';
 import { useTranslation } from '../hooks/useTranslation';
 import EditableText from './ui/EditableText';
-import ActionButton from './ui/ActionButton';
-import ConfirmDialog from './ui/ConfirmDialog';
-import { X, PlusCircle, GripHorizontal, Columns } from 'lucide-react';
-import ProfileInfoBlock from './blocks/ProfileInfoBlock';
+import { X, GripHorizontal, Settings, AlignLeft, AlignCenter, Palette } from 'lucide-react';
+import HeadingBlock from './blocks/HeadingBlock';
+import AvatarBlock from './blocks/AvatarBlock';
+import InfoListBlock from './blocks/InfoListBlock';
+import QrCodeBlock from './blocks/QrCodeBlock';
+import DividerBlock from './blocks/DividerBlock';
 import ParagraphBlock from './blocks/ParagraphBlock';
 import TagSectionBlock from './blocks/TagSectionBlock';
 import OshiSectionBlock from './blocks/OshiSectionBlock';
 import GroupedTagSectionBlock from './blocks/GroupedTagSectionBlock';
+import ImageGalleryBlock from './blocks/ImageGalleryBlock';
+import type { BlockProps } from './blocks/BlockShell';
 import AddElementModal from './AddElementModal';
-import { getWidthFromLayoutSpan } from '../hooks/useGridLayout';
+import { getWidthFromLayoutSpan, getLayoutSpanFromWidth } from '../utils/gridLayout';
+import { CARD_COLOR_PRESETS, getCardBackground, getCardTextOverride } from '../utils/appearance';
+import { AddButton, MoveControls, Popover, SegmentedControl, SettingRow, SwitchControl, ToolButton } from './ui/EditorControls';
 
 // 策略模式：元素类型 → 渲染组件映射表，新增元素类型只需在此注册
-const ELEMENT_RENDERERS: Record<CardElement['type'], React.ComponentType<any>> = {
-  profileInfo: ProfileInfoBlock,
+const ELEMENT_RENDERERS: Record<CardElement['type'], React.ComponentType<BlockProps<any>>> = {
+  heading: HeadingBlock,
   paragraph: ParagraphBlock,
+  avatar: AvatarBlock,
+  infoList: InfoListBlock,
+  qrCode: QrCodeBlock,
+  divider: DividerBlock,
   tagSection: TagSectionBlock,
   tagSectionTwo: OshiSectionBlock,
   groupedTagSection: GroupedTagSectionBlock,
+  imageGallery: ImageGalleryBlock,
 };
 
 interface CardProps {
   cardData: CardData;
   cardIndex: number;
-  onHeightChange?: (height: number) => void;
+  appearance: AppearanceSettings;
+  isFirst: boolean;
+  isLast: boolean;
+  /** 当前能否拖动（只有桌面三列布局、非预览时可以） */
+  canDrag: boolean;
+  onHeightChange: (cardId: string, height: number) => void;
+  onMove: (cardId: string, direction: -1 | 1) => void;
 }
 
-const Card: React.FC<CardProps> = ({ cardData, cardIndex, onHeightChange }) => {
-  const { updateProfileData } = useProfile();
+const Card: React.FC<CardProps> = ({ cardData, cardIndex, appearance, isFirst, isLast, canDrag, onHeightChange, onMove }) => {
+  const { updateProfileData, commitWithUndo } = useProfileActions();
+  const { setCustomizeOpen } = useEditorUI();
   const { t } = useTranslation();
   const [isAddElementModalOpen, setAddElementModalOpen] = useState(false);
-  const [isHoveringDelete, setIsHoveringDelete] = useState(false);
-  const [isCardHovered, setIsCardHovered] = useState(false);
-  const [deleteCardConfirm, setDeleteCardConfirm] = useState(false);
-  const [deleteElementIndex, setDeleteElementIndex] = useState<number | null>(null);
-  const [isWidthMenuOpen, setIsWidthMenuOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const widthControlRef = useRef<HTMLDivElement>(null);
+  const cardId = cardData.id;
+  const padding = appearance.layout.padding;
 
   const currentWidth = cardData.layout?.w ?? getWidthFromLayoutSpan(cardData.layoutSpan);
+  const style = cardData.style ?? {};
 
   useEffect(() => {
-      if (!cardRef.current || !onHeightChange) return;
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-              const element = entry.target as HTMLElement;
-              // Use scrollHeight to ensure we capture all content
-              // Add padding (24px * 2) + border (2px) + minimal buffer (10px) = 58px
-              onHeightChange(element.scrollHeight + 58);
-          }
-      });
-      // Observe the content wrapper instead of the card itself
-      const contentWrapper = cardRef.current.querySelector('.card-inner-content');
-      if (contentWrapper) {
-          resizeObserver.observe(contentWrapper);
+    const contentWrapper = cardRef.current?.querySelector('.card-inner-content');
+    if (!contentWrapper) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // 内容高度 + 上下内边距 + 边框和少量余量
+        onHeightChange(cardId, (entry.target as HTMLElement).scrollHeight + padding * 2 + 10);
       }
-      return () => resizeObserver.disconnect();
-  }, [onHeightChange]);
+    });
+    resizeObserver.observe(contentWrapper);
+    return () => resizeObserver.disconnect();
+  }, [onHeightChange, cardId, padding]);
 
-  const handleUpdateCard = useCallback((field: keyof CardData, value: any) => {
+  const updateCard = useCallback((patch: (card: CardData) => CardData) => {
     updateProfileData((prev: ProfileData) => ({
       ...prev,
-      cards: prev.cards.map((card, i) => i === cardIndex ? { ...card, [field]: value } : card)
+      cards: prev.cards.map(card => card.id === cardId ? patch(card) : card),
     }));
-  }, [cardIndex, updateProfileData]);
+  }, [cardId, updateProfileData]);
 
-  const setWidth = (width: number) => {
-      updateProfileData((prev: ProfileData) => {
-          const newCards = prev.cards.map(c => {
-              if (c.id === cardData.id) {
-                  let newLayoutSpan = c.layoutSpan;
-                  if (width === 1) newLayoutSpan = 'profile-card-span';
-                  else if (width === 2) newLayoutSpan = 'about-me-card-span';
-                  else if (width === 3) newLayoutSpan = 'full-width-card-span';
-
-                  return {
-                      ...c,
-                      layoutSpan: newLayoutSpan,
-                      layout: {
-                          ...(c.layout || { i: c.id, x: 0, y: 0, h: 10 }),
-                          w: width
-                      }
-                  };
-              }
-              return c;
-          });
-          return { ...prev, cards: newCards };
+  const updateStyle = (patch: Partial<CardStyle>) => {
+    updateCard(card => {
+      const next: CardStyle = { ...card.style, ...patch };
+      (Object.keys(next) as (keyof CardStyle)[]).forEach(key => {
+        if (next[key] === undefined || next[key] === '' || next[key] === false) delete next[key];
       });
-      setIsWidthMenuOpen(false);
+      return { ...card, style: Object.keys(next).length ? next : undefined };
+    });
   };
 
-  useEffect(() => {
-    if (!isWidthMenuOpen) return;
-
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (!widthControlRef.current) return;
-      const target = event.target as Node;
-      if (!widthControlRef.current.contains(target)) {
-        setIsWidthMenuOpen(false);
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsWidthMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside, { passive: true });
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isWidthMenuOpen]);
-  
-  const deleteCard = useCallback(() => {
-    updateProfileData((prev: ProfileData) => ({
-      ...prev,
-      cards: prev.cards.filter((_, i) => i !== cardIndex)
+  const setWidth = (width: number) => {
+    updateCard(c => ({
+      ...c,
+      layoutSpan: getLayoutSpanFromWidth(width),
+      layout: { ...(c.layout || { i: c.id, x: 0, y: 0, h: 10 }), w: width, x: Math.min(c.layout?.x ?? 0, 3 - width) },
     }));
-  }, [cardIndex, updateProfileData]);
+  };
+
+  const deleteCard = () => {
+    commitWithUndo(prev => ({ ...prev, cards: prev.cards.filter(card => card.id !== cardId) }), 'deleteCard');
+  };
 
   const addElement = useCallback((element: CardElement) => {
-    handleUpdateCard('elements', [...cardData.elements, element]);
-  }, [cardData.elements, handleUpdateCard]);
-  
-  const confirmDeleteElement = useCallback(() => {
-    if (deleteElementIndex !== null) {
-      handleUpdateCard('elements', cardData.elements.filter((_, i) => i !== deleteElementIndex));
-      setDeleteElementIndex(null);
-    }
-  }, [deleteElementIndex, cardData.elements, handleUpdateCard]);
+    updateCard(card => ({ ...card, elements: [...card.elements, element] }));
+  }, [updateCard]);
 
-  const renderElement = useCallback((element: CardElement, elementIndex: number) => {
-    const key = `${cardData.id}-el-${elementIndex}`;
-    const commonProps = {
-      cardIndex,
-      elementIndex,
-      onDelete: () => setDeleteElementIndex(elementIndex),
-    };
+  const deleteElement = (index: number) => {
+    commitWithUndo(prev => ({
+      ...prev,
+      cards: prev.cards.map(card => card.id === cardId ? { ...card, elements: card.elements.filter((_, i) => i !== index) } : card),
+    }), 'deleteBlock');
+  };
 
-    const Renderer = ELEMENT_RENDERERS[element.type];
-    return Renderer ? <Renderer key={key} element={element} {...commonProps} /> : null;
-  }, [cardData.id, cardIndex]);
+  const moveElement = (index: number, direction: -1 | 1) => {
+    updateCard(card => {
+      const target = index + direction;
+      if (target < 0 || target >= card.elements.length) return card;
+      const elements = [...card.elements];
+      [elements[index], elements[target]] = [elements[target], elements[index]];
+      return { ...card, elements };
+    });
+  };
+
+  const cardBackground = style.bgColor ? getCardBackground(appearance, style.bgColor) : '';
+  const cardText = getCardTextOverride(appearance, style.bgColor);
+  const cardInlineStyle: React.CSSProperties | undefined = cardBackground
+    ? ({ backgroundColor: cardBackground, ...(cardText ? { '--pc-card-text': cardText } : {}) } as React.CSSProperties)
+    : undefined;
 
   return (
     <>
       <div
         ref={cardRef}
-        className={`ui-card ${cardData.layoutSpan} ${isHoveringDelete ? 'is-deleting' : ''}`}
-        data-card-id={cardData.id}
-        onMouseEnter={() => setIsCardHovered(true)}
-        onMouseLeave={() => setIsCardHovered(false)}
+        className={[
+          'ui-card',
+          cardData.layoutSpan,
+          style.textAlign === 'center' ? 'is-centered' : '',
+          style.hideTitle ? 'is-title-hidden' : '',
+        ].filter(Boolean).join(' ')}
+        style={cardInlineStyle}
+        data-card-id={cardId}
+        // 触屏没有悬停：点一下卡片让它获得焦点，从而显示控件（:focus-within）
+        tabIndex={-1}
       >
         <div className="card-inner-content">
-          <div className={`card-top-controls ${isCardHovered || isWidthMenuOpen ? 'is-visible' : ''}`}>
-            <div className={`width-control-container ${isWidthMenuOpen ? 'is-open' : ''}`} ref={widthControlRef}>
-              <button
-                className="width-control-btn"
-                title={t('card.adjustWidth')}
-                aria-haspopup="menu"
-                aria-expanded={isWidthMenuOpen}
-                onClick={() => setIsWidthMenuOpen(prev => !prev)}
-              >
-                <Columns size={16} />
-              </button>
-              <div className="width-dropdown">
-                <button onClick={() => setWidth(1)} className={`width-dropdown-item ${currentWidth === 1 ? 'is-active' : ''}`}>{t('card.width1')}</button>
-                <button onClick={() => setWidth(2)} className={`width-dropdown-item ${currentWidth === 2 ? 'is-active' : ''}`}>{t('card.width2')}</button>
-                <button onClick={() => setWidth(3)} className={`width-dropdown-item ${currentWidth === 3 ? 'is-active' : ''}`}>{t('card.width3')}</button>
+          <div className="card-top-controls editor-only">
+            <span />
+            {canDrag ? (
+              <div className="drag-handle" title={t('controls.dragToMove')}>
+                <GripHorizontal size={20} />
               </div>
+            ) : <span />}
+            <div className="pc-controls is-inline">
+              <Popover icon={<Settings size={14} />} title={t('controls.cardSettings')} className="card-settings">
+                {(close) => (
+                  <>
+                    <SettingRow label={t('controls.width')}>
+                      <SegmentedControl
+                        value={currentWidth}
+                        options={[1, 2, 3].map(w => ({ value: w, label: t(`card.width${w}`) }))}
+                        onChange={setWidth}
+                      />
+                    </SettingRow>
+                    <SettingRow label={t('card.background')}>
+                      <div className="pc-swatches">
+                        <button type="button" className={`pc-swatch is-auto ${!style.bgColor ? 'is-active' : ''}`} title={t('card.followGlobal')} onClick={() => updateStyle({ bgColor: undefined })}>
+                          A
+                        </button>
+                        {CARD_COLOR_PRESETS.map(color => (
+                          <button
+                            key={color}
+                            type="button"
+                            className={`pc-swatch ${style.bgColor?.toUpperCase() === color ? 'is-active' : ''}`}
+                            style={{ backgroundColor: color }}
+                            title={color}
+                            aria-label={color}
+                            onClick={() => updateStyle({ bgColor: color })}
+                          />
+                        ))}
+                        <label className="pc-swatch is-custom" title={t('card.customColor')}>
+                          <input type="color" value={style.bgColor || '#FFFFFF'} onChange={(e) => updateStyle({ bgColor: e.target.value })} />
+                        </label>
+                      </div>
+                    </SettingRow>
+                    <SettingRow label={t('card.textAlign')}>
+                      <SegmentedControl
+                        value={style.textAlign === 'center' ? 'center' : 'left'}
+                        options={[
+                          { value: 'left', label: <><AlignLeft size={13} /> {t('card.alignLeft')}</> },
+                          { value: 'center', label: <><AlignCenter size={13} /> {t('card.alignCenter')}</> },
+                        ]}
+                        onChange={(align) => updateStyle({ textAlign: align === 'center' ? 'center' : undefined })}
+                      />
+                    </SettingRow>
+                    <SettingRow label={t('card.showTitle')}>
+                      <SwitchControl label={t('card.showTitle')} checked={!style.hideTitle} onChange={(v) => updateStyle({ hideTitle: !v })} />
+                    </SettingRow>
+                    <MoveControls onMove={(dir) => onMove(cardId, dir)} isFirst={isFirst} isLast={isLast} />
+                    <button
+                      type="button"
+                      className="pc-popover-link"
+                      onClick={() => {
+                        close();
+                        setCustomizeOpen(true);
+                      }}
+                    >
+                      <Palette size={13} /> {t('controls.globalAppearance')}
+                    </button>
+                  </>
+                )}
+              </Popover>
+              <ToolButton danger icon={<X size={14} />} title={t('controls.deleteCard')} onClick={deleteCard} />
             </div>
-
-            <div className="drag-handle">
-              <GripHorizontal size={20} />
-            </div>
-
-            <ActionButton
-              icon={<X size={14} />}
-              title={t('card.deleteCard')}
-              onClick={() => setDeleteCardConfirm(true)}
-              variant="delete"
-              className={`card-delete-btn ${isCardHovered ? 'is-visible' : ''}`}
-              onMouseEnter={() => setIsHoveringDelete(true)}
-              onMouseLeave={() => setIsHoveringDelete(false)}
-            />
           </div>
 
-          <div className="section-title-container">
-            <EditableText
-              as="h2"
-              className="section-title"
-              html={cardData.title}
-              styles={cardData.titleStyles}
-              onUpdate={(html) => handleUpdateCard('title', html)}
-              onStyleUpdate={(styles) => handleUpdateCard('titleStyles', styles)}
-            />
-          </div>
+          {!style.hideTitle && (
+            <div className="section-title-container">
+              <EditableText
+                as="h2"
+                className="section-title"
+                html={cardData.title}
+                styles={cardData.titleStyles}
+                onUpdate={(html) => updateCard(card => ({ ...card, title: html }))}
+              />
+            </div>
+          )}
 
           <div className="card-content-wrapper">
-            {cardData.elements.map(renderElement)}
+            {cardData.elements.map((element, elementIndex) => {
+              const Renderer = ELEMENT_RENDERERS[element.type];
+              if (!Renderer) return null;
+              return (
+                <Renderer
+                  key={`${cardId}-el-${elementIndex}`}
+                  element={element}
+                  cardIndex={cardIndex}
+                  elementIndex={elementIndex}
+                  isFirst={elementIndex === 0}
+                  isLast={elementIndex === cardData.elements.length - 1}
+                  onDelete={() => deleteElement(elementIndex)}
+                  onMove={(dir) => moveElement(elementIndex, dir)}
+                />
+              );
+            })}
           </div>
 
-          <button onClick={() => setAddElementModalOpen(true)} className="action-button-text-with-icon" title={t('card.addNewBlock')}>
-            <PlusCircle size={18} /> {t('card.addNewBlock')}
-          </button>
+          <AddButton variant="block" label={t('controls.addBlock')} onClick={() => setAddElementModalOpen(true)} />
         </div>
       </div>
-      
-      <AddElementModal 
+
+      <AddElementModal
         isOpen={isAddElementModalOpen}
         onClose={() => setAddElementModalOpen(false)}
         onAddElement={addElement}
-      />
-      
-      <ConfirmDialog
-        isOpen={deleteCardConfirm}
-        onClose={() => setDeleteCardConfirm(false)}
-        onConfirm={deleteCard}
-        title={t('modal.confirmDeleteCard')}
-        message={t('modal.confirmDeleteCardMessage', { title: cardData.title.replace(/<[^>]*>/g, '') })}
-        confirmText={t('modal.delete')}
-        isDangerous={true}
-      />
-      
-      <ConfirmDialog
-        isOpen={deleteElementIndex !== null}
-        onClose={() => setDeleteElementIndex(null)}
-        onConfirm={confirmDeleteElement}
-        title={t('modal.confirmDeleteBlock')}
-        message={t('modal.confirmDeleteBlockMessage')}
-        confirmText={t('modal.delete')}
-        isDangerous={true}
       />
     </>
   );

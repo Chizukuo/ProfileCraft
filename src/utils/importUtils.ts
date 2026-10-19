@@ -1,8 +1,9 @@
 import { ProfileData, CardData, CardElement, UserSettings } from '../types/data';
 import { getDefaultProfileData } from './data';
-import { showNotification } from './exportUtils';
+import { showNotification } from './notify';
 import { loadTranslations, createT } from './i18n';
 import { Locale } from '../context/LocaleContext';
+import { normalizeProfileData, normalizeCards } from './profileSchema';
 
 // Tintro 第三方配置格式的类型定义
 interface TintroPersonalInfo {
@@ -41,11 +42,6 @@ interface TintroConfig {
 // 简单判断是否是 Tintro 格式
 const isTintroConfig = (data: Record<string, unknown>): data is TintroConfig => {
     return Boolean(data && data.personalInfo && Array.isArray(data.cards) && data.globalCardStyles);
-};
-
-// 简单判断是否是 ProfileCraft 格式
-const isProfileCraftConfig = (data: Record<string, unknown>): boolean => {
-    return Boolean(data && data.userSettings && Array.isArray(data.cards));
 };
 
 export const parseTintroToProfileData = (tintroData: TintroConfig): ProfileData => {
@@ -118,14 +114,14 @@ export const parseTintroToProfileData = (tintroData: TintroConfig): ProfileData 
             title: tintroCard.title || '',
             titleStyles,
             layoutSpan,
-            layout: { i: `card_${Date.now()}_${index}`, x: (index * w) % 3, y: Infinity, w, h: 10 },
+            layout: { i: `card_${Date.now()}_${index}`, x: (index * w) % 3, y: Number.NaN, w, h: 10 },
             elements
         };
     });
 
     return {
         userSettings,
-        cards
+        cards: normalizeCards(cards)
     };
 };
 
@@ -139,8 +135,9 @@ export const importConfig = async (file: File, locale: Locale, onSuccess: (data:
             const result = e.target?.result as string;
             const parsedData = JSON.parse(result) as Record<string, unknown>;
 
-            if (isProfileCraftConfig(parsedData)) {
-                onSuccess(parsedData as unknown as ProfileData);
+            const profileCraftData = normalizeProfileData(parsedData);
+            if (profileCraftData) {
+                onSuccess(profileCraftData);
                 showNotification(t('notification.importSuccess') || 'Import successful!', 'success');
             } else if (isTintroConfig(parsedData)) {
                 const convertedData = parseTintroToProfileData(parsedData);

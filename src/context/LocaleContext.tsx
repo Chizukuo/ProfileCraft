@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import localesManifest from '../config/locales.json';
+import { safeGetItem, safeSetItem } from '../utils/storage';
 
 export type Locale = keyof typeof localesManifest;
 
@@ -14,13 +15,13 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
   // 默认语言设为简体中文，或根据浏览器语言自动检测
   const getDefaultLocale = (): Locale => {
     // 首先检查 localStorage
-    const savedLocale = localStorage.getItem('profilecraft-locale') as Locale;
+    const savedLocale = safeGetItem('profilecraft-locale') as Locale;
     if (savedLocale && Object.keys(localesManifest).includes(savedLocale)) {
       return savedLocale;
     }
 
     // 如果没有保存的语言，使用浏览器语言
-    const browserLang = navigator.language;
+    const browserLang = navigator.language || 'zh-CN';
     const supportedLocales = Object.keys(localesManifest) as Locale[];
     
     // 尝试完全匹配
@@ -51,7 +52,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.setAttribute('data-locale', locale);
     
     // 保存到 localStorage
-    localStorage.setItem('profilecraft-locale', locale);
+    safeSetItem('profilecraft-locale', locale);
   }, [locale]);
 
   return (

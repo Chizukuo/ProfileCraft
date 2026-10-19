@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useProfile } from './ProfileContext';
 import type { ResolvedTheme, ThemeOption } from '../types/theme';
 import { getThemeCssPath, getThemeOptions, isKnownTheme, resolveTheme, type ThemeKey } from '../utils/themeUtils';
+import { safeGetItem, safeSetItem } from '../utils/storage';
 
 const THEME_STORAGE_KEY = 'profilecraft-theme';
 
@@ -20,7 +21,7 @@ const getStoredTheme = (): ThemeKey => {
     return 'default';
   }
 
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const stored = safeGetItem(THEME_STORAGE_KEY);
   return stored && isKnownTheme(stored) ? stored : 'default';
 };
 
@@ -52,7 +53,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, [updateProfileData]);
 
   useEffect(() => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, resolvedTheme.key);
+    safeSetItem(THEME_STORAGE_KEY, resolvedTheme.key);
   }, [resolvedTheme.key]);
 
   useEffect(() => {

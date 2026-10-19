@@ -359,6 +359,21 @@
     color: var(--success-green);
     font-size: 0.8rem;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+}
+
+.ai-panel-success-undo {
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 /* Input Area */
@@ -481,4 +496,88 @@
         animation: none;
         opacity: 0.6;
     }
+}
+
+.ai-settings-note {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: var(--ui-text-tertiary);
+}
+
+/* 没有 Key 时的引导 */
+.ai-onboarding {
+    margin-top: var(--space-m);
+    width: 100%;
+    max-width: 360px;
+    text-align: left;
+    padding: var(--space-m);
+    border: 1px dashed var(--ui-border-default);
+    border-radius: var(--radius-m);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ai-onboarding-title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--ui-text-primary);
+}
+
+.ai-onboarding-steps {
+    margin: 0;
+    padding-left: 1.2em;
+    font-size: 0.82rem;
+    color: var(--ui-text-secondary);
+    line-height: 1.7;
+}
+
+.ai-onboarding-steps a {
+    color: var(--theme-text-strong);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.ai-onboarding-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: var(--radius-s);
+    border: 1px solid var(--ui-border-default);
+    background: var(--toolbar-bg);
+    color: var(--ui-text-primary);
+    font-size: 0.85rem;
+}
+
+.ai-onboarding-input:focus {
+    outline: none;
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 3px var(--hover-bg-color);
+}
+
+.ai-onboarding-note {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ui-text-tertiary);
+}
+
+.ai-onboarding .ai-welcome-hint {
+    align-self: flex-start;
+}
+
+/* 生成方式：替换 / 追加 */
+.ai-apply-mode {
+    margin-left: auto;
+    font-size: 0.75rem;
+}
+
+.ai-apply-mode .pc-segmented button {
+    padding: 3px 8px;
+    font-size: 0.72rem;
 }

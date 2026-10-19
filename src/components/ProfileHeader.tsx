@@ -3,7 +3,7 @@ import { useProfile } from '../context/ProfileContext';
 import { UserSettings } from '../types/data';
 import EditableText from './ui/EditableText';
 
-const ProfileHeader: React.FC = () => {
+const ProfileHeader: React.FC<{ showSubtitle: boolean }> = ({ showSubtitle }) => {
     const { profileData, updateProfileData } = useProfile();
 
     if (!profileData) return null;
@@ -28,14 +28,14 @@ const ProfileHeader: React.FC = () => {
                 onUpdate={(html) => handleUpdate('mainTitle', html)}
                 onStyleUpdate={(styles) => handleUpdate('mainTitleStyles', styles)}
             />
-            <EditableText
+            {showSubtitle && <EditableText
                 as="p"
                 className="subtitle subtitle-text"
                 html={profileData.userSettings.subtitle}
                 styles={profileData.userSettings.subtitleStyles}
                 onUpdate={(html) => handleUpdate('subtitle', html)}
                 onStyleUpdate={(styles) => handleUpdate('subtitleStyles', styles)}
-            />
+            />}
         </header>
     );
 };
