@@ -196,8 +196,8 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
 
         /* 移动端：导出的 HTML 在手机上打开时改为单列 */
         @media (max-width: 720px) {
-            .layout { grid-template-columns: 1fr !important; }
-            .layout > .react-grid-item { grid-column: span 1 !important; }
+            body.pc-static .layout { grid-template-columns: 1fr !important; }
+            body.pc-static .layout > .react-grid-item { grid-column: span 1 !important; }
             main#profileCardContainer { padding: 24px 16px !important; }
         }
 
@@ -280,9 +280,18 @@ export const exportToHtml = async (profileData: ProfileData, currentThemeName: T
  * @param locale 当前语言
  * @param currentThemeName 当前选择的主题名称
  */
-export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale, currentThemeName: Theme) => {
+/**
+ * wide：桌面三列（1080px）；phone：手机竖版单列，方便发到手机上的社交平台。
+ * 竖版按 430px 排版：手机上全宽显示时只缩小到约 0.9 倍，正文约 13.5px、标签约 12px。
+ * 按 540px 排版时标签会缩到 9px 左右，看不清。
+ */
+export type ImageExportLayout = 'wide' | 'phone';
+
+export const exportToImage = async (element: HTMLElement, profileData: ProfileData | null, locale: Locale, currentThemeName: Theme, layout: ImageExportLayout = 'wide') => {
     const t = await getTranslationFunction(locale);
     if (!element || !profileData) return;
+    const isPhone = layout === 'phone';
+    const width = isPhone ? 430 : 1080;
 
     const themeCssContent = await getThemeCssContent(currentThemeName);
 
@@ -304,7 +313,7 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     exportRoot.style.position = 'fixed';
     exportRoot.style.top = '0';
     exportRoot.style.left = '-2000px';
-    exportRoot.style.width = '1080px';
+    exportRoot.style.width = `${width}px`;
     exportRoot.style.pointerEvents = 'none';
     exportRoot.style.zIndex = '-1';
     document.body.appendChild(exportRoot);
@@ -332,10 +341,10 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     const desktopOverride = document.createElement('style');
     desktopOverride.textContent = `
         #export-root main#profileCardContainer {
-            width: 1080px !important;
-            max-width: 1080px !important;
+            width: ${width}px !important;
+            max-width: ${width}px !important;
             margin: 0 auto !important;
-            padding: 48px 32px 32px 32px !important;
+            padding: ${isPhone ? '32px 14px 20px 14px' : '48px 32px 32px 32px'} !important;
             height: auto !important;
         }
         /* 重置 react-grid-layout 为 CSS Grid 以消除留白 */
@@ -359,6 +368,12 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
         #export-root .about-me-card-span { grid-column: span 2 !important; }
         #export-root .oshi-card-span,
         #export-root .full-width-card-span { grid-column: span 3 !important; }
+        ${isPhone ? `
+        /* 竖版：单列，卡片按 (y, x) 的顺序从上到下排 */
+        #export-root .layout { grid-template-columns: minmax(0, 1fr) !important; gap: min(var(--pc-gap-y, 32px), 14px) !important; }
+        #export-root .react-grid-item { grid-column: span 1 !important; }
+        #export-root .main-title { font-size: 2rem !important; }
+        ` : ''}
 
         #export-root .sidebar-container,
         #export-root .hamburger-menu { display: none !important; }
@@ -369,7 +384,7 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     const wrapper = document.createElement('div');
     // 与预览模式共用 .pc-static 样式（见 App.css）
     wrapper.className = 'pc-static';
-    wrapper.style.width = '1080px';
+    wrapper.style.width = `${width}px`;
     wrapper.style.margin = '0 auto';
     wrapper.style.position = 'relative';
     wrapper.style.backgroundColor = backgroundColor;
@@ -385,8 +400,8 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
     // 克隆内容并移除编辑器控件
     const clonedElement = element.cloneNode(true) as HTMLElement;
     cloneRootCssVariables(clonedElement);
-    clonedElement.style.width = '1080px';
-    clonedElement.style.maxWidth = '1080px';
+    clonedElement.style.width = `${width}px`;
+    clonedElement.style.maxWidth = `${width}px`;
     clonedElement.style.margin = '0 auto';
     clonedElement.style.boxSizing = 'border-box';
 
@@ -419,8 +434,8 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
             scale: 3,
             useCORS: true,
             logging: false,
-            width: 1080,
-            windowWidth: 1080,
+            width,
+            windowWidth: width,
             scrollX: 0,
             scrollY: 0
         });
@@ -444,7 +459,7 @@ export const exportToImage = async (element: HTMLElement, profileData: ProfileDa
         const image = finalCanvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = image;
-        link.download = '扩列条.png';
+        link.download = isPhone ? '扩列条-竖版.png' : '扩列条.png';
         link.click();
 
         showNotification(t('notification.exportImageSuccess') || 'Export successful', 'success');

@@ -36,7 +36,7 @@ const GroupedTagSectionBlock: React.FC<BlockProps<GroupedTagSectionElement>> = (
             <InlineAdder
                 label={t('controls.addTag')}
                 placeholder={t('block.newTagPlaceholder')}
-                onAdd={(text) => update(el => ({ [group]: [...el[group], { text }] }))}
+                onAdd={(text) => update(el => ({ [group]: [...el[group].filter(x => !x.placeholder), { text }] }))}
             />
         </div>
     );

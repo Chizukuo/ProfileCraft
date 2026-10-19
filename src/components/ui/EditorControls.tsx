@@ -3,6 +3,7 @@ import { Plus, ArrowUp, ArrowDown } from 'lucide-react';
 import { useDismissable } from '../../hooks/useDismissable';
 import { useTranslation } from '../../hooks/useTranslation';
 import { isSubmitEnter } from '../../utils/keyboard';
+import { escapeHtml, splitItems } from '../../utils/html';
 
 // 编辑器里所有控件的统一外观与行为。新增的编辑控件请优先复用这里的组件，
 // 让用户在卡片、区块、标签、图片上看到的是同一套按钮。
@@ -121,7 +122,10 @@ export const AddButton: React.FC<AddButtonProps> = ({ label, onClick, variant = 
   </button>
 );
 
-/** 先显示“+ 添加标签”，点开后变成输入框；回车添加并保持输入状态，方便连续添加 */
+/**
+ * 先显示“+ 添加标签”，点开后变成输入框；回车添加并保持输入状态，方便连续添加。
+ * 一次输入“A、B、C”会拆成多个条目；onAdd 收到的是转义后的 HTML（数据里的文字按 HTML 存储）。
+ */
 export const InlineAdder: React.FC<{ label: string; placeholder: string; onAdd: (text: string) => void }> = ({ label, placeholder, onAdd }) => {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
@@ -133,8 +137,7 @@ export const InlineAdder: React.FC<{ label: string; placeholder: string; onAdd: 
   }
 
   const submit = () => {
-    const value = text.trim();
-    if (value) onAdd(value);
+    splitItems(text).forEach((item) => onAdd(escapeHtml(item)));
     setText('');
   };
 

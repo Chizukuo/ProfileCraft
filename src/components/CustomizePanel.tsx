@@ -6,64 +6,16 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useAppearanceActions } from '../hooks/useAppearance';
 import { useThrottle } from '../hooks/useThrottle';
 import { SegmentedControl, SwitchControl } from './ui/EditorControls';
-import { APPEARANCE_LIMITS, CARD_COLOR_PRESETS, DEFAULT_APPEARANCE, FONT_OPTIONS, getAppearance } from '../utils/appearance';
+import { APPEARANCE_LIMITS, CARD_COLOR_PRESETS, FONT_OPTIONS, STYLE_PRESETS, getAppearance } from '../utils/appearance';
+import type { StylePreset } from '../utils/appearance';
 import { compressImage, IMAGE_PRESETS } from '../utils/image';
 import { showNotification } from '../utils/notify';
-import type { AppearanceSettings, BackgroundType, BackgroundFit, CardShadow } from '../types/data';
+import type { AppearanceSettings, BackgroundPattern, BackgroundType, BackgroundFit, CardShadow } from '../types/data';
 
 interface CustomizePanelProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-type DeepPartialAppearance = { [K in keyof AppearanceSettings]?: Partial<AppearanceSettings[K]> };
-
-interface StylePreset {
-  key: string;
-  swatch: string;
-  value: DeepPartialAppearance;
-}
-
-// 一键风格：只覆盖背景 / 卡片 / 间距，不动显示开关
-const STYLE_PRESETS: StylePreset[] = [
-  { key: 'classic', swatch: '#FFFDF5', value: { background: DEFAULT_APPEARANCE.background, card: DEFAULT_APPEARANCE.card, layout: { gapX: 24, gapY: 32, padding: 24 } } },
-  {
-    key: 'glass',
-    swatch: 'linear-gradient(135deg, #FFD6E7, #C9E4FF)',
-    value: {
-      background: { type: 'gradient', gradientFrom: '#FFD6E7', gradientTo: '#C9E4FF', gradientAngle: 135 },
-      card: { bgColor: '#FFFFFF', opacity: 0.62, radius: 24, shadow: 'strong', border: false, textColor: '' },
-      layout: { gapX: 20, gapY: 24, padding: 24 },
-    },
-  },
-  {
-    key: 'minimal',
-    swatch: '#F4F4F5',
-    value: {
-      background: { type: 'color', color: '#F4F4F5' },
-      card: { bgColor: '#FFFFFF', opacity: 1, radius: 8, shadow: 'none', border: true, textColor: '' },
-      layout: { gapX: 12, gapY: 12, padding: 20 },
-    },
-  },
-  {
-    key: 'journal',
-    swatch: '#F6EEDC',
-    value: {
-      background: { type: 'color', color: '#F6EEDC' },
-      card: { bgColor: '#FFFBF2', opacity: 1, radius: 4, shadow: 'soft', border: true, textColor: '#5B4636' },
-      layout: { gapX: 20, gapY: 24, padding: 26 },
-    },
-  },
-  {
-    key: 'night',
-    swatch: 'linear-gradient(135deg, #1F2233, #3A2D4F)',
-    value: {
-      background: { type: 'gradient', gradientFrom: '#1F2233', gradientTo: '#3A2D4F', gradientAngle: 160 },
-      card: { bgColor: '#2B2B36', opacity: 0.92, radius: 18, shadow: 'strong', border: false, textColor: '#ECECF1' },
-      layout: { gapX: 20, gapY: 24, padding: 24 },
-    },
-  },
-];
 
 const GRADIENT_PRESETS: [string, string][] = [
   ['#FFF1C1', '#FFD6E7'],
@@ -308,6 +260,23 @@ const CustomizePanel: React.FC<CustomizePanelProps> = ({ isOpen, onClose }) => {
               <Slider label={t('customize.overlayOpacity')} value={bg.overlayOpacity} limits={L.overlayOpacity} format={(v) => `${Math.round(v * 100)}%`} onChange={(overlayOpacity) => updateAppearance('background', { overlayOpacity })} />
             </>
           )}
+
+          {bg.type !== 'image' && (
+            <>
+              <span className="cz-label">{t('customize.pattern')}</span>
+              <Segmented<BackgroundPattern>
+                ariaLabel={t('customize.pattern')}
+                value={bg.pattern}
+                onChange={(pattern) => updateAppearance('background', { pattern })}
+                options={[
+                  { value: 'none', label: t('customize.patternNone') },
+                  { value: 'dots', label: t('customize.patternDots') },
+                  { value: 'stripes', label: t('customize.patternStripes') },
+                  { value: 'grid', label: t('customize.patternGrid') },
+                ]}
+              />
+            </>
+          )}
         </Section>
 
         <Section icon={<LayoutGrid size={15} />} title={t('customize.cards')} onReset={() => resetAppearance('card')} resetLabel={t('customize.reset')}>
@@ -369,6 +338,7 @@ const CustomizePanel: React.FC<CustomizePanelProps> = ({ isOpen, onClose }) => {
                 <option key={font.key || 'default'} value={font.key}>{t(`customize.fonts.${font.key || 'default'}`)}</option>
               ))}
             </select>
+            {FONT_OPTIONS.find(font => font.key === layout.fontFamily)?.titleOnly && <small className="cz-hint">{t('customize.titleFontNote')}</small>}
           </label>
         </Section>
 

@@ -25,7 +25,10 @@
     "preview": "미리보기",
     "previewHint": "편집 버튼을 숨기고 내보낼 모습을 확인",
     "userGuide": "사용 가이드",
-    "settingsHelp": "설정 및 도움말"
+    "settingsHelp": "설정 및 도움말",
+    "exportImagePhone": "세로 이미지로 내보내기 (모바일)",
+    "exportImagePhoneShort": "세로 이미지",
+    "startBlank": "빈 카드로 시작"
   },
   "card": {
     "width1": "1열",
@@ -75,17 +78,21 @@
     "aboutMeCard": "자기소개",
     "aboutMeCardDesc": "2열 너비, 글로 자신을 소개",
     "oshiCard": "최애",
-    "oshiCardDesc": "전체 너비, 최애를 소개",
+    "oshiCardDesc": "최애와 차애를 두 단계로 나누고 사진 자리도",
     "fullWidthCard": "전체 너비 카드",
     "fullWidthCardDesc": "전체 너비를 차지하는 카드",
-    "wishCard": "찾는 친구",
-    "wishCardDesc": "어떤 친구를 만나고 싶은지",
-    "boundaryCard": "지뢰 / 주의사항",
-    "boundaryCardDesc": "싫어하는 것과 교류 스타일",
+    "wishCard": "친추 환영",
+    "wishCardDesc": "어떤 친구를 원하는지, 추가 규칙, QR 코드",
+    "boundaryCard": "지뢰 / NG",
+    "boundaryCardDesc": "빨간 태그로 지뢰를 적고 한마디 덧붙이기",
     "galleryCard": "이미지 모음",
     "galleryCardDesc": "여러 장의 이미지를 격자로 배치",
     "profileInfoCard": "기본 정보",
-    "profileInfoCardDesc": "프로필 사진, 기본 정보, QR 코드"
+    "profileInfoCardDesc": "프로필 사진, 기본 정보, QR 코드",
+    "identityCard": "프로필 카드",
+    "identityCardDesc": "큰 프로필 사진 + “생일 | MBTI | 지역” 한 줄 + 한 줄 소개",
+    "attributeCard": "취향",
+    "attributeCardDesc": "CP, 같은 최애 팬에 대한 생각 등"
   },
   "blockTypes": {
     "paragraph": "문단",
@@ -107,7 +114,11 @@
     "infoList": "정보 목록",
     "infoListDesc": "\"항목: 내용\" 형식 (닉네임, MBTI 등)",
     "qrCode": "QR 코드",
-    "qrCodeDesc": "링크로 생성하거나 QR 이미지 업로드"
+    "qrCodeDesc": "링크로 생성하거나 QR 이미지 업로드",
+    "checklist": "체크리스트",
+    "checklistDesc": "☑ / ☐ 항목 (취향, 원하는 것 등)",
+    "scale": "성향 슬라이더",
+    "scaleDesc": "양쪽 문구 + 슬라이더 (예: 즐겜 ←→ 빡겜)"
   },
   "common": {
     "confirm": "확인",
@@ -145,7 +156,7 @@
     "apiKeyPlaceholder": "API Key 입력",
     "baseUrl": "Base URL",
     "model": "모델",
-    "welcomeQuestion": "안녕하세요. 확장 카드 작성을 도와드릴게요. 먼저 닉네임과 원하는 분위기를 알려주세요.",
+    "welcomeQuestion": "안녕하세요! 소개 카드 만들기를 도와드릴게요. 먼저 뭐라고 부르면 될지, 주로 어떤 장르나 취미를 즐기는지 알려 주세요.",
     "fallbackQuestion": "좋아요. 요즘 가장 자주 하는 게임이나 좋아하는 작품이 무엇인가요?",
     "thinking": "생성 중...",
     "you": "나",
@@ -174,13 +185,25 @@
     "otherProviders": "OpenAI / Anthropic / 기타 엔드포인트 사용",
     "applyModeLabel": "생성된 카드 적용 방식",
     "applyReplace": "모두 교체",
-    "applyAppend": "끝에 추가"
+    "applyAppend": "끝에 추가",
+    "shuffleStyle": "다른 스타일 (현재: {style})",
+    "shuffleStyleHint": "내용은 그대로 두고 전체 스타일만 바꿉니다. AI 요청은 다시 보내지 않습니다",
+    "afterApplyHint": "프로필 사진, QR 코드, 최애 사진은 직접 올려야 해요. 패널을 닫고 해당 위치를 클릭하세요."
   },
   "editor": {
     "bold": "굵게",
     "italic": "기울임",
     "underline": "밑줄",
-    "strikethrough": "취소선"
+    "strikethrough": "취소선",
+    "big": "크게",
+    "clearFormat": "서식 지우기",
+    "color": {
+      "accent": "테마 색",
+      "red": "빨강",
+      "blue": "파랑",
+      "green": "초록",
+      "purple": "보라"
+    }
   },
   "block": {
     "newTagPlaceholder": "새 태그",
@@ -203,7 +226,11 @@
     "uploading": "처리 중…",
     "addImages": "이미지 추가",
     "cropSquare": "정사각형 자르기",
-    "replaceImage": "이미지 변경"
+    "replaceImage": "이미지 변경",
+    "addOption": "항목 추가",
+    "newOptionPlaceholder": "새 항목",
+    "addScale": "줄 추가",
+    "sampleTagHint": "예시 태그: 내 태그를 추가하면 사라지고, 미리보기와 내보내기에는 표시되지 않아요"
   },
   "templates": {
     "paragraphText": "여기에 내용을 입력하세요…",
@@ -225,13 +252,39 @@
     "aboutMeTitle": "자기소개",
     "aboutMeText": "여기에 자기소개를 적어 주세요.",
     "oshiTitle": "최애",
-    "wishTitle": "찾는 친구",
-    "wishText": "같은 취미를 가진 분들과 이야기하고 함께 놀고 싶어요. 낯을 가리지만 편하게 말 걸어 주세요!",
-    "boundaryTitle": "지뢰 / 주의사항",
-    "boundaryText": "· DM 전에 인사 부탁드려요<br>· 이유 없는 언팔은 삼가 주세요<br>· 동담: 환영 / 거절 (직접 수정)",
+    "wishTitle": "친추 환영",
+    "wishText": "같이 얘기하고 게임할 친구를 찾아요~<br>추가할 때 한마디 남겨 주세요",
+    "boundaryTitle": "지뢰 / NG",
+    "boundaryText": "· DM 전에 인사 먼저 해 주세요<br>· 말없이 친구 삭제는 사양해요",
     "galleryTitle": "이미지 모음",
     "profileInfoTitle": "기본 정보",
-    "headingText": "내 닉네임"
+    "headingText": "내 닉네임",
+    "checklistHeading": "취향",
+    "checklist1": "같이 랭크",
+    "checklist2": "보이스 채팅",
+    "checklist3": "오프 모임",
+    "scaleHeading": "내 성향",
+    "scaleLeft": "즐겜",
+    "scaleRight": "빡겜",
+    "scaleLeft2": "낯가림",
+    "scaleRight2": "사교적",
+    "scaleMiddle": "보통",
+    "identityTitle": "프로필",
+    "labelBirthday": "생일",
+    "valueBirthday": "생일",
+    "valueIp": "지역",
+    "mottoText": "한 줄 소개",
+    "oshiTopHeading": "최애",
+    "oshiLikeHeading": "차애",
+    "oshiName2": "좋아하는 캐릭터",
+    "oshiName3": "좋아하는 성우",
+    "attributeTitle": "취향",
+    "attr1": "CP",
+    "attr2": "같은 최애 팬",
+    "attr3": "기타",
+    "ng1": "지뢰 1",
+    "ng2": "지뢰 2",
+    "blankSubtitle": "한 줄 자기소개"
   },
   "undo": {
     "import": "설정을 가져왔습니다",
@@ -242,7 +295,9 @@
     "deleteBlock": "블록을 삭제했습니다",
     "deleteTag": "태그를 삭제했습니다",
     "deleteItem": "항목을 삭제했습니다",
-    "deleteImage": "이미지를 삭제했습니다"
+    "deleteImage": "이미지를 삭제했습니다",
+    "style": "스타일을 바꿨습니다",
+    "blank": "예시를 지우고 빈 카드로 시작했습니다"
   },
   "customize": {
     "title": "외관 꾸미기",
@@ -308,7 +363,13 @@
     "showSubtitle": "부제목",
     "showFooter": "바닥글",
     "resetAll": "외관 설정 모두 초기화",
-    "perCardHint": "카드별 색상과 정렬은 카드 오른쪽 위 ⚙에서 설정하세요."
+    "perCardHint": "카드별 색상과 정렬은 카드 오른쪽 위 ⚙에서 설정하세요.",
+    "pattern": "패턴",
+    "patternNone": "없음",
+    "patternDots": "도트",
+    "patternStripes": "스트라이프",
+    "patternGrid": "격자",
+    "titleFontNote": "이 글꼴은 제목에만 쓰이고 본문은 읽기 쉬운 글꼴을 유지해요."
   },
   "controls": {
     "position": "위치",
@@ -336,7 +397,20 @@
     "style": "스타일",
     "dividerLine": "실선",
     "dividerDashed": "점선",
-    "dividerSpace": "여백"
+    "dividerSpace": "여백",
+    "tagTone": "색상",
+    "toneDefault": "기본",
+    "toneStrong": "강조",
+    "toneOutline": "테두리",
+    "toneNg": "지뢰",
+    "infoLayout": "배치",
+    "infoLayoutList": "목록",
+    "infoLayoutInline": "한 줄",
+    "toggleChecked": "체크 / 체크 해제",
+    "checklistGrid": "정렬",
+    "checklistCompact": "촘촘하게",
+    "scaleMiddle": "가운데 문구",
+    "blockKind": "종류"
   },
   "preview": {
     "title": "미리보기 중",
@@ -344,7 +418,8 @@
   },
   "guideHint": {
     "text": "처음이신가요? 1분 만에 사용법 알아보기",
-    "open": "가이드 열기"
+    "open": "가이드 열기",
+    "startBlank": "빈 카드로 시작"
   },
   "blockGroups": {
     "text": "텍스트",

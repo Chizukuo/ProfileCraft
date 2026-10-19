@@ -23,6 +23,8 @@ export interface UserSettings {
 export type BackgroundType = 'theme' | 'color' | 'gradient' | 'image';
 export type BackgroundFit = 'cover' | 'contain' | 'repeat';
 export type CardShadow = 'none' | 'soft' | 'strong';
+/** 叠在纯色 / 渐变 / 主题背景上的图案 */
+export type BackgroundPattern = 'none' | 'dots' | 'stripes' | 'grid';
 
 export interface BackgroundSettings {
   type: BackgroundType;
@@ -34,6 +36,7 @@ export interface BackgroundSettings {
   imageFit: BackgroundFit;
   overlayColor: string;
   overlayOpacity: number; // 0 ~ 0.9，叠在背景图上方的纯色蒙版
+  pattern: BackgroundPattern;
 }
 
 export interface CardAppearance {
@@ -71,6 +74,8 @@ export interface TagData {
   text: string;
   styles?: Styles;
   type?: string;
+  /** 模板里的示例标签：编辑器里灰色虚线显示，预览 / 导出时隐藏；改过文字或添加第一个真标签后就消失 */
+  placeholder?: boolean;
 }
 
 interface BaseElement {
@@ -120,11 +125,12 @@ export interface HeadingElement extends BaseElement {
   size: BlockSize;
 }
 
-/** 信息列表：“标签: 内容”若干行 */
+/** 信息列表：“标签: 内容”若干行；单行模式只显示内容，用竖线隔开（如 05.20 | INTP | IP 成都） */
 export interface InfoListElement extends BaseElement {
   type: 'infoList';
   items: ProfileItem[];
   textStyles: Styles;
+  layout?: 'list' | 'inline';
 }
 
 /** 二维码：使用 userSettings.qrCodeLink / qrCodeImage */
@@ -137,12 +143,16 @@ export interface DividerElement extends BaseElement {
   variant: 'line' | 'dashed' | 'space';
 }
 
+/** 标签配色：默认 / 醒目（心肝、本命）/ 描边（好感、轻度）/ 雷点 */
+export type TagTone = 'default' | 'strong' | 'outline' | 'ng';
+
 export interface TagSectionElement extends BaseElement {
   type: 'tagSection';
   subheading: string;
   subheadingStyles: Styles;
   tags: TagData[];
   tagStyles: Styles;
+  tone?: TagTone;
 }
 
 export interface GroupedTagSectionElement extends BaseElement {
@@ -165,6 +175,39 @@ export interface OshiSectionElement extends BaseElement {
   subheadingStyles: Styles;
   oshis: TagData[];
   meta: TagData[];
+  tone?: TagTone;
+}
+
+export interface ChecklistItem {
+  text: string;
+  checked: boolean;
+}
+
+/** 勾选清单：☑ / ☐ 选项，如“我偏好：☑ 一起上分 ☐ 语音” */
+export interface ChecklistElement extends BaseElement {
+  type: 'checklist';
+  subheading: string;
+  subheadingStyles: Styles;
+  items: ChecklistItem[];
+  /** compact：一个挨一个排成一行（适合“周一 周二 …”这种短选项）；默认按列对齐 */
+  layout?: 'grid' | 'compact';
+}
+
+export interface ScaleItem {
+  left: string;
+  right: string;
+  /** 轨道中间下方的文字，如“新手 / 中坚 / 大佬”里的“中坚”；只在区块开启 showMiddle 时显示 */
+  middle?: string;
+  value: number; // 0 ~ 100，越大越靠右
+}
+
+/** 倾向滑杆：如“佛系 ←●→ 硬核” */
+export interface ScaleElement extends BaseElement {
+  type: 'scale';
+  subheading: string;
+  subheadingStyles: Styles;
+  items: ScaleItem[];
+  showMiddle?: boolean;
 }
 
 export interface GalleryImage {
@@ -189,7 +232,9 @@ export type CardElement =
   | ImageGalleryElement
   | TagSectionElement
   | GroupedTagSectionElement
-  | OshiSectionElement;
+  | OshiSectionElement
+  | ChecklistElement
+  | ScaleElement;
 
 export interface CardLayout {
     i: string;

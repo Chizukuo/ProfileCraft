@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useRef, Suspense } from 'react';
 import { useProfileDataCtx, useProfileActions } from '../context/ProfileContext';
-import { FileCode2, Image, PlusSquare, RotateCcw, Star, Sparkles, Download, Upload, Palette, Languages, MoreHorizontal, Share, Settings2, Eye, BookOpen } from 'lucide-react';
+import { FileCode2, Image, PlusSquare, RotateCcw, Star, Sparkles, Download, Upload, Palette, Languages, MoreHorizontal, Share, Settings2, Eye, BookOpen, Smartphone, FilePlus2 } from 'lucide-react';
 import { useEditorUI } from '../context/EditorUIContext';
 import { getGuideUrl } from '../utils/guide';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import localesManifest from '../config/locales.json';
 import { useExportActions } from '../hooks/useExportActions';
+import { useStartBlank } from '../hooks/useStartBlank';
 import { useDismissable } from '../hooks/useDismissable';
 import type { Locale } from '../context/LocaleContext';
 import ConfirmDialog from './ui/ConfirmDialog';
@@ -23,6 +24,7 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
   const { theme } = useTheme();
   const { t, locale, setLocale } = useTranslation();
 
+  const startBlank = useStartBlank();
   const [isResetModalOpen, setResetModalOpen] = useState(false);
   const [isAiModalOpen, setAiModalOpen] = useState(false);
   const [isExportMenuOpen, setExportMenuOpen] = useState(false);
@@ -147,6 +149,10 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
                   <Image size={16} className="pref-icon" />
                   <span>{t('toolbar.exportImage')}</span>
                 </button>
+                <button type="button" className="pref-row pref-action" onClick={exportActions.handleExportImagePhone}>
+                  <Smartphone size={16} className="pref-icon" />
+                  <span>{t('toolbar.exportImagePhone')}</span>
+                </button>
                 <button type="button" className="pref-row pref-action" onClick={exportActions.handleExportConfig}>
                   <Download size={16} className="pref-icon" />
                   <span>{t('toolbar.exportConfig')}</span>
@@ -184,6 +190,10 @@ const Navigation: React.FC<NavigationProps> = ({ onAddCardClick }) => {
                   <span>{t('toolbar.userGuide')}</span>
                 </a>
 
+                <button type="button" className="pref-row pref-action" onClick={() => { startBlank(); setExportMenuOpen(false); }}>
+                  <FilePlus2 size={16} className="pref-icon" />
+                  <span>{t('toolbar.startBlank')}</span>
+                </button>
                 <button type="button" className="pref-row pref-action" onClick={() => { setResetModalOpen(true); setExportMenuOpen(false); }}>
                   <RotateCcw size={16} className="pref-icon text-red" />
                   <span className="text-red">{t('toolbar.restoreDefault')}</span>

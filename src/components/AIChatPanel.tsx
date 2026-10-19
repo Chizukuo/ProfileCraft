@@ -1,11 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Settings, Sparkles, Send, RotateCcw, Wand2, Gamepad2, Music, Users, ChevronRight, MessageCircle, ExternalLink } from 'lucide-react';
+import { X, Settings, Sparkles, Send, RotateCcw, Wand2, Gamepad2, Music, Users, ChevronRight, MessageCircle, ExternalLink, Shuffle } from 'lucide-react';
 import { SegmentedControl } from './ui/EditorControls';
 import { fixCardLayouts } from '../utils/profileSchema';
 import { useTranslation } from '../hooks/useTranslation';
 import { useProfileActions, useProfileDataCtx } from '../context/ProfileContext';
 import { isSubmitEnter } from '../utils/keyboard';
 import { safeGetItem, safeSetItem } from '../utils/storage';
+import { STYLE_PRESETS, applyStylePreset, resolveAppearance } from '../utils/appearance';
+import { defaultFooter } from '../utils/data';
+import { LEGACY_SAMPLE_AVATAR, LEGACY_SAMPLE_QR_LINK, MOCK_AVATAR, MOCK_QR } from '../utils/placeholders';
+import { escapeHtml } from '../utils/html';
+import type { ProfileData } from '../types/data';
 import {
   AI_LOCAL_STORAGE_KEY,
   AI_REQUEST_TIMEOUT_MS,
@@ -16,7 +21,9 @@ import {
   PROVIDER_PRESETS,
   callAiInterviewer,
   normalizeGeneratedCards,
+  normalizeGeneratedLook,
   resolveAiConfig,
+  splitQuickReplies,
 } from '../utils/aiProfile';
 
 /** 对话按标签页保存：误点遮罩 / 按 Esc 关掉面板后再打开，聊天记录还在 */
@@ -76,10 +83,19 @@ const plainReply = (text: string) =>
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/^\s*[-*]\s+/gm, '• ');
 
+/** 模型给的标题是纯文本，存进去之前转义（标题用 innerHTML 渲染） */
+const escapeText = (value: unknown) => (typeof value === 'string' ? escapeHtml(value.trim()) : '');
+
 /** 免费获取 Gemini API Key 的页面 */
 const GEMINI_KEY_URL = 'https://aistudio.google.com/apikey';
 
 type ApplyMode = 'replace' | 'append';
+
+// Automatic grid measurements may change layout, but must not invalidate undo.
+const generationContent = (data: ProfileData) => JSON.stringify({
+  userSettings: data.userSettings,
+  cards: data.cards.map(card => ({ ...card, layout: undefined })).sort((a, b) => a.id.localeCompare(b.id)),
+});
 
 const QUICK_STARTS = [
   { key: 'quickStart1', icon: MessageCircle, replyKey: 'quickReply4' },
@@ -90,7 +106,7 @@ const QUICK_STARTS = [
 
 const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   const { t, locale } = useTranslation();
-  const { replaceProfileData, undo } = useProfileActions();
+  const { replaceProfileData } = useProfileActions();
   const { profileData } = useProfileDataCtx();
   const abortRef = useRef<AbortController | null>(null);
 
@@ -103,8 +119,12 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [appliedCount, setAppliedCount] = useState(() => loadChat().appliedCount);
   const [showSettings, setShowSettings] = useState(false);
-  // 本次打开面板后应用过的生成可以就地撤销（不持久化：关闭期间用户可能已经改过内容）
-  const [canUndoGeneration, setCanUndoGeneration] = useState(false);
+  // Keep the original snapshot even after more than 30 local style changes.
+  // Any intervening content edit or global undo disables this restore.
+  const [beforeGeneration, setBeforeGeneration] = useState<ProfileData | null>(null);
+  const [lastGenerationContent, setLastGenerationContent] = useState('');
+  const canUndoGeneration = Boolean(beforeGeneration && profileData && generationContent(profileData) === lastGenerationContent);
+  const [currentStyle, setCurrentStyle] = useState('classic');
   // 生成结果替换全部卡片，还是追加到现有卡片后面（追加时不改标题）
   const [applyMode, setApplyMode] = useState<ApplyMode>('replace');
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -155,24 +175,71 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
   };
 
   const applyGeneratedCards = (generated: unknown) => {
-    const raw = generated as { cards?: unknown; userSettings?: { mainTitle?: string; subtitle?: string } };
+    const raw = generated as { cards?: unknown; look?: unknown; userSettings?: { mainTitle?: unknown; subtitle?: unknown } } | undefined;
     const cards = normalizeGeneratedCards(raw?.cards);
     if (!cards.length) throw new Error(t('aiBuilder.emptyCardsError'));
 
     if (!profileData) return;
     const nextSettings = { ...profileData.userSettings };
-    if (applyMode === 'replace' && raw?.userSettings) {
-      if (raw.userSettings.mainTitle) nextSettings.mainTitle = raw.userSettings.mainTitle;
-      if (raw.userSettings.subtitle) nextSettings.subtitle = raw.userSettings.subtitle;
+    let style = 'classic';
+    if (applyMode === 'replace') {
+      // 标题也按纯文本处理（EditableText 用 innerHTML 渲染）
+      const mainTitle = escapeText(raw?.userSettings?.mainTitle);
+      const subtitle = escapeText(raw?.userSettings?.subtitle);
+      if (mainTitle) nextSettings.mainTitle = mainTitle;
+      if (subtitle) nextSettings.subtitle = subtitle;
+      // 外观只在“替换全部”时应用：追加时保留用户现在的样子
+      const look = normalizeGeneratedLook(raw?.look);
+      if (look.style) {
+        style = look.style;
+        const appearance = applyStylePreset(nextSettings.appearance, look.style);
+        nextSettings.appearance = { ...appearance, layout: { ...appearance.layout, fontFamily: look.fontFamily ?? '' } };
+      }
+      if (look.accentColor) nextSettings.accentColor = look.accentColor;
     }
-    // 追加：新卡片的 y 置空，由 fixCardLayouts 依次排到现有卡片下方
+    // 示例数据里的头像、二维码、页脚是作者本人的（小芝士）：还没换掉的话用占位图 / 用户的称呼代替。
+    // 用户自己上传过的不动。
+    if (applyMode === 'replace' && nextSettings.avatarSrc === LEGACY_SAMPLE_AVATAR) nextSettings.avatarSrc = MOCK_AVATAR;
+    if (applyMode === 'replace' && !nextSettings.qrCodeImage && nextSettings.qrCodeLink === LEGACY_SAMPLE_QR_LINK) {
+      nextSettings.qrCodeLink = '';
+      nextSettings.qrCodeImage = MOCK_QR;
+    }
+    // 页脚还是示例的或默认格式的，换成新的称呼
+    if (applyMode === 'replace' && (nextSettings.footerText === defaultFooter('小芝士') || nextSettings.footerText === defaultFooter(profileData.userSettings.mainTitle))) {
+      nextSettings.footerText = defaultFooter(nextSettings.mainTitle);
+    }
+    // 追加：整体平移到现有卡片下方（保留自动排好的行），再由 fixCardLayouts 修正
+    const bottom = profileData.cards.reduce((max, c) => Math.max(max, (c.layout?.y ?? 0) + (c.layout?.h ?? 0)), 0);
     const nextCards = applyMode === 'append'
-      ? fixCardLayouts([...profileData.cards, ...cards.map(card => ({ ...card, layout: card.layout && { ...card.layout, y: Number.NaN } }))])
+      ? fixCardLayouts([...profileData.cards, ...cards.map(card => ({ ...card, layout: card.layout && { ...card.layout, y: card.layout.y + bottom } }))])
       : cards;
     // 走 replaceProfileData：可通过撤销提示或面板里的按钮撤销
-    replaceProfileData({ userSettings: nextSettings, cards: nextCards }, 'ai');
+    const nextData = { userSettings: nextSettings, cards: nextCards };
+    setBeforeGeneration(profileData);
+    setLastGenerationContent(generationContent(nextData));
+    replaceProfileData(nextData, 'ai');
     setAppliedCount(cards.length);
-    setCanUndoGeneration(true);
+    setCurrentStyle(style);
+  };
+
+  /** 生成后在本地轮换一键风格：内容不变，不再请求 AI */
+  const handleShuffleStyle = () => {
+    if (!profileData) return;
+    const keys = STYLE_PRESETS.map(p => p.key);
+    const next = keys[(keys.indexOf(currentStyle) + 1) % keys.length];
+    const appearance = applyStylePreset(resolveAppearance(profileData.userSettings.appearance), next);
+    const nextData: ProfileData = { ...profileData, userSettings: { ...profileData.userSettings, appearance } };
+    replaceProfileData(nextData, 'style');
+    if (canUndoGeneration) setLastGenerationContent(generationContent(nextData));
+    setCurrentStyle(next);
+  };
+
+  const handleUndoGeneration = () => {
+    if (!canUndoGeneration || !beforeGeneration) return;
+    replaceProfileData(beforeGeneration, 'ai');
+    setBeforeGeneration(null);
+    setLastGenerationContent('');
+    setAppliedCount(0);
   };
 
   const errorCodeToMessage = (code?: string, fallback?: string): string => {
@@ -235,14 +302,15 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
     await runAi(nextHistory);
   };
 
-  const handleQuickStart = async (replyKey: string) => {
+  /** 点快捷按钮（开场按钮或 AI 给的选项）= 直接发出这句话 */
+  const sendText = async (content: string) => {
     if (isSubmitting || !canSend) return;
-    const reply = t(`aiBuilder.${replyKey}`);
-    const userMessage: AiChatMessage = { role: 'user', content: reply };
-    const nextHistory = [...messages, userMessage];
+    const nextHistory: AiChatMessage[] = [...messages, { role: 'user', content }];
     setMessages(nextHistory);
     await runAi(nextHistory);
   };
+
+  const handleQuickStart = (replyKey: string) => sendText(t(`aiBuilder.${replyKey}`));
 
   const handleForceGenerate = async () => {
     if (isSubmitting || !canSend) return;
@@ -418,18 +486,32 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {messages.map((msg, i) => (
+          {messages.map((msg, i) => {
+            // AI 提问时最后一行是 [[选项 | 选项]]：显示时去掉，最新一条的选项做成按钮
+            const { text, options } = msg.role === 'assistant' ? splitQuickReplies(msg.content) : { text: msg.content, options: [] };
+            const showOptions = options.length > 0 && i === messages.length - 1 && !isSubmitting;
+            return (
               <div key={`${msg.role}-${i}`} className={`ai-msg ${msg.role === 'user' ? 'ai-msg-user' : 'ai-msg-assistant'}`}>
                 <div className="ai-msg-bubble">
-                  {(msg.role === 'assistant' ? plainReply(msg.content) : msg.content).split('\n').map((line, li, lines) => (
+                  {(msg.role === 'assistant' ? plainReply(text) : text).split('\n').map((line, li, lines) => (
                     <React.Fragment key={li}>
                       {line}
                       {li < lines.length - 1 && <br />}
                     </React.Fragment>
                   ))}
                 </div>
+                {showOptions && (
+                  <div className="ai-quick-replies">
+                    {options.map(option => (
+                      <button key={option} type="button" className="ai-quick-reply" onClick={() => sendText(option)} disabled={!canSend}>
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-          ))}
+            );
+          })}
 
           {isSubmitting && (
             <div className="ai-msg ai-msg-assistant">
@@ -453,20 +535,20 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ isOpen, onClose }) => {
         {/* Success */}
         {appliedCount > 0 && (
           <div className="ai-panel-success">
-            <span>{t('aiBuilder.appliedCards', { count: appliedCount })}</span>
-            {canUndoGeneration && (
-              <button
-                type="button"
-                className="ai-panel-success-undo"
-                onClick={() => {
-                  undo();
-                  setCanUndoGeneration(false);
-                  setAppliedCount(0);
-                }}
-              >
-                {t('aiBuilder.undoGeneration')}
-              </button>
-            )}
+            <div className="ai-panel-success-row">
+              <span>{t('aiBuilder.appliedCards', { count: appliedCount })}</span>
+              {canUndoGeneration && (
+                <span className="ai-panel-success-actions">
+                  <button type="button" className="ai-panel-success-btn" onClick={handleShuffleStyle} title={t('aiBuilder.shuffleStyleHint')}>
+                    <Shuffle size={13} /> {t('aiBuilder.shuffleStyle', { style: t(`customize.preset.${currentStyle}`) })}
+                  </button>
+                  <button type="button" className="ai-panel-success-undo" onClick={handleUndoGeneration}>
+                    {t('aiBuilder.undoGeneration')}
+                  </button>
+                </span>
+              )}
+            </div>
+            <p className="ai-panel-success-hint">{t('aiBuilder.afterApplyHint')}</p>
           </div>
         )}
 

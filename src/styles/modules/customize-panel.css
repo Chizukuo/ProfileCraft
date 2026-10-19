@@ -337,6 +337,24 @@ html[data-theme-scheme='dark'] .customize-panel {
 
 /* 手机：底部抽屉，给页面留出上半部分预览 */
 @media (max-width: 640px) {
+    .preview-bar {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        width: calc(100vw - 24px);
+        box-sizing: border-box;
+        gap: 4px;
+        border-radius: 18px;
+        bottom: 16px;
+    }
+    .preview-bar-btn {
+        min-width: 0;
+        flex-direction: column;
+        justify-content: center;
+        padding: 8px 2px;
+        border-radius: 12px;
+        white-space: normal;
+        text-align: center;
+    }
     .customize-panel {
         top: auto;
         left: 0;
@@ -560,4 +578,14 @@ html[data-theme-scheme='dark'] .customize-panel {
     cursor: pointer;
     display: inline-flex;
     padding: 4px;
+}
+
+.guide-hint button.guide-hint-action {
+    padding: 2px 10px;
+    border: 1px solid var(--theme-accent);
+    border-radius: 999px;
+    color: var(--theme-text-strong);
+    font: inherit;
+    font-weight: 600;
+    white-space: nowrap;
 }

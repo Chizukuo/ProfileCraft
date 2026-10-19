@@ -25,7 +25,10 @@
     "preview": "Preview",
     "previewHint": "Hide editing controls and see the exported look",
     "userGuide": "User guide",
-    "settingsHelp": "Settings & help"
+    "settingsHelp": "Settings & help",
+    "exportImagePhone": "Export Image (phone, vertical)",
+    "exportImagePhoneShort": "Phone image",
+    "startBlank": "Start from blank"
   },
   "card": {
     "width1": "1 Column",
@@ -75,17 +78,21 @@
     "aboutMeCard": "About me",
     "aboutMeCardDesc": "Two columns wide, introduce yourself",
     "oshiCard": "My faves",
-    "oshiCardDesc": "Full width, show off your faves",
+    "oshiCardDesc": "Top faves and likes in two tiers, plus a spot for pictures",
     "fullWidthCard": "Full Width Card",
     "fullWidthCardDesc": "Card spanning the full width",
-    "wishCard": "Looking for",
-    "wishCardDesc": "What kind of friends you want to meet",
-    "boundaryCard": "Boundaries",
-    "boundaryCardDesc": "Your dealbreakers and social preferences",
+    "wishCard": "Add me",
+    "wishCardDesc": "Who you want to meet, how to add you, and your QR code",
+    "boundaryCard": "No-gos",
+    "boundaryCardDesc": "Red tags for your no-gos plus a short note",
     "galleryCard": "Image wall",
     "galleryCardDesc": "Upload several images in a grid",
     "profileInfoCard": "Profile info",
-    "profileInfoCardDesc": "Avatar, basics and QR code"
+    "profileInfoCardDesc": "Avatar, basics and QR code",
+    "identityCard": "Identity card",
+    "identityCardDesc": "Big avatar + one line “Birthday | MBTI | City” + a motto",
+    "attributeCard": "Preferences",
+    "attributeCardDesc": "Shipping, same-fave fans and more"
   },
   "blockTypes": {
     "paragraph": "Paragraph",
@@ -107,7 +114,11 @@
     "infoList": "Info list",
     "infoListDesc": "\"Label: value\" rows, e.g. name, MBTI",
     "qrCode": "QR code",
-    "qrCodeDesc": "From a link, or upload a QR image"
+    "qrCodeDesc": "From a link, or upload a QR image",
+    "checklist": "Checklist",
+    "checklistDesc": "☑ / ☐ options, e.g. preferences",
+    "scale": "Slider scale",
+    "scaleDesc": "Two ends + a slider, e.g. Casual ←→ Tryhard"
   },
   "common": {
     "confirm": "Confirm",
@@ -145,7 +156,7 @@
     "apiKeyPlaceholder": "Enter your API key",
     "baseUrl": "Base URL",
     "model": "Model",
-    "welcomeQuestion": "Hi! I can build your profile card. What name should I use, and what vibe do you want?",
+    "welcomeQuestion": "Hi! I'll help you make your intro card. What should people call you, and what fandoms or hobbies are you into?",
     "fallbackQuestion": "Great. One more thing: what games or fandoms do you spend the most time on lately?",
     "thinking": "Thinking...",
     "you": "You",
@@ -174,13 +185,25 @@
     "otherProviders": "Use OpenAI / Anthropic / another endpoint",
     "applyModeLabel": "How generated cards are applied",
     "applyReplace": "Replace all",
-    "applyAppend": "Add to end"
+    "applyAppend": "Add to end",
+    "shuffleStyle": "Try another style (now: {style})",
+    "shuffleStyleHint": "Keeps your content and only changes the overall style. No new AI request.",
+    "afterApplyHint": "Upload your avatar, QR code and fave pictures yourself: close this panel and click those spots."
   },
   "editor": {
     "bold": "Bold",
     "italic": "Italic",
     "underline": "Underline",
-    "strikethrough": "Strikethrough"
+    "strikethrough": "Strikethrough",
+    "big": "Large text",
+    "clearFormat": "Clear formatting",
+    "color": {
+      "accent": "Accent color",
+      "red": "Red",
+      "blue": "Blue",
+      "green": "Green",
+      "purple": "Purple"
+    }
   },
   "block": {
     "newTagPlaceholder": "New tag",
@@ -203,7 +226,11 @@
     "uploading": "Processing…",
     "addImages": "Add images",
     "cropSquare": "Square crop",
-    "replaceImage": "Replace image"
+    "replaceImage": "Replace image",
+    "addOption": "Add option",
+    "newOptionPlaceholder": "New option",
+    "addScale": "Add row",
+    "sampleTagHint": "Sample tag: disappears once you add your own, and never shows in preview or exports"
   },
   "templates": {
     "paragraphText": "Edit your text here…",
@@ -225,13 +252,39 @@
     "aboutMeTitle": "About me",
     "aboutMeText": "Write more about yourself here.",
     "oshiTitle": "My faves",
-    "wishTitle": "Looking for",
-    "wishText": "Looking for people who share my interests to chat, play games or meet up. Slow to warm up but easy to talk to!",
-    "boundaryTitle": "Boundaries",
-    "boundaryText": "· Please say hi before DMing<br>· No unfollowing without reason<br>· Same-fave friends: welcome / no thanks (edit me)",
+    "wishTitle": "Add me",
+    "wishText": "Looking for friends to chat and play with~<br>Tell me who you are when you add me",
+    "boundaryTitle": "No-gos",
+    "boundaryText": "· Say hi before DMing<br>· Please don’t unfriend without a word",
     "galleryTitle": "Image wall",
     "profileInfoTitle": "About",
-    "headingText": "Your name"
+    "headingText": "Your name",
+    "checklistHeading": "I prefer",
+    "checklist1": "Ranked games",
+    "checklist2": "Voice chat",
+    "checklist3": "Meeting up",
+    "scaleHeading": "My vibe",
+    "scaleLeft": "Casual",
+    "scaleRight": "Tryhard",
+    "scaleLeft2": "Shy at first",
+    "scaleRight2": "Outgoing",
+    "scaleMiddle": "In between",
+    "identityTitle": "About me",
+    "labelBirthday": "Birthday",
+    "valueBirthday": "Birthday",
+    "valueIp": "City",
+    "mottoText": "Your motto",
+    "oshiTopHeading": "Top faves",
+    "oshiLikeHeading": "Also like",
+    "oshiName2": "A character",
+    "oshiName3": "A voice actor",
+    "attributeTitle": "Preferences",
+    "attr1": "Shipping",
+    "attr2": "Same-fave fans",
+    "attr3": "Other",
+    "ng1": "No-go 1",
+    "ng2": "No-go 2",
+    "blankSubtitle": "One line about yourself"
   },
   "undo": {
     "import": "Configuration imported",
@@ -242,7 +295,9 @@
     "deleteBlock": "Block deleted",
     "deleteTag": "Tag deleted",
     "deleteItem": "Item deleted",
-    "deleteImage": "Image deleted"
+    "deleteImage": "Image deleted",
+    "style": "Style changed",
+    "blank": "Cleared the sample. Starting from blank"
   },
   "customize": {
     "title": "Customize",
@@ -308,7 +363,13 @@
     "showSubtitle": "Subtitle",
     "showFooter": "Footer",
     "resetAll": "Reset all appearance settings",
-    "perCardHint": "For one card’s color or alignment, use the ⚙ in its top-right corner."
+    "perCardHint": "For one card’s color or alignment, use the ⚙ in its top-right corner.",
+    "pattern": "Pattern",
+    "patternNone": "None",
+    "patternDots": "Dots",
+    "patternStripes": "Stripes",
+    "patternGrid": "Grid",
+    "titleFontNote": "This font is only used for headings; body text stays in a readable font."
   },
   "controls": {
     "position": "Position",
@@ -336,7 +397,20 @@
     "style": "Style",
     "dividerLine": "Solid",
     "dividerDashed": "Dashed",
-    "dividerSpace": "Space"
+    "dividerSpace": "Space",
+    "tagTone": "Color",
+    "toneDefault": "Default",
+    "toneStrong": "Bold",
+    "toneOutline": "Outline",
+    "toneNg": "No-go",
+    "infoLayout": "Layout",
+    "infoLayoutList": "List",
+    "infoLayoutInline": "One line",
+    "toggleChecked": "Check / uncheck",
+    "checklistGrid": "Aligned",
+    "checklistCompact": "Compact",
+    "scaleMiddle": "Middle label",
+    "blockKind": "Type"
   },
   "preview": {
     "title": "Preview",
@@ -344,7 +418,8 @@
   },
   "guideHint": {
     "text": "New here? Learn the basics in a minute",
-    "open": "Open the guide"
+    "open": "Open the guide",
+    "startBlank": "Start from blank"
   },
   "blockGroups": {
     "text": "Text",

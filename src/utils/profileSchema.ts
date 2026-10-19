@@ -24,6 +24,7 @@ const normalizeTags = (v: unknown, type?: string): TagData[] => {
         text: str(t.text),
         ...(t.type || type ? { type: str(t.type, type) } : {}),
         ...(isObject(t.styles) ? { styles: t.styles as Styles } : {}),
+        ...(t.placeholder === true ? { placeholder: true } : {}),
       };
     })
     .filter((t): t is TagData => t !== null);
@@ -35,9 +36,14 @@ const DEFAULT_TAG: Styles = { fontWeight: '500', fontSize: '13', fontFamily: '' 
 const DEFAULT_LABEL: Styles = { fontWeight: 'bold', fontSize: '15', fontFamily: '' };
 const DEFAULT_HEADING: Styles = { fontWeight: '700', fontFamily: '' };
 const SIZES = ['sm', 'md', 'lg'] as const;
+const TONES = ['default', 'strong', 'outline', 'ng'] as const;
 
 const pick = <T extends string>(v: unknown, options: readonly T[], fallback: T): T =>
   (options as readonly unknown[]).includes(v) ? (v as T) : fallback;
+
+/** 可选的枚举字段：值合法且不是默认值时才写入，保持旧数据 / 导出 JSON 干净 */
+const optional = <K extends string, T extends string>(key: K, v: unknown, options: readonly T[], defaultValue: T) =>
+  ((options as readonly unknown[]).includes(v) && v !== defaultValue ? { [key]: v as T } : {}) as Partial<Record<K, T>>;
 
 const normalizeItems = (raw: Raw) =>
   Array.isArray(raw.items)
@@ -73,7 +79,7 @@ export const expandElement = (raw: unknown, options: MigrationOptions = {}): Car
     case 'avatar':
       return [{ ...base, type: 'avatar', size: pick(raw.size, SIZES, 'md'), shape: pick(raw.shape, ['circle', 'rounded'] as const, 'circle') }];
     case 'infoList':
-      return [{ ...base, type: 'infoList', items: normalizeItems(raw), textStyles: styles(raw.textStyles, DEFAULT_TEXT) }];
+      return [{ ...base, type: 'infoList', items: normalizeItems(raw), textStyles: styles(raw.textStyles, DEFAULT_TEXT), ...optional('layout', raw.layout, ['list', 'inline'] as const, 'list') }];
     case 'qrCode':
       return [{ ...base, type: 'qrCode' }];
     case 'divider':
@@ -93,6 +99,7 @@ export const expandElement = (raw: unknown, options: MigrationOptions = {}): Car
         subheadingStyles: styles(raw.subheadingStyles, DEFAULT_SUBHEADING),
         tags: normalizeTags(raw.tags),
         tagStyles: styles(raw.tagStyles, DEFAULT_TAG),
+        ...optional('tone', raw.tone, TONES, 'default'),
       }];
     case 'groupedTagSection':
       return [{
@@ -116,6 +123,36 @@ export const expandElement = (raw: unknown, options: MigrationOptions = {}): Car
         subheadingStyles: styles(raw.subheadingStyles, DEFAULT_SUBHEADING),
         oshis: normalizeTags(raw.oshis, 'oshi-tag'),
         meta: normalizeTags(raw.meta, 'oshi-meta-tag'),
+        ...optional('tone', raw.tone, TONES, 'default'),
+      }];
+    case 'checklist':
+      return [{
+        ...base,
+        type: 'checklist',
+        subheading: str(raw.subheading),
+        subheadingStyles: styles(raw.subheadingStyles, DEFAULT_SUBHEADING),
+        items: Array.isArray(raw.items)
+          ? raw.items
+              .map((i) => (typeof i === 'string' ? { text: i, checked: true } : isObject(i) ? { text: str(i.text), checked: i.checked !== false } : null))
+              .filter((i): i is { text: string; checked: boolean } => Boolean(i && i.text))
+          : [],
+        ...optional('layout', raw.layout, ['grid', 'compact'] as const, 'grid'),
+      }];
+    case 'scale':
+      return [{
+        ...base,
+        type: 'scale',
+        subheading: str(raw.subheading),
+        subheadingStyles: styles(raw.subheadingStyles, DEFAULT_SUBHEADING),
+        items: Array.isArray(raw.items)
+          ? raw.items.filter(isObject).map((i) => ({
+              left: str(i.left),
+              right: str(i.right),
+              ...(typeof i.middle === 'string' && i.middle ? { middle: i.middle } : {}),
+              value: finite(i.value) ? Math.min(100, Math.max(0, Math.round(i.value))) : 50,
+            }))
+          : [],
+        ...(raw.showMiddle === true ? { showMiddle: true } : {}),
       }];
     case 'imageGallery':
       return [{

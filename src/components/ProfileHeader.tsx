@@ -2,9 +2,15 @@ import React from 'react';
 import { useProfile } from '../context/ProfileContext';
 import { UserSettings } from '../types/data';
 import EditableText from './ui/EditableText';
+import { defaultFooter } from '../utils/data';
+import { useStartBlank } from '../hooks/useStartBlank';
+import { useTranslation } from '../hooks/useTranslation';
+import { AddButton } from './ui/EditorControls';
 
 const ProfileHeader: React.FC<{ showSubtitle: boolean }> = ({ showSubtitle }) => {
     const { profileData, updateProfileData } = useProfile();
+    const startBlank = useStartBlank();
+    const { t } = useTranslation();
 
     if (!profileData) return null;
 
@@ -25,7 +31,15 @@ const ProfileHeader: React.FC<{ showSubtitle: boolean }> = ({ showSubtitle }) =>
                 className="main-title main-title-text"
                 html={profileData.userSettings.mainTitle}
                 styles={profileData.userSettings.mainTitleStyles}
-                onUpdate={(html) => handleUpdate('mainTitle', html)}
+                onUpdate={(html) => updateProfileData(prev => ({
+                    ...prev,
+                    userSettings: {
+                        ...prev.userSettings,
+                        mainTitle: html,
+                        // 页脚还是默认的“© 年份 旧称呼.”时跟着改，免得改了名字页脚还写着别人
+                        ...(prev.userSettings.footerText === defaultFooter(prev.userSettings.mainTitle) ? { footerText: defaultFooter(html) } : {}),
+                    },
+                }))}
                 onStyleUpdate={(styles) => handleUpdate('mainTitleStyles', styles)}
             />
             {showSubtitle && <EditableText
@@ -36,6 +50,9 @@ const ProfileHeader: React.FC<{ showSubtitle: boolean }> = ({ showSubtitle }) =>
                 onUpdate={(html) => handleUpdate('subtitle', html)}
                 onStyleUpdate={(styles) => handleUpdate('subtitleStyles', styles)}
             />}
+            <div className="profile-start-actions editor-only">
+                <AddButton label={t('toolbar.startBlank')} onClick={startBlank} />
+            </div>
         </header>
     );
 };

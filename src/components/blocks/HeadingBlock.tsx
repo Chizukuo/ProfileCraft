@@ -5,9 +5,10 @@ import { useElementActions } from '../../hooks/useElementActions';
 import { useTranslation } from '../../hooks/useTranslation';
 import BlockShell, { BlockProps } from './BlockShell';
 import { SegmentedControl, SettingRow } from '../ui/EditorControls';
+import TextKindSetting from './TextKindSetting';
 
 const HeadingBlock: React.FC<BlockProps<HeadingElement>> = ({ element, cardIndex, elementIndex, ...shell }) => {
-    const { update } = useElementActions<HeadingElement>(cardIndex, elementIndex);
+    const { update, replace } = useElementActions<HeadingElement>(cardIndex, elementIndex);
     const { t } = useTranslation();
 
     return (
@@ -15,13 +16,16 @@ const HeadingBlock: React.FC<BlockProps<HeadingElement>> = ({ element, cardIndex
             title={t('blockTypes.heading')}
             {...shell}
             settings={() => (
-                <SettingRow label={t('controls.size')}>
-                    <SegmentedControl
-                        value={element.size}
-                        options={[{ value: 'sm', label: t('controls.sizeSm') }, { value: 'md', label: t('controls.sizeMd') }, { value: 'lg', label: t('controls.sizeLg') }]}
-                        onChange={(size) => update({ size })}
-                    />
-                </SettingRow>
+                <>
+                    <TextKindSetting kind="heading" text={element.text} onReplace={replace} />
+                    <SettingRow label={t('controls.size')}>
+                        <SegmentedControl
+                            value={element.size}
+                            options={[{ value: 'sm', label: t('controls.sizeSm') }, { value: 'md', label: t('controls.sizeMd') }, { value: 'lg', label: t('controls.sizeLg') }]}
+                            onChange={(size) => update({ size })}
+                        />
+                    </SettingRow>
+                </>
             )}
         >
             <EditableText

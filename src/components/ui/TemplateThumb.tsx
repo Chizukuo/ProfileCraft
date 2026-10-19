@@ -1,5 +1,5 @@
 import React, { useId } from 'react';
-import type { CardData, CardElement, TagData } from '../../types/data';
+import type { CardData, CardElement, TagData, TagTone } from '../../types/data';
 
 // 模板缩略图：直接根据模板“真正会插入的数据”画抽象图形（标签个数、文字长短、空图片墙、
 // 头像 / 信息 / 二维码居中竖排……），模板改了缩略图自动跟着变，不会和实际效果对不上。
@@ -72,6 +72,11 @@ const subheading = (key: string, html: string, x: number, y: number, w: number, 
 const tagCls = (tag: TagData, fallback = 'tt-pill') =>
   tag.type === 'oshi-meta-tag' ? 'tt-dash' : tag.type === 'oshi-tag' ? 'tt-pill2' : fallback;
 
+/** 标签组配色对应的胶囊样式（醒目 / 描边 / 雷点） */
+const TONE_CLS: Partial<Record<TagTone, string>> = { strong: 'tt-strong', outline: 'tt-dash', ng: 'tt-ng' };
+const toneTagCls = (tone: TagTone | undefined, tag: TagData, fallback?: string) =>
+  (tone && TONE_CLS[tone] && tag.type !== 'oshi-meta-tag' ? TONE_CLS[tone]! : tagCls(tag, fallback));
+
 const stack = (key: string, parts: Drawn[], gap = 3): Drawn => {
   let h = 0;
   const nodes = parts.filter(p => p.h > 0).map((p, i, arr) => {
@@ -103,6 +108,24 @@ const drawElement = (el: CardElement, key: string, x: number, w: number): Drawn 
       };
     }
     case 'infoList': {
+      if (el.layout === 'inline') {
+        // 单行：只显示内容，用竖线隔开，整行居中
+        const unit = FONT.body * K;
+        const widths = el.items.slice(0, 5).map(r => Math.max(1, visualLength(plain(r.value))) * unit);
+        const sep = 2.5;
+        const total = Math.min(w, widths.reduce((a, b) => a + b, 0) + sep * 2 * Math.max(0, widths.length - 1));
+        let cx = x + (w - total) / 2;
+        const nodes: Node[] = [];
+        widths.forEach((vw, i) => {
+          if (i > 0) {
+            nodes.push(<rect key={`${key}-s${i}`} x={cx + sep - 0.3} y={0} width={0.6} height={LINE_H} className="tt-head" />);
+            cx += sep * 2;
+          }
+          nodes.push(bar(`${key}-v${i}`, cx, 0, Math.min(vw, x + w - cx), 'tt-line', LINE_H));
+          cx += vw;
+        });
+        return { node: <g key={key}>{nodes}</g>, h: el.items.length ? LINE_H : 0 };
+      }
       // 实际效果：整块居中，每行左对齐“标签: 内容”
       const rows = el.items.slice(0, 6);
       const unit = FONT.body * K;
@@ -144,12 +167,51 @@ const drawElement = (el: CardElement, key: string, x: number, w: number): Drawn 
         ? { node: null, h: 4 }
         : { node: <rect key={key} x={x} y={1.5} width={w} height={0.8} className={el.variant === 'dashed' ? 'tt-dash-line' : 'tt-head'} />, h: 4 };
     case 'tagSection':
-      return stack(key, [subheading(`${key}-h`, el.subheading, x, 0, w), pills(`${key}-p`, el.tags.map(t => ({ text: t.text, cls: tagCls(t) })), x, 0, w)]);
+      return stack(key, [subheading(`${key}-h`, el.subheading, x, 0, w), pills(`${key}-p`, el.tags.map(t => ({ text: t.text, cls: toneTagCls(el.tone, t) })), x, 0, w)]);
     case 'tagSectionTwo':
       return stack(key, [
         subheading(`${key}-h`, el.subheading, x, 0, w),
-        pills(`${key}-p`, [...el.oshis, ...el.meta].map(t => ({ text: t.text, cls: tagCls(t, 'tt-pill2') })), x, 0, w),
+        pills(`${key}-p`, [...el.oshis, ...el.meta].map(t => ({ text: t.text, cls: toneTagCls(el.tone, t, 'tt-pill2') })), x, 0, w),
       ]);
+    case 'checklist': {
+      // 实际：方框 + 文字，按 140px 最小列宽自动分列
+      const cols = Math.max(1, Math.floor(w / (140 * K)));
+      const colW = w / cols;
+      const box = 3.6;
+      const rowH = 5.5;
+      const items = el.items.slice(0, cols * 4);
+      const nodes = items.map((item, i) => {
+        const cx = x + (i % cols) * colW;
+        const cy = Math.floor(i / cols) * rowH;
+        return (
+          <g key={`${key}-${i}`}>
+            <rect x={cx} y={cy} width={box} height={box} rx={0.8} className={item.checked ? 'tt-strong' : 'tt-dash'} />
+            {bar(`${key}-t${i}`, cx + box + 1.5, cy + 0.3, Math.min(colW - box - 3, visualLength(plain(item.text)) * FONT.body * K), item.checked ? 'tt-line' : 'tt-line tt-faded')}
+          </g>
+        );
+      });
+      const rows = Math.ceil(items.length / cols);
+      return stack(key, [subheading(`${key}-h`, el.subheading, x, 0, w), { node: <g>{nodes}</g>, h: rows ? rows * rowH - (rowH - box) : 0 }]);
+    }
+    case 'scale': {
+      const rowH = 6;
+      const labelW = w * 0.22;
+      const nodes = el.items.slice(0, 4).map((item, i) => {
+        const cy = i * rowH;
+        const trackX = x + labelW + 2;
+        const trackW = w - labelW * 2 - 4;
+        return (
+          <g key={`${key}-${i}`}>
+            {bar(`${key}-l${i}`, x + labelW - Math.min(labelW, visualLength(plain(item.left)) * FONT.body * K), cy, Math.min(labelW, visualLength(plain(item.left)) * FONT.body * K))}
+            <rect x={trackX} y={cy + 1} width={trackW} height={1.2} rx={0.6} className="tt-pill" />
+            <circle cx={trackX + (trackW * item.value) / 100} cy={cy + 1.6} r={1.8} className="tt-strong" />
+            {bar(`${key}-r${i}`, x + w - labelW, cy, Math.min(labelW, visualLength(plain(item.right)) * FONT.body * K))}
+          </g>
+        );
+      });
+      const rows = Math.min(4, el.items.length);
+      return stack(key, [subheading(`${key}-h`, el.subheading, x, 0, w), { node: <g>{nodes}</g>, h: rows ? rows * rowH - 2.5 : 0 }]);
+    }
     case 'groupedTagSection': {
       const group = (gk: string, label: string, tags: TagData[]): Drawn => {
         const lw = Math.min(w * 0.4, visualLength(plain(label)) * FONT.body * K);

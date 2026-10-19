@@ -76,7 +76,7 @@ const ImageGalleryBlock: React.FC<BlockProps<ImageGalleryElement>> = ({ element,
     return (
         <BlockShell
             title={t('blockTypes.imageGallery')}
-            className="image-gallery-block"
+            className={`image-gallery-block${element.images.length ? '' : ' is-empty-gallery'}`}
             {...shell}
             settings={() => (
                 <>

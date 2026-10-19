@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Palette, Image, FileCode2, X } from 'lucide-react';
+import { Eye, Palette, Image, FileCode2, X, Smartphone } from 'lucide-react';
 import { useProfileDataCtx, useProfileActions } from '../context/ProfileContext';
 import { useEditorUI } from '../context/EditorUIContext';
 import { useTheme } from '../context/ThemeContext';
@@ -25,6 +25,9 @@ const PreviewBar: React.FC = () => {
       </button>
       <button type="button" className="preview-bar-btn" onClick={exportActions.handleExportImage}>
         <Image size={15} /> <span>{t('toolbar.exportImage')}</span>
+      </button>
+      <button type="button" className="preview-bar-btn" onClick={exportActions.handleExportImagePhone}>
+        <Smartphone size={15} /> <span>{t('toolbar.exportImagePhoneShort')}</span>
       </button>
       <button type="button" className="preview-bar-btn" onClick={exportActions.handleExportHtml}>
         <FileCode2 size={15} /> <span>{t('toolbar.exportHtml')}</span>

@@ -168,10 +168,12 @@
     background-color: rgba(239, 68, 68, 0.1);
 }
 
+/* 信息行的 × 紧跟在这一行文字后面（以前固定在整块最右边，短的行离得很远） */
 .profile-item-row > .pc-item-delete {
-    top: 50%;
-    right: -26px;
-    transform: translateY(-50%);
+    position: static;
+    align-self: center;
+    margin-left: 4px;
+    flex-shrink: 0;
 }
 
 .gallery-item-actions {
@@ -424,6 +426,24 @@ html[data-theme-scheme='dark'] .pc-segmented {
     border-radius: var(--radius-s);
 }
 
+.profile-start-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.profile-start-actions .pc-add-btn {
+    min-height: 44px;
+    padding: 10px 20px;
+    border-style: solid;
+    border-color: var(--theme-accent);
+    background: var(--toolbar-bg);
+    color: var(--ui-text-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    opacity: 1;
+}
+
 .pc-add-btn.is-block {
     width: 100%;
     padding: 12px;
@@ -527,6 +547,9 @@ button.template-option {
 .tt-img2 { fill: #FFD3E0; }
 .tt-img3 { fill: #CFF0DD; }
 .tt-imgfg { fill: #fff; fill-opacity: 0.75; }
+.tt-strong { fill: var(--theme-accent); }
+.tt-ng { fill: #ef4444; fill-opacity: 0.18; stroke: #ef4444; stroke-opacity: 0.5; stroke-width: 0.6; }
+.tt-faded { fill-opacity: 0.14; }
 
 .template-option:hover .tt-card {
     stroke: var(--theme-accent);

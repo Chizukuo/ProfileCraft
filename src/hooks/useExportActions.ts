@@ -26,13 +26,17 @@ export const useExportActions = ({
     }
   }, [profileData, theme, locale]);
 
-  const handleExportImage = useCallback(async () => {
+  const exportImage = useCallback(async (layout: 'wide' | 'phone') => {
     const container = document.getElementById('profileCardContainer');
     if (container && profileData) {
       const { exportToImage } = await import('../utils/exportUtils');
-      exportToImage(container, profileData, locale, theme);
+      exportToImage(container, profileData, locale, theme, layout);
     }
   }, [profileData, locale, theme]);
+
+  const handleExportImage = useCallback(() => exportImage('wide'), [exportImage]);
+  /** 手机竖版：单列长图 */
+  const handleExportImagePhone = useCallback(() => exportImage('phone'), [exportImage]);
 
   const handleExportConfig = useCallback(async () => {
     if (profileData) {
@@ -60,6 +64,7 @@ export const useExportActions = ({
     fileInputRef,
     handleExportHtml,
     handleExportImage,
+    handleExportImagePhone,
     handleExportConfig,
     handleImportConfigClick,
     handleImportConfig
